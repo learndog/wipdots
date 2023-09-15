@@ -65,6 +65,7 @@
 " Note: There may be some differences running inside tmux, so you may have to adjust your tmux config and/or .vimrc
 "       Check if tmux is active from vimscript... exists('$TMUX')
 "       In windows you may not be able to find key control codes for your terminal with Ctrl-v. Try ctrl-q instead.
+" Note: If logging needed for startup, use nvim -V /tmp/nvim.log to dump startup log to a file.
 
 " Support for older versions of vim/neovim
 " The version of Vim available in the Debian 11 package manager is Vim 9.0.1378-2, 
