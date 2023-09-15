@@ -45,17 +45,14 @@
 "     Note: Also includes functionality for marks, registers, spelling, etc
 
 " iOS ish notes - Alpine on iPhone
-"   Use vim-which-key, not folke which-key
-"   Remove nvim-tree
-"   fzf install needs the community package repository
-"     From discord...
-"     Alpine Linux splits its repositories into a a few "folders". 
+"   Alpine Linux splits its repositories into a few folders. 
 "     See them at https://dl-cdn.alpinelinux.org/alpine/. 
 "     If you can't find a package, try to add --repository https://dl-cdn.alpinelinux.org/alpine/edge/<fill> 
 "     to your command and replace <fill> with community and testing. 
 "     Note that this may mean that your packages are not stable.
 "     Eg: apk add fzf --repository https://dl-cdn.alpinelinux.org/alpine/edge/community
-"     Also, if you can't find a package, apk search is a great tool that also works with --repository
+"     Also, if you can't find a package, apk search is a great tool. 
+"       It also works with --repository
 
 " Install Instructions for vim configuration
 " * Save this file as ~/.vimrc
@@ -65,7 +62,6 @@
 " Note: There may be some differences running inside tmux, so you may have to adjust your tmux config and/or .vimrc
 "       Check if tmux is active from vimscript... exists('$TMUX')
 "       In windows you may not be able to find key control codes for your terminal with Ctrl-v. Try ctrl-q instead.
-" Note: If logging needed for startup, use nvim -V /tmp/nvim.log to dump startup log to a file.
 
 " Support for older versions of vim/neovim
 " The version of Vim available in the Debian 11 package manager is Vim 9.0.1378-2, 
@@ -85,6 +81,22 @@
 "    Error: javascript bundle not found, please compile code of coc.nvim by esbuild.
 "    then run... node esbuild.js in the coc.nvim directory
 "    Note: npm install should take care of this also 
+
+" Install nvim on Debian 10 (Buster)
+" Following https://github.com/neovim/neovim/wiki/Installing-Neovim
+" # NOTE: Don't install FUSE because requires a privileged container
+" Now install neovim
+" cd && mkdir usr && cd usr
+" curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+" chmod 755 nvim.appimage
+" # Because older version of Ubuntu
+" ./nvim.appimage --appimage-extract
+" ./squashfs-root/AppRun --version
+" # Make it available globally
+" sudo mv squashfs-root /squashfs-root
+" sudo ln -s /squashfs-root/AppRun /usr/bin/nvim
+" cd && nvim -v
+" rm nvim.appimage && nvim -v
 
 " Restore vim to pristine just-installed condition
 "   1. Delete the entire ~/.vim directory
@@ -165,22 +177,9 @@
 " which python
 " pip --version
 
-
 " CURRENT TIDY UP
-" TODO: Duplicate the <C-W> mappings as <Leader>w 
-"       and add keymap doc warning to not use on some platforms (C-w will sometimes close window/tab)
-" TODO: Any other C- mappings to duplicate/remove? Consider phone ssh, browser ssh, etc
-"       C-/ doesn't seem to work on GCP.
-" TODO: Fix GCP: Status line and gitgutter
-" TODO: Fix GCP: cant switch windows (Ctrl-w closes the tab)
-" TODO: Ensure all lsp completions included
-" TODO: <leader>la vs <leader>la... (forces quick entry of <>la)
-" TODO: Folke lua lsp setup and vimscript lsp?
-" TODO: Remove coc-jedi? On GCP only?
-" TODO: Add Pylint (optionally?) as linter
-" TODO: Fix status line (and status line color)
-" TODO: Use Fugitive, autopairs, leap (or lazyvim/lunarvim alt) instead of custom code
-" TODO: Other plugins forked to learndog? folke/trouble, ...
+" TODO: Add support for old (cavim) versions, eg https://github.com/ctrlpvim/ctrlp.vim
+" TODO: Move plugin repos to a work fork and disable vim-which-key by default
 " TODO: Fix git diff (<Leader>dg)
 " TODO: Quirks to fix
 "         Commenting should start at first nonws char, not col pos 1
@@ -190,8 +189,6 @@
 "         autopair brackets - if {<CR> slowly, it fills in with funny stuff - stop it!
 "         move selected (indent or move up) text loses selection so cant repeat. Honors indents?
 " TODO: Fix Ctrl-arrows and status line colors for vim running in tmux
-" TODO: Winbar customization, eg https://alpha2phi.medium.com/neovim-for-beginners-window-bar-e7b4435fc7e9
-"         or plugin. Also see statusline... https://alpha2phi.medium.com/neovim-for-beginners-status-line-dd0c97fba978
 
 " BACKLOG FEATURES
 " TODO: Add toggle for light / dark color theme (or a .vimrc paramter to set color theme)
@@ -220,12 +217,6 @@
 " TODO: Debug python in terminal
 "         See www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
 " TODO: Nvim compatibility
-" TODO: VSCode-like Winbar
-"       https://github.com/SmiteshP/nvim-navic
-"       https://nvimdev.github.io/lspsaga/
-"       https://github.com/fgheng/winbar.nvim
-"       https://github.com/utilyre/barbecue.nvim
-"       https://alpha2phi.medium.com/neovim-101-status-line-winbar-and-buffer-line-404600bcd982
 " TODO: Use forked fugitive, maximizer, tmuxvimnavigator, whichkey, autoformat, ...
 "       Try this...
 "         To ensure that the forked versions of coc.nvim and coc-pyright are installed,
@@ -243,13 +234,15 @@
 "         For git TUI tools, see dev.to/mainendra/terminal-ui-for-git-283p
 "         and github.com/frontaid/git-cli-tools
 "         and github.com/rhysd/conflict-marker.vim
-
-
+"
 " #### START CONFIGURATION
 
 " Set leader to <space>
-let g:mapleader=" "
-let g:maplocalleader=" "
+"let mapleader = "\<Space>"
+let g:mapleader = " "
+let g:maplocalleader = ' '     " Added for vim-which-key (default was ,)
+nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
+nnoremap <silent> <localleader> :<c-u>WhichKey  '<Space>'<CR>
 
 " Allow mouse clicks anywhere (eg past column 88) if supported
 " xterm2 has been removed in nvim
@@ -279,38 +272,53 @@ let g:maplocalleader=" "
 colorscheme slate
 " colorscheme zellner
 
+" auto-reload vimrc
+" autocmd! bufwritepost vimrc source ~/.vim/vimrc
+
 
 " #### SECTION: VIM-PLUG PLUGINS
+
+let g:install_plug_lsp = 'coc'                   " Options: 'disable', 'ale', 'coc'
+let g:install_plug_vimwhichkey = 'vim-which-key' " disable, which-key, vim-which-key
+let g:install_plug_filetree = 'netrw'            " netrw, nvimtree
+let g:install_plug_fzf = 1                       " 0 or 1 (for true or false)
+let g:install_plug_fzfbat = 1                    " 0 or 1 (for true or false)
+let g:install_plug_comments = 'manual'           " manual or commentary
 
 " VimPlug Autoinstall
 source $HOME/.vimrc_helpers/vimplug_autoinstall.vim
 
 " Install included plugins
 call plug#begin()
-"  Plug 'learndog/coc.nvim'
-   Plug 'learndog/ale'
-   Plug 'learndog/fzf', { 'do': { -> fzf#install() } }
-   Plug 'learndog/fzf.vim'
-   Plug 'learndog/bat'
-   Plug 'learndog/which-key.nvim'
-   Plug 'learndog/nvim-tree.lua'
+   if g:install_plug_lsp == 'coc' | Plug 'learndog/coc.nvim' | endif
+   if g:install_plug_lsp == 'ale' | Plug 'learndog/ale'      | endif
+   if g:install_plug_fzf          | Plug 'learndog/fzf', { 'do': { -> fzf#install() } } | endif
+   if g:install_plug_fzf          | Plug 'learndog/fzf.vim' | endif
+   if g:install_plug_fzfbat       | Plug 'learndog/bat' | endif
+   if g:install_plug_vimwhichkey == 'which-key' | Plug 'learndog/which-key.nvim' | endif
+   if g:install_plug_vimwhichkey == 'vim-which-key' | Plug 'learndog/vim-which-key', {'branch': 'release'} | endif
+   if g:install_plug_filetree == 'nvimtree' | Plug 'learndog/nvim-tree.lua'  | endif
    Plug 'learndog/vim-maximizer'
    Plug 'learndog/vim-gitgutter', {'branch': 'release'}
    Plug 'learndog/lightline.vim'
    Plug 'learndog/vim-fugitive'
-   Plug 'learndog/vim-commentary'
+   if g:install_plug_comments == 'commentary' | Plug 'learndog/vim-commentary' | endif
 call plug#end()
 
 source $HOME/.vimrc_helpers/config_base.vim
+if g:install_plug_vimwhichkey == 'which-key' | source $HOME/.vimrc_helpers/folke_whichkey.vim | endif
+if g:install_plug_vimwhichkey == 'vim-which-key' | source $HOME/.vimrc_helpers/vim-which-key.vim | endif
+if g:install_plug_filetree == 'netrw' | source $HOME/.vimrc_helpers/netrw.vim | endif
+if g:install_plug_filetree == 'nvimtree' | source $HOME/.vimrc_helpers/nvimtree.vim | endif
+if g:install_plug_lsp == 'coc' | source $HOME/.vimrc_helpers/coc1_config.vim | endif
+if g:install_plug_lsp == 'ale' | source $HOME/.vimrc_helpers/ale_config.vim | endif
+if g:install_plug_fzf          | source $HOME/.vimrc_helpers/fzf.vim | endif
+if g:install_plug_lsp == 'coc' | source $HOME/.vimrc_helpers/coc2_boilerplate.vim | endif
+if g:install_plug_lsp == 'ale' && g:install_plug_fzf | source $HOME/.vimrc_helpers/alefzf_config.vim | endif
 source $HOME/.vimrc_helpers/keymap_base.vim
-source $HOME/.vimrc_helpers/folke_whichkey.vim
-source $HOME/.vimrc_helpers/nvimtree.vim
-source $HOME/.vimrc_helpers/commentary.vim
+if g:install_plug_comments == 'commentary' | source $HOME/.vimrc_helpers/commentary.vim | endif
+if g:install_plug_comments == 'manual' | source $HOME/.vimrc_helpers/comments_manual.vim | endif
 source $HOME/.vimrc_helpers/lightline.vim
-"source $HOME/.vimrc_helpers/coc1_config.vim
-source $HOME/.vimrc_helpers/ale_config.vim
-source $HOME/.vimrc_helpers/alefzf_config.vim
-source $HOME/.vimrc_helpers/fzf.vim
 source $HOME/.vimrc_helpers/linenumbers.vim
 source $HOME/.vimrc_helpers/maximizer.vim
 source $HOME/.vimrc_helpers/gitblame.vim
@@ -322,13 +330,9 @@ source $HOME/.vimrc_helpers/keymap_windows.vim
 source $HOME/.vimrc_helpers/bufferselect.vim
 source $HOME/.vimrc_helpers/tmux.vim
 source $HOME/.vimrc_helpers/togglezero.vim
-source $HOME/.vimrc_helpers/netrw.vim
 source $HOME/.vimrc_helpers/togglehighlight.vim
-"source $HOME/.vimrc_helpers/coc2_boilerplate.vim
 source $HOME/.vimrc_helpers/sessions.vim
 source $HOME/.vimrc_helpers/config_endstuff.vim
-
-
 
 
 
