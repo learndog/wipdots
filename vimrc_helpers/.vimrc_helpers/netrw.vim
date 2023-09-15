@@ -1,4 +1,9 @@
-" Use Esc to exit netrw
-" autocmd FileType netrw nmap <silent> <buffer> <Esc> :bd<cr>
+" Configure netrw
 
-nnoremap <Leader>oe :Explore<CR>    " Open file explorer
+" Use Esc to exit netrw
+autocmd FileType netrw nmap <silent> <buffer> <Esc> :bd<cr>
+
+" Open netrw (first should open curr dir)
+nnoremap <Leader>of :Explore<CR>
+nnoremap <Leader>oe :Explore<CR>
+
