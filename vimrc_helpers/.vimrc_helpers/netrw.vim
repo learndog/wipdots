@@ -7,3 +7,6 @@ autocmd FileType netrw nmap <silent> <buffer> <Esc> :bd<cr>
 nnoremap <Leader>of :Explore<CR>
 nnoremap <Leader>oe :Explore<CR>
 
+" Set width of netrw windows (eg  for :Vexplore)
+" let g:netrw_winsize=20
+

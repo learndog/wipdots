@@ -36,9 +36,6 @@ nmap <silent> gy <Plug>(coc-type-definition)
 "nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
-" Use K to show documentation in preview window
-nnoremap <silent> K :call ShowDocumentation()<CR>
-
 function! ShowDocumentation()
    if CocAction('hasProvider', 'hover')
       call CocActionAsync('doHover')
@@ -46,6 +43,9 @@ function! ShowDocumentation()
       call feedkeys('K', 'in')
    endif
 endfunction
+
+" Use K to show documentation in preview window
+nnoremap <silent> K :call ShowDocumentation()<CR>
 
 " Highlight the symbol and its references when holding the cursor (eg user not typing)
 autocmd CursorHold * silent! call CocActionAsync('highlight')
@@ -118,7 +118,8 @@ nnoremap <silent><nowait> <space>le  :<C-u>CocList extensions<cr>
 " Show commands
 nnoremap <silent><nowait> <space>lc  :<C-u>CocList commands<cr>
 " Find symbol of current document
-nnoremap <silent><nowait> <space>lo  :<C-u>CocList outline<cr>
+" nnoremap <silent><nowait> <space>lo  :<C-u>CocList outline<cr>
+nnoremap <silent><nowait> <space>lo  :CocList outline<cr>
 " Search workspace symbols
 nnoremap <silent><nowait> <space>ls  :<C-u>CocList -I symbols<cr>
 " Do default action for next item

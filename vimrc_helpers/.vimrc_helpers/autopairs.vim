@@ -4,11 +4,12 @@
 " Warning: Will also NOT double a first non-comment character. Won't work with set paste option
 
 " For quotes
-inoremap <expr> " getline('.')[0:col('.')-2] =~ '[^\s]' ? '"' : '""<left><C-o>:noh<CR>'
-inoremap <expr> ' getline('.')[0:col('.')-2] =~ '[^\s]' ? "'" : "''<left><C-o>:noh<CR>"
+inoremap <expr> " col('.') > 1 && getline('.')[0:col('.')-2] =~ '[^\s]' ? '""' : '"<C-o>:noh<CR>'
+inoremap <expr> ' getline('.')[0:col('.')-2] =~ '[^\s]' ? "''" : "'<C-o>:noh<CR>" "No col1 fix
 inoremap <expr> ` getline('.')[0:col('.')-2] =~ '[^\s]' ? '`' : '``<left><C-o>:noh<CR>'
 
 " For brackets
+"
 inoremap <expr> ( getline('.')[0:col('.')-2] =~ '[^\s]' ? '(' : '()<left>'
 inoremap <expr> [ getline('.')[0:col('.')-2] =~ '[^\s]' ? '[' : '[]<left>'
 inoremap <expr> { getline('.')[0:col('.')-2] =~ '[^\s]' ? '{' : '{}<left>'

@@ -24,7 +24,8 @@ set nowrap                     " Disable line wrapping
 "set gdefault                   " Set global replace (all occurances) for substitute
 "set clipboard=unnamedplus      " Enable clipboard support (req vim compiled +clipboard)
 set clipboard+=unnamedplus     " Always use clipboard for All operations (not + and/or * explicitly)
-set mouse=v                    " Enable mouse support (a chgs on click to visual in vim, try v in nvim)
+" set mouse=v                    " Enable mouse support (a chgs on click to visual in vim, try v in nvim)
+set mouse=a
 set hlsearch
 set incsearch
 set ignorecase
@@ -42,5 +43,4 @@ set title                      " Show the filename in the window titlebar
 set background=dark            " Or use light
 set laststatus=2               " Enable the status line
 set noshowmode                " Don't show the mode word. (Not needed if status line shows it)
-set signcolumn=yes
-
+"set signcolumn=yes            " Delete this for vim 7.3-

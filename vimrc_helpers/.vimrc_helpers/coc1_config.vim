@@ -1,4 +1,5 @@
-" coc.nvim configuration
+" #### coc.nvim configuration
+" #### Dependencies: node 14.14
 set nocompatible
 filetype plugin indent on
 syntax on
@@ -36,6 +37,8 @@ nnoremap <F4> :CocPrev<CR>
 nnoremap <F5> :CocNext<CR>
 nnoremap <F6> :CocFirst<CR>
 nnoremap <F7> :CocLast<CR>
+nnoremap <leader>j :CocNext<CR>
+nnoremap <leader>k :CocPrev<CR>
 " coc.nvim go-to commands DELETE THESE???
 " nnoremap <Leader>gd :CocDefinition<CR>
 " nnoremap <Leader>gi :CocImplementation<CR>
@@ -46,13 +49,17 @@ nnoremap <F7> :CocLast<CR>
 " coc.nvim code actions
 " nnoremap <Leader>ca :CocAction<CR>
 
-" From another coc vimrc - almost finished
 noremap <leader>ld :call CocAction('jumpDefinition')<CR>
-nnoremap <leader>lr :call CocAction('references')<CR>
+nnoremap <leader>lr :call CocAction('jumpReferences')<CR>
+nnoremap <leader>lc :call CocAction('references')<CR>
 nnoremap <leader>ln :call CocAction('rename')<CR>
 nnoremap <leader>la :call CocAction('codeAction')<CR>
-nnoremap <leader>lk :call CocAction('doHover')<CR>
 nnoremap <leader>lf :call CocAction('format')<CR>
+nnoremap <leader>lI :call CocAction('showOutgoingCalls')<CR>
+nnoremap <silent><nowait> <space>ll  :<C-u>CocList outline<cr>
+nnoremap <leader>li :call CocAction('showIncomingCalls')<CR>
+nnoremap <leader>ly :call CocAction('runCommand', 'editor.action.organizeImport')<CR>
+
 
 " Define a custom command :Format
 command! Format call CocAction('format')

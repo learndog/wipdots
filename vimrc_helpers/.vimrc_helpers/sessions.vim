@@ -51,3 +51,6 @@ nnoremap <C-r> :redo<CR>
 nnoremap <leader>ss :call SessionSave()<CR>
 nnoremap <leader>sr :call SessionRestore()<CR>
 
+" Map key for reload vimrc into current session
+nnoremap <Leader>vr :source $MYVIMRC<CR>
+nnoremap <leader>ve :edit $MYVIMRC

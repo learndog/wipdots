@@ -1,4 +1,6 @@
-" SECTION: CONFIGURE NVIM-TREE
+" #### SECTION: CONFIGURE NVIM-TREE
+" #### Dependencies: vim 0.8.0
+" #### Optional: nvim-web-devicons and patched font in terminal
 lua << EOF
 -- Configure nvim-tree file explorer
 -- disable netrw at the very start of your init.lua

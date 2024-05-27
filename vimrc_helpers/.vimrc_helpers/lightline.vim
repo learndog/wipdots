@@ -1,4 +1,5 @@
 " #### SECTION: LIGHTLINE SETUP
+" #### Dependencies: None 
 let g:lightline = {
     \ 'active': {
     \     'left': [ [ 'bufferstatus', 'mode', 'cocstatus', 'gitbranch', 'filepath', 'filename' ] ],
