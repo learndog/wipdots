@@ -16,6 +16,7 @@ let g:coc_global_extensions = ['coc-pyright']
 
 let g:coc_user_config = {
          \ "python.linting.enabled": 1,
+         \ "python.linting.pylintEnabled": 1,
          \ }
 " Alternate configs...
 "      \ "python.formatting.provider": "autopep8",

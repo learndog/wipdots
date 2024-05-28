@@ -17,6 +17,13 @@ nnoremap <C-w>h <C-w>h
 nnoremap <C-w>j <C-w>j
 nnoremap <C-w>k <C-w>k
 nnoremap <C-w>l <C-w>l
+" Alternate maps if intercepted by codeanywhere
+nnoremap <leader><LEFT> <C-w><LEFT>
+nnoremap <leader><DOWN> <C-w><DOWN>
+nnoremap <leader><UP> <C-w><UP>
+nnoremap <leader><RIGHT> <C-w><RIGHT>
+" Note: DO NOT map visual mode alternatives for windowing - save those for visual block moves 
+
 
 " Split to specified direction 
 nnoremap <C-w>hh :vertical topleft split<CR>

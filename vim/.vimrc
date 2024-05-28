@@ -86,6 +86,8 @@
 "     In windows you may not be able to find key control codes for your terminal with Ctrl-v. Try ctrl-q instead.
 
 "     If you get a coc error about a yarn install, then
+"       :call coc#util#install()      from vim command line
+"       OR in terminal
 "       cd ~/.local/share/nvim/plugged/coc.nvim (or equivalent where coc is installed)
 "       OR in vim
 "       cd ~/.vim/plugged/coc.nvim && npm install
@@ -142,6 +144,16 @@
 "     https://github.com/folke/which-key.nvim
 "     Note: Also includes functionality for marks, registers, spelling, etc
 
+" CopyPasteFromSystemClipboard: Seems to vary by platform. Try...
+"    select: visual mode or select with mouse
+"    copy:   Ctrl-c | Ctrl+Insert | Shift+Insert
+"    copy:   SHIFT select your text, then copy with CTRL+SHIFT+C (from WSL/CA to Windows)
+"    cut: Shift+Del
+"    paste:  Ctrl-v | Shift RightClick | middle mouse button
+"    replace: copy and then visual select the destination text to replace, then p
+"    Tip: If you paste from system clipboard into vim and get ^M at end of line,
+"         try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)
+"
 " Bonus:
  
 " SSH Key Pair Setup
@@ -230,7 +242,8 @@
 " TODO: Find text in files inside project folder (git proj folder or manual setting)
 " TODO: :Commits and :BCommits commands as in
 "         https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
-"         Try other fzf - pattern match, key maps, MRU files, diagnostiics, current buffer files, file content etc
+"         Try other fzf - pattern match, key maps, MRU files sorted by MRU or alpha, 
+"         diagnostiics, current buffer files, file content etc
 "         MRU or same dir files...  nnoremap <silent> <Space>. :Files <C-r>=expand("%:h")<CR>/<CR>
 " TODO: Search help, buffer text, search by grep(?), 
 " TODO: :Lines and :BLines ??
@@ -245,6 +258,7 @@
 " LANGUAGE SERVER
 " TODO: Diagnostics: Show list and do Previous/Next or fzf search
 " TODO: format or format on save or format from project folder
+" TODO: coc working folders (and see other items in :CocList)
 
 " FILE DIFFS
 " TODO: Integrate with external diff, colordiff, nbdiff, difftastic, vimdiff, github.com/dandavison/delta 
@@ -277,6 +291,7 @@
 
 " WINDOWS
 " INFO: Better splits and windows - see https://github.com/Aster89/WinZoZ/tree/main
+" TODO: Add a <leader> version of <C-W> commands
 
 " THEMES
 " TODO: Toggle for light / dark color theme (or a .vimrc paramter to set color theme)

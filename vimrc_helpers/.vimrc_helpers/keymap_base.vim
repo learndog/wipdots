@@ -26,12 +26,16 @@ nnoremap <Leader>of :open .<CR>
 
 
 " ####### MOVE BLOCKS UP/DOWN (and preserve selection)
-" UP/DOWN
+" UP/DOWN/LEFT/RIGHT
 vnoremap <C-Up> xkP`[V`]
 vnoremap <C-Down> xp`[V`]
-" LEFT/RIGHT
 vnoremap <C-LEFT> <<`[V`]
 vnoremap <C-RIGHT> >>`[V`]
+" Alternative mappings in case these are intercepted by codeanywhere
+vnoremap <leader><UP> xkP`[V`]
+vnoremap <leader><DOWN> xp`[V`]
+vnoremap <leader><LEFT> <<`[V`]
+vnoremap <leader><RIGHT> >>`[V`]
 
 " Note: Only <C-_> keymaps to upper/lower alphabet are reliable
 "       Intent is to use <C-up/down> for other things in normal mode, but move lines in visual select.
