@@ -217,14 +217,13 @@
 " BUGS
 
 " KEYMAPS
-" TODO: Full set of netrw file explorer keymaps
 " TODO: Add organize imports with coc with keymap for ":call CocAction('runCommand', 'editor.action.organizeImport')"
 " TODO: Add a keymap for :e $VIMRC  and one to just echo $VIMRC (vim or nvim - does it work?)
 " TODO: BLock alignment script and keymap - for docstrings like 'parameter:      info'
 " TODO: Page up and down keeping curson in middle of page (see old configs)
-" TODO: Find and remove keymaps that cause harmless muscle memory to change text
+" TODO: Find and remove keymaps that cause muscle memory to change text
 " TODO: help navigation/search
-" TODO: Add :verbose map (shows where the keybinding was defined)
+" TODO: Add :verbose map (shows where the keybinding was defined) and fzf version
 
 " GIT
 " TODO: Integrate with git diff commands? What is fzf.vim :GF?
@@ -232,13 +231,15 @@
 " TODO: External git merge tool... lazygit? magit? github.com/mkchoi212/fac?
 
 " FILE EXPLORER
+" TODO: :cd to project top level folder or to current buffer file location
 " TODO: TUI FIle manager... https://terminaltrove.com/superfile/, ranger, mc,...  (outside of VIM can launch in vim?)
 " TODO: launch external file TUI at curr dir / proj folder 
 " TODO: Add nvim-tree.lua for nvim (https://github.com/nvim-tree/nvim-tree.lua) no deps but nice
 " TODO: Open file in new split or tab
 
 " FZF SEARCH
-" TODO: Fuzzy find file in same dir as buffer
+" TODO: Fuzzy find file in specified dir or in same dir as buffer or top dir of proj
+" TODO: fzf bLines in specified dir or in same dir as buffer or in top dir of project
 " TODO: Find text in files inside project folder (git proj folder or manual setting)
 " TODO: :Commits and :BCommits commands as in
 "         https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
@@ -254,6 +255,8 @@
 " TODO: Close buffer (:bd)
 " TODO: Keymaps for next and previous tab... gt or gT
 " TODO: Buffer and tab rename
+" TODO: Open buffers as new tabs (if not already a tab)
+" TODO: Close all tabs (wihtout error on last one) but keep buffers
 
 " LANGUAGE SERVER
 " TODO: Diagnostics: Show list and do Previous/Next or fzf search
@@ -285,6 +288,7 @@
 " TODO: Nvim compatibility
 " TODO: Commenting should start at first nonws char, not col pos 1 (works in vim)
 " TODO: Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
+" TODO: Try debug capabilities
 
 " TMUX SUPPORT
 " TODO: Fix Ctrl-arrows and status line colors for vim running in tmux
@@ -443,4 +447,63 @@ source $HOME/.vimrc_helpers/sessions.vim
 source $HOME/.vimrc_helpers/config_endstuff.vim
 
 
+"""""""""""""""""""""""""""""""""""""""""""""""
+" GETTING STARTED WITH VIM IN WSL UBUNTU 24.04
+"""""""""""""""""""""""""""""""""""""""""""""""
+"## For dev, setup ssh keys for GitHub
+"cd ~/dev
+"git clone <use wipdots ssh address from the GitHub page)
 
+"## Stow the vim config files
+"stow -t ~ ~/dev/wipdots/vim
+"mkdir ~/.vimrc_helpers/
+"stow -t ~/.vimrc_helpers/ .vimrc_helpers/
+
+" Run Vim
+"
+
+" pyenv prereqs
+"sudo apt-get install -y \
+"  make \
+"  build-essential \
+"  libssl-dev \
+"  zlib1g-dev \
+"  libbz2-dev \
+"  libreadline-dev \
+"  libsqlite3-dev \
+"  wget \
+"  curl \
+"  llvm \
+"  libncurses5-dev \
+"  libncursesw5-dev \
+"  xz-utils \
+"  tk-dev \       # Not needed
+"  liblzma-dev    # THis is probably not needed
+
+" vim config prereqs 
+" - in .profile or .bashrc
+"   export MYVIMRC="$HOME/.vimrc"
+" - Vim (recent version with python and etc)
+" - Python3 (pyenv install 3 && pyenv global 3.12.4)
+" - black (pip install black)
+" - pyright -> pip install pyright (for coc python linting)
+" - Node (sudo apt install nodejs npm, or install with NVM)
+" - sudo apt install fzf (eg to switch buffers, open files)
+" - [opt] bat (batcat) for fzf syntax highlights -> sudo apt install bat
+" - [opt] ripgrep (rg) for fzf Rg command -> sudo apt-get install ripgrep
+" - [opt] delta for git diff formatting (see github.com/dandavison/delta)
+"         eg cd ~/temp_install && wget http://... 
+"            sudo dpkg -i git-delta_0.17.0_amd64.deb
+"
+
+" First run do...
+" - :PlugInstall should run automatically
+" - Will probably get coc.nvim error... build/index.js not found... compile with yarn install
+"     :call coc#util#install()      from vim command line
+"     OR
+"     cd ~/.vim/plugged/coc.nvim && npm install && npm audit fix
+" - :CocInstall coc-pyright coc-jedi
+" - Restart vim
+"""""""""""""""""""""""""""""""""""""""""""""""
+" END OF FILE
+"""""""""""""""""""""""""""""""""""""""""""""""
