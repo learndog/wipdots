@@ -25,10 +25,9 @@ nnoremap <Leader>of :open .<CR>
 " Save <Leader>f... for find
 
 
-" ####### MOVE BLOCKS UP/DOWN (and preserve selection)
-" UP/DOWN/LEFT/RIGHT
-vnoremap <C-Up> xkP`[V`]
-vnoremap <C-Down> xp`[V`]
+" #### SECTION: Move blocks around (and preserve selection)
+vnoremap <C-UP> xkP`[V`]
+vnoremap <C-DOWN> xp`[V`]
 vnoremap <C-LEFT> <<`[V`]
 vnoremap <C-RIGHT> >>`[V`]
 " Alternative mappings in case these are intercepted by codeanywhere

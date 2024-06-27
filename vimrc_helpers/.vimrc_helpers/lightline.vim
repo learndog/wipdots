@@ -1,5 +1,8 @@
 " #### SECTION: LIGHTLINE SETUP
 " #### Dependencies: None 
+
+" TODO: Add filetype and if available, coc lsp status info like loaded lsps, linters, formatters
+
 let g:lightline = {
     \ 'active': {
     \     'left': [ [ 'bufferstatus', 'mode', 'cocstatus', 'gitbranch', 'filepath', 'filename' ] ],

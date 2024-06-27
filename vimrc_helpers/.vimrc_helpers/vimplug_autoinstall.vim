@@ -6,3 +6,22 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
 endif
 " END  vim-plug autoinstall
 
+" See https://github.com/junegunn/vim-plug
+"
+" Keybindings (inside the vimplug window?)
+"   D - PlugDiff
+"   S - PlugStatus
+"   R - Retry failed update or installation tasks
+"   U - Update plugins in the selected range
+"   q - Close the window
+"   :PlugStatus
+"       L - Load plugin
+"   :PlugDiff
+"       X - Revert the update
+
+" Commands
+"   PlugInstall [name ...] Install plugins
+"   PlugUpdate [name ...]  Install or update plugins
+"   PlugClean              Remove unlisted plugins
+"   PlugUpgrade            Upgrade vim-plug itself
+"   PlugStatus             Check the status of plugins
