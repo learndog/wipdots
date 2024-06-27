@@ -384,6 +384,7 @@ source $HOME/.vimrc_helpers/config_endstuff.vim
 "   # With ssh config file, use entries like... todo
 "
 " Stow instructions
+"     # Probably easier to just create the symlinks manually if not already using stow
 "     # Assumes a github repository user/dotfiles with config file dotfiles/vim/.vimrc
 "     sudo apt-get install stow
 "     cd ~ && git clone git@github.com/github_user/github_repository
@@ -437,6 +438,8 @@ source $HOME/.vimrc_helpers/config_endstuff.vim
 """""""""""""""""""""""""""""""""""""""""""""""
 " GETTING STARTED WITH VIM IN UBUNTU 24.04 (WITH WSL)
 """""""""""""""""""""""""""""""""""""""""""""""
+" This is somewhat opinionated about pyenv, file locs, naming
+"
 " Install Python3
 " sudo apt-get update && sudo apt-get install -y \
 "  make \
@@ -459,7 +462,7 @@ source $HOME/.vimrc_helpers/config_endstuff.vim
 
 " More linux prereqs
 " sudo apt install nodejs npm (or install with NVM)
-" sudo apt install stow fzf bat ripgrep (stow, fzf, rg, bat for cat w/highlighting - aka batcat)
+" sudo apt install fzf bat ripgrep (fzf, rg, bat for cat w/highlighting - aka batcat)
 " install delta for diff formatting... if desired 
 "     cd ~/temp_install && wget http://... (see github.com/dandavison/delta)
 "     sudo dpkg -i git-delta_0.17.0_amd64.deb
@@ -469,10 +472,9 @@ source $HOME/.vimrc_helpers/config_endstuff.vim
 
 " Install the Vim config
 "     Vim config development only - ssh key setup for GitHub, with git config privitized email, name
-"     cd ~/dev && git clone...
-"     stow -t ~ ~/dev/wipdots/vim
-"     mkdir ~/.vimrc_helpers/
-"     stow -t ~/.vimrc_helpers/ .vimrc_helpers/
+"     git clone wipdots into ~/dev
+"     ln -s $HOME/dev/wipdots/.vimrc $HOME/.vimrc
+"     ln -s $HOME/dev/wipdots/.vimrc_helpers/ $HOME/.vimrc_helpers 
 
 " First run...
 " :PlugInstall should run automatically
@@ -490,7 +492,7 @@ source $HOME/.vimrc_helpers/config_endstuff.vim
 
 " Reset vim to pristine newly installed condition
 "       1. Delete the entire ~/.vim directory
-"       2. Remove this .vimrc file and .vimrc_helpers (unstow them or remove symlinks)
+"       2. Remove this .vimrc file and .vimrc_helpers (unstow or remove the symlinks)
 
 """""""""""""""""""""""""""""""""""""""""""""""
 " END OF FILE
