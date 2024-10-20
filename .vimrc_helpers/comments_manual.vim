@@ -7,15 +7,15 @@
 " while pressing <Leader>// will always comment lines
 
 function! ConditionalCommentUncomment(start, end)
-   " Check the first non-space/non-tab character of the first line of the visual selection
-   let firstChar = matchstr(getline(a:start), '^\s*\zs.')
-   if firstChar == b:comment_symbol[0]
-      " Uncomment action
-      silent execute a:start.','.a:end.'s#^\(\s*\)' . b:comment_symbol . '\s\?#\1#'
-   else
-      " Comment action
-      silent execute a:start.','.a:end.'s#^#'.b:comment_symbol.' #'
-   endif
+    " Check the first non-space/non-tab character of the first line of the visual selection
+    let firstChar = matchstr(getline(a:start), '^\s*\zs.')
+    if firstChar == b:comment_symbol[0]
+        " Uncomment action
+        execute a:start . ',' . a:end . 's#^\(\s*\)' . escape(b:comment_symbol, '#') . '\s\?#\1#'
+    else
+        " Comment action
+        execute a:start . ',' . a:end . 's#^#' . escape(b:comment_symbol, '#') . ' #'
+    endif
 endfunction
 
 function! VisualCommentUncomment()
