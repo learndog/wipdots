@@ -45,10 +45,10 @@
 " ###################################################################################
 " Set leader to <space><space>
 "let mapleader = "\<Space>"
-let g:mapleader = "  "
-let g:maplocalleader = '  '     " Added for vim-which-key (default was ,)
-nnoremap <silent> <leader><leader>      :<c-u>WhichKey '<Space>'<CR>
-nnoremap <silent> <localleader><localleader> :<c-u>WhichKey  '<Space>'<CR>
+let g:mapleader = " "
+let g:maplocalleader = ' '     " Added for vim-which-key (default was ,)
+nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
+nnoremap <silent> <localleader> :<c-u>WhichKey  '<Space>'<CR>
 
 " Allow mouse clicks anywhere (eg past column 88) if supported
 " xterm2 has been removed in nvim
