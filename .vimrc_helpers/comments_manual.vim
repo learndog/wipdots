@@ -11,10 +11,10 @@ function! ConditionalCommentUncomment(start, end)
     let firstChar = matchstr(getline(a:start), '^\s*\zs.')
     if firstChar == b:comment_symbol[0]
         " Uncomment action
-        execute a:start . ',' . a:end . 's#^\(\s*\)' . escape(b:comment_symbol, '#') . '\s\?#\1#'
+        silent execute a:start . ',' . a:end . 's#^\(\s*\)' . escape(b:comment_symbol, '#') . '\s\?#\1#'
     else
         " Comment action
-        execute a:start . ',' . a:end . 's#^#' . escape(b:comment_symbol, '#') . ' #'
+        silent execute a:start . ',' . a:end . 's#^#' . escape(b:comment_symbol, '#') . ' #'
     endif
 endfunction
 
