@@ -126,6 +126,7 @@ source $HOME/.vimrc_helpers/autopairs.vim
 source $HOME/.vimrc_helpers/fixvisualpaste.vim
 source $HOME/.vimrc_helpers/keymap_windows.vim
 source $HOME/.vimrc_helpers/bufferselect.vim
+" source $HOME/.vimrc_helpers/bufferdiffs.vim
 source $HOME/.vimrc_helpers/tmux.vim
 source $HOME/.vimrc_helpers/togglezero.vim
 source $HOME/.vimrc_helpers/togglehighlight.vim
