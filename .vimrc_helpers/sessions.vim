@@ -47,10 +47,10 @@ endfunction
 " Fix <C-r> mapping (Coc overwrites this, maybe because one config setting can lose redo chain?)
 nnoremap <C-r> :redo<CR>
 
-" Map keys to save and restore sessions
-nnoremap <leader>ss :call SessionSave()<CR>
-nnoremap <leader>sr :call SessionRestore()<CR>
+" Map keys to save and restore sessions (vim..config..save/restore)
+nnoremap <leader>vss :call SessionSave()<CR>
+nnoremap <leader>vsr :call SessionRestore()<CR>
 
-" Map key for reload vimrc into current session
-nnoremap <Leader>vr :source $MYVIMRC<CR>
-nnoremap <leader>ve :edit $MYVIMRC
+" Map key for reload vimrc into current session (vim..config..restore/edit)
+nnoremap <Leader>vcr :source $MYVIMRC<CR>
+nnoremap <leader>vce :edit $MYVIMRC
