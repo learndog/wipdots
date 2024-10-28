@@ -40,3 +40,4 @@ luac.out
 *.hex
 
 *.gitconfig
+**/.ipynb_checkpoints/
