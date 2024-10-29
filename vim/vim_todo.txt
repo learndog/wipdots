@@ -146,6 +146,10 @@ PLUGIN MANAGEMENT
 
 MISC
 * Check licensing so can distribute
+* Make some branches private
+  24ways.org/2013/keeping-parts-of-your-codebase-private-on-github/
+  stackoverflow.com/questions/7983204/having-a-private-branch-of-a-public-repo-on-github
+  GitHub Gist... amir-aniyan/create-private-branch-of-a-public-repository.md
 
 GIT SUPPORT
         For git TUI tools, see dev.to/mainendra/terminal-ui-for-git-283p
