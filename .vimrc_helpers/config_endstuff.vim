@@ -13,8 +13,8 @@ nnoremap <S-DOWN> <C-f>
 nnoremap <S-UP> <C-b>
 "nnoremap <S-H> B
 "nnoremap <S-L> W
-nnoremap <S-J> <C-f>
-nnoremap <S-K> <C-b>
+" nnoremap <S-J> <C-f>
+" nnoremap <S-K> <C-b> "NO!!!! This is hover
 " Match to <S-...> list for cross-platform compatibility
 nnoremap <C-h> B
 nnoremap <C-l> W

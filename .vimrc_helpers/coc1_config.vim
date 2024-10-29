@@ -38,8 +38,6 @@ nnoremap <F4> :CocPrev<CR>
 nnoremap <F5> :CocNext<CR>
 nnoremap <F6> :CocFirst<CR>
 nnoremap <F7> :CocLast<CR>
-nnoremap <leader>j :CocNext<CR>
-nnoremap <leader>k :CocPrev<CR>
 " coc.nvim go-to commands DELETE THESE???
 " nnoremap <Leader>gd :CocDefinition<CR>
 " nnoremap <Leader>gi :CocImplementation<CR>
