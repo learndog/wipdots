@@ -1,0 +1,155 @@
+Vim Todo
+  
+PRIORITIES                                                                                                             
+
+BUGS                                                                                                                   
+* Block move lines in visual mode with Shift > and Shift <                                                             
+* Visual mode <space> up, down, right, left (odd multiline behavior)                                                   
+* Lightline only updates the time when the mode changes.                                                               
+* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!                         
+
+KEYMAPS                                                                                                                
+* Reorg keymaps by helper file (including overwrites to document keymap and add whichkey text)                         
+      Confirm that disable, which-key and vim-which-key have compatible formats                                        
+* Add organize imports with coc with keymap for ":call CocAction('runCommand', 'editor.action.organizeImport')"        
+* Add :e $VIMRC                                                                                                        
+* Add :echo $VIMRC                                                                                                     
+* Add block alignment script and keymap                                                                                
+          esp for docstrings like 'parameter:      mytext'                                                             
+* Page (or 1/2 or 2/3 page) up and down keeping cursor in middle of page (see old configs)                             
+          or simply add "M" after full page scroll                                                                     
+* Remove keymaps that cause muscle memory to change text                                                               
+* Keymap to set a .vimrc paramter for color theme                                                                      
+* Use del key to delete without yank (and update copypaste hint at top of this .vimrc file)                            
+* Add a keymap to trigger WhichKey from visual line mode                                                               
+
+FZF SEARCH                                                                                                             
+* Help file content                                                                                                    
+* Keymap and verbose(where keybind def) keymap searches using vim-which-key.                                           
+        See https://jay-baker.com/posts/vim-1-which-key/                                                               
+* :[b|p|d]Lines and :[b|p|d]Files  (b=curr buffer, bb=open buff files, p=project, d=specify dir)                       
+* LINES and FILES searches by regex                                                                                    
+* :Commits and :BCommits commands as in                                                                                
+        https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html                                         
+        Try other fzf - pattern match, key maps, MRU files sorted by MRU or alpha,                                     
+        diagnostiics, current buffer files, file content etc                                                           
+        MRU or same dir files...  nnoremap <silent> <Space>. :Files <C-r>=expand("%:h")<CR>/<CR>                       
+* Add :verbose map                                                                                                     
+* fzf key bindings (and verbose version of fzf keymaps)                                                                
+
+GIT                                                                                                                    
+* Integrate with git diff? What is fzf.vim :GF?                                                                        
+* git mergetool keymap for select local/remote/base (OR lazygit? magit? github.com/mkchoi212/fac?)                     
+* Synch scroll for git blame sidebar                                                                                   
+
+FILE EXPLORER                                                                                                          
+* Open file explorer using vim cwd OR curr buff file dir OR proj dir                                                   
+* :cd to project top level folder or to current buffer file location                                                   
+* TUI FIle manager... https://terminaltrove.com/superfile/, ranger, mc,...  (outside of VIM can launch in vim?)        
+* launch external file TUI at curr dir / proj folder                                                                   
+* Add nvim-tree.lua for nvim (https://github.com/nvim-tree/nvim-tree.lua) no deps but nice                             
+
+FEATURES
+* Remove all trailing spaces from lines
+
+BUFFERS AND TABS                                                                                                       
+* Close buffer (:bd)                                                                                                   
+* Keymaps for next and previous tab... gt or gT                                                                        
+* Buffer and tab rename                                                                                                
+* Open buffers as new tabs (if not already a tab)                                                                      
+* Close all tabs (wihtout error on last one) but keep buffers                                                          
+* Open file in new split or tab (after selecting in netrw also?)                                                       
+                                                                                                                           
+LANGUAGE SERVER                                                                                                        
+* Diagnostics: Show list and do Previous/Next or fzf search                                                            
+* format or format on save or format from project folder                                                               
+* coc working folders (and see other items in :CocList)                                                                
+                                                                                                                           
+FILE DIFFS                                                                                                             
+* Integrate with external diff, colordiff, nbdiff, difftastic, vimdiff, github.com/dandavison/delta                    
+        Also see github.com/whiteinge/diffconflicts for vim-diffconflicts                                              
+                                                                                                                           
+TERMINALS                                                                                                              
+* Keymaps for :terminal, :vertical terminal, :vertical <modifier> terminal,                                            
+      where <modifier> is... lefta[bove], abo[veleft], bel[owright], rightb[elow]                                      
+      See https://www.baeldung.com/linux/vim-terminal-open-position                                                    
+* Keymaps for :tab terminal                                                                                            
+                                                                                                                           
+SNIPPETS                                                                                                               
+* Simple manual snippets (and keep in git - manual updates get pushed, no on-the-fly additions)                        
+                                                                                                                           
+OLD VIM VERSIONS                                                                                                       
+* fix sign column toggle for vim 7.4-                                                                                  
+      see https://stackoverflow.com/questions/18319284/vim-sign-column-toggle                                          
+* Add support for old (cavim) versions, eg https://github.com/ctrlpvim/ctrlp.vim                                       
+                                                                                                                           
+NATIVE NVIM                                                                                                            
+* Nvim compatibility                                                                                                   
+* Commenting should start at first nonws char, not col pos 1 (works in vim)                                            
+* Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372                             
+* Try debug capabilities                                                                                               
+                                                                                                                           
+TMUX SUPPORT                                                                                                           
+* Fix Ctrl-arrows and status line colors for vim running in tmux                                                       
+                                                                                                                           
+WINDOWS                                                                                                                
+* Better splits and windows - see https://github.com/Aster89/WinZoZ/tree/main                                          
+* Add a <leader> version of <C-W> commands                                                                             
+                                                                                                                           
+TESTS                                                                                                                  
+* Code and unit test - fast process                                                                                    
+                                                                                                                           
+DEBUG                                                                                                                  
+* Debug python in terminal                                                                                             
+        See www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/                             
+* Try vimspector... https://github.com/puremourning/vimspector                                                         
+                                                                                                                           
+IPYTHON                                                                                                                
+* Add vim-ipython-cell (run cells inside .py files in Vim)                                                             
+      and/or jupyter console with script to start kernel and connect to it (lastest one)                               
+        See locally saved discussion                                                                                   
+        and see code.visualstudio.com/docs/python/jupyter-support-py                                                   
+        and see stackoverflow.com/questions/64730660/how-do-i-find-excute-python-interactive-mode-in-visual-studio-code
+        and https://github.com/luk400/vim-jukit                                                                        
+        and https://github.com/jpalardy/vim-slime                                                                      
+                                                                                                                       
+      Edit and run Jupyter notebooks from Vim or Neovim                                                                
+         1. **Molten and Quarto**: Molten is a plugin that enables a notebook-like code running experience¹. It can start Jupyter kernels or attach to already running kernels, run code with those
+         2. **Jupyter-Vim**: This is a two-way integration between Vim and Jupyter². It allows you to develop code on a Jupyter notebook without leaving the terminal². You can send lines from Vim
+         3. **Vim-Notebook**: This plugin allows you to edit `.ipynb` files locally using Vim³.                        
+         4. **Vimpyter**: This is another plugin that allows you to edit your Jupyter notebooks in Vim/Neovim⁴.        
+         5. **Jupytext.vim**: This Vim plugin allows you to edit Jupyter `.ipynb` files⁵. Make sure that you have the `jupytext` CLI program installed (`pip install jupytext`)⁵.
+        Sources                                                                                                        
+         (1) How to: Edit Jupyter Notebooks in Neovim (with very few ... - Reddit. https://www.reddit.com/r/neovim/comments/17ynpg2/how_to_edit_jupyter_notebooks_in_neovim_with_very/.
+         (2) A two-way integration between Vim and Jupyter - Python Awesome. https://pythonawesome.com/a-two-way-integration-between-vim-and-jupyter/.
+         (3) Hack of the day: edit and run Python notebook inside vim(neovim). https://medium.com/@teddy23ai/hack-of-the-day-edit-and-run-python-notebook-inside-vim-neovim-19970436b2cd.
+         (4) szymonmaszke/vimpyter: Edit your Jupyter notebooks in Vim/Neovim - GitHub. https://github.com/szymonmaszke/vimpyter.
+         (5) GitHub - goerz/jupytext.vim: Vim plugin for editing Jupyter ipynb files .... https://github.com/goerz/jupytext.vim.
+         (6) undefined. https://github.com/jupyter-vim/jupyter-vim.git.                                                
+         (7) undefined. https://github.com/jupyter-vim/vim-notebook.git.                                               
+                                                                                                                           
+PLUGIN MANAGEMENT                                                                                                      
+* Use specified commit or version for plugins                                                                          
+* Use forked fugitive, maximizer, tmuxvimnavigator, whichkey, autoformat, ...                                          
+* Fix or confirm proper plugin branches are available and installed in the forked repos                                
+        To ensure that the forked versions of coc.nvim and coc-pyright are installed,                                  
+        you can specify the URL of your forked repositories in your .vimrc file.                                       
+        Here’s an example of how you can do this:                                                                      
+          Replace 'your-username' with your GitHub username                                                            
+          Plug 'your-username/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}                  
+          Plug 'your-username/coc-pyright', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}               
+          or Plug 'fannheyward/coc-pyright', {'do': 'yarn install --frozen-lockfile'}                                  
+        After updating your .vimrc file, you can run :PlugInstall to install the plugins from your forked              
+        repositories. You don’t need to run :CocInstall coc-pyright since you have already                             
+        specified the forked repositories in your .vimrc file.                                                         
+                                                                                                                           
+BACKLOG                                                                                                                
+* Which comments_manual.vim helper file has the improvements?                                                          
+* Add statusline detailed dependencies info                                                                            
+* Check licensing so can distribute                                                                                    
+
+GIT SUPPORT                                                                                                            
+        For git TUI tools, see dev.to/mainendra/terminal-ui-for-git-283p                                               
+        and github.com/frontaid/git-cli-tools                                                                          
+        and github.com/rhysd/conflict-marker.vim                                                                       
+                                                                                                                       

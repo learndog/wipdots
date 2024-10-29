@@ -34,9 +34,9 @@ let g:coc_user_config = {
 " BEGIN - KEYMAPS FOR LSP
 
 " coc.nvim navigation commands
-nnoremap <F4> :CocPrev<CR>
-nnoremap <F5> :CocNext<CR>
-nnoremap <F6> :CocFirst<CR>
+nnoremap <F4> :CocFirst<CR>
+nnoremap <F5> :CocPrev<CR>
+nnoremap <F6> :CocNext<CR>
 nnoremap <F7> :CocLast<CR>
 " coc.nvim go-to commands DELETE THESE???
 " nnoremap <Leader>gd :CocDefinition<CR>
