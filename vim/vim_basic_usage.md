@@ -13,7 +13,6 @@ Editing Tips
 * Copy text... On GCP JupyterLab Terminals use Shift select before Ctrl-C
 * Jmp past closing quote or bracket... jl
 * Jump to first character after left paren before cursor... jh
-* Test - Redraw window... \<Leader\>wr (does :redraw!)
 * Fix - Move text block... \<Leader\>ARROW or Ctrl-ARROW (switch window keymap conflict & left/right broken)
 * Join two lines, from first line in normal mode... J
 * TODO - Don't autoclose at position 1. Move cursor inside quotes (or just use jh/jl?)
@@ -42,6 +41,7 @@ Commenting
 Vim
 * Sessions... \<Leader\>vss and \<Leader\>vsr to save or restore vim sessions
 * $MYVIMRC... \<Leader\>vce and \<Leader\>vcr for config edit or reload
+* Redraw window... \<Leader\>wr (does :redraw!)
 * Keymaps... \<Leader\>fml literal or \<Leader\>fmf fuzzy
 * Show current keymap for the normal mode K... :map K
 * TODO - Add the builtin Keymap Commands...
