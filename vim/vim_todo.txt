@@ -28,7 +28,6 @@ FZF SEARCH
 * Keymap and verbose(where keybind def) keymap searches using vim-which-key.
         See https://jay-baker.com/posts/vim-1-which-key/
 * :[b|p|d]Lines and :[b|p|d]Files  (b=curr buffer, bb=open buff files, p=project, d=specify dir)
-* LINES and FILES searches by regex
 * :Commits and :BCommits commands as in
         https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
         Try other fzf - pattern match, key maps, MRU files sorted by MRU or alpha,
@@ -38,9 +37,10 @@ FZF SEARCH
 * fzf key bindings (and verbose version of fzf keymaps)
 
 GIT
-* Integrate with git diff? What is fzf.vim :GF?
+* Integrate with git diff?
 * git mergetool keymap for select local/remote/base (OR lazygit? magit? github.com/mkchoi212/fac?)
 * Synch scroll for git blame sidebar
+* Add git branch name to status line
 
 FILE EXPLORER
 * Open file explorer using vim cwd OR curr buff file dir OR proj dir
