@@ -26,15 +26,25 @@ nnoremap <Leader>of :open .<CR>
 
 
 " #### SECTION: Move blocks around (and preserve selection)
-vnoremap <C-UP> xkP`[V`]
-vnoremap <C-DOWN> xp`[V`]
-vnoremap <C-LEFT> <<`[V`]
-vnoremap <C-RIGHT> >>`[V`]
-" Alternative mappings in case these are intercepted by codeanywhere
+
+" Simple version to keep visual mode after indent
+vnoremap > >gv
+vnoremap < <gv
+vnoremap <leader><RIGHT> >gv
+vnoremap <leader><LEFT> <gv
 vnoremap <leader><UP> xkP`[V`]
 vnoremap <leader><DOWN> xp`[V`]
-vnoremap <leader><LEFT> <<`[V`]
-vnoremap <leader><RIGHT> >>`[V`]
+
+
+" vnoremap <C-UP> xkP`[V`]
+" vnoremap <C-DOWN> xp`[V`]
+" vnoremap <C-LEFT> <<`[V`]
+" vnoremap <C-RIGHT> >>`[V`]
+" Alternative mappings in case these are intercepted by codeanywhere
+" vnoremap <leader><UP> xkP`[V`]
+" vnoremap <leader><DOWN> xp`[V`]
+" vnoremap <leader><LEFT> <<`[V`]
+" vnoremap <leader><RIGHT> >>`[V`]
 
 " Note: Only <C-_> keymaps to upper/lower alphabet are reliable
 "       Intent is to use <C-up/down> for other things in normal mode, but move lines in visual select.

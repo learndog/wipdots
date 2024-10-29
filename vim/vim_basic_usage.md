@@ -17,6 +17,10 @@ Editing Tips
 * Join two lines, from first line in normal mode... J
 * TODO - Don't autoclose at position 1. Move cursor inside quotes (or just use jh/jl?)
 
+Moving Text Blocks (Visual lines)
+* Indent/Outdent... < and < after selecting lines (use . to repeat)
+* Indent/Outdent and keep selection... 
+
 Search
 * / to search text in curr buffer (n or N for next or prev)
 * :BLines or \<Leader\>fb to fzf lines in the curr buffer (dbl click to go there)
@@ -26,13 +30,18 @@ Search
 *            Case insensitive... grep -irn -- "my_case_insensitive_target"
 
 Buffers
-* Switch buffer... \<Leader\>\<Leader\> or \<Leader\>bb
+* Switch buffer... \<Leader\>\<Leader\> or \<Leader\>bb (\<Leader\>b if fzf not available)
 * Delete buffer... :bd
 
 Windows
 * Switch windows... \<Leader\>ARROW or Ctrl-ARROW
 * Close, Split, etc... \<Leader\>w
 * Maximizer Toggle... \<Leader\>m
+
+Folds
+* Toggle folding... \<Leader\>z
+* Set fold level... :Z0 (collapse all) thru :Z9 (expand 9 levels)
+* Current fold... Open... zo    Close... zc
 
 Commenting
 * \<Leader\>/ will comment or uncomment line or visual lines
@@ -45,6 +54,7 @@ Vim
 * Keymaps... \<Leader\>fml literal or \<Leader\>fmf fuzzy
 * Show current keymap for the normal mode K... :map K
 * TODO - Add the builtin Keymap Commands...
+* After accidental Ctrl-z, return with $ fg
 
 Python LSP - CoC stuff
 * \<Leader\>l prefix

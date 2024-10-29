@@ -1,14 +1,10 @@
 Vim Todo
 
 PRIORITIES
-* Block move lines in visual mode with Shift > and Shift <
-  Maybe use builtin... vim.fandom.com/wiki/Shifting_blocks_visually
-  Or keep visual selection... vi.stackexchange.com/questions/8433/how-do-you-indent-without-leaving-visual-mode-and-losing-your-current-select
-* Visual mode <space> up, down, right, left (odd multiline behavior)
-* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
-
+* 
 
 BUGS
+* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
 
 KEYMAPS
 * Reorg keymaps by helper file (including overwrites to document keymap and add whichkey text)
@@ -37,6 +33,8 @@ FZF SEARCH
         MRU or same dir files...  nnoremap <silent> <Space>. :Files <C-r>=expand("%:h")<CR>/<CR>
 * Add :verbose map
 * fzf key bindings (and verbose version of fzf keymaps)
+* :Files search with dotfiles included
+* Find all vim swap files in dir or git project
 
 GIT
 * Integrate with git diff?
