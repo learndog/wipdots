@@ -17,9 +17,9 @@ Editing Tips
 * Join two lines, from first line in normal mode... J
 * TODO - Don't autoclose at position 1. Move cursor inside quotes (or just use jh/jl?)
 
-Moving Text Blocks (Visual lines)
+Moving Text (Visual line selections only)
 * Indent/Outdent... < and < after selecting lines (use . to repeat)
-* Indent/Outdent and keep selection... 
+* Move and keep selection... \<Leader\>ARROW
 
 Search
 * / to search text in curr buffer (n or N for next or prev)
@@ -61,18 +61,14 @@ Python LSP - CoC stuff
 * \<Leader\>r is shortcut for rename symbol
 * \<Leader\>lo or \<Leader\>ll for lsp symbol outline with fzf (up arrow or start typing)
 * \<Leader\>ld jump to defn
-* \<Leader\>li incoming calls to highlighted fn 
-* \<Leader\>lI outgoing calls from highlighted fn 
+* \<Leader\>li incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)
+* \<Leader\>lI outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
 * \<Leader\>lf format
+* \<Leader\>la fzf list of problems (F4/F5/F6/F7 for first/prev/next/last)
 * \<Leader\>ly organize imports
+* \<Leader\>lc code actions for curser location
+* \<Leader\>ls code actions for source code
 * Shift-K for LSP hover to see fn defn
-* CoC problem(?) list...
-```
-F4 :CocFirst
-F5 :CocPrev
-F6 :CocNext
-F7 :CocLast
-```
 
 Cut and Paste                                                                                                                  
 * Copy paste from sys clipboard variations...                                                                          
@@ -88,6 +84,7 @@ Cut and Paste
 
 
 Git                                                                                                                    
+    # IF FUGITIVE AVAIL: fzf current buffer git history... :BCommits   or project git history... :Commits
     # To see changes in a vim buffer not yet saved, use <Leader>ds                                                     
     # To see changes in a local saved, unstaged file vs previous commit, use $ git diff                                
     # To see changes in a local saved, staged file vs previous commit, use $ git diff --staged                         

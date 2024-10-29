@@ -1,7 +1,17 @@
 Vim Todo
 
 PRIORITIES
-* 
+* Block move lines in visual mode with Shift > and Shift <
+  Maybe use builtin... vim.fandom.com/wiki/Shifting_blocks_visually
+  Or keep visual selection... vi.stackexchange.com/questions/8433/how-do-you-indent-without-leaving-visual-mode-and-losing-your-current-select
+  or... vi.stackexchange.com/questions/8433/keep-the-full-visual-selection-after-indenting-in-easy-mode-vim
+* Visual mode <space> up, down, right, left (odd multiline behavior)
+* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
+* Implement Fugitive
+  - use learndog version
+  - add helper_fzf_fugitive.vim (and source it conditionally on fzf and fugtive)
+    with configuration for BCommits and Commits
+  - Fix usage for BCommits and Commits (if nec)
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!

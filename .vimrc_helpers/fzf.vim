@@ -50,6 +50,13 @@ function! LiteralFindKeyMappings()
             \})
 endfunction
 
+" ONLY IF FUGITIVE IS AVAILABLE
+" Configure for :BCommits and :Commits
+" let g:fzf_commits_log_options = '--graph --color=always
+"   \ --format="%C(yellow)%h%C(red)%d%C(reset)
+"   \ - %C(bold green)(%ar)%C(reset) %s %C(blue)<%an>%C(reset)"'
+
+
 " " Keymaps for fuzzy searches
 nnoremap <C-p> :Files<CR>
 nnoremap <Leader>ff :Files<CR>
