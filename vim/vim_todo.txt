@@ -1,12 +1,6 @@
 Vim Todo
 
 PRIORITIES
-* Block move lines in visual mode with Shift > and Shift <
-  Maybe use builtin... vim.fandom.com/wiki/Shifting_blocks_visually
-  Or keep visual selection... vi.stackexchange.com/questions/8433/how-do-you-indent-without-leaving-visual-mode-and-losing-your-current-select
-  or... vi.stackexchange.com/questions/8433/keep-the-full-visual-selection-after-indenting-in-easy-mode-vim
-* Visual mode <space> up, down, right, left (odd multiline behavior)
-* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
 * Implement Fugitive
   - use learndog version
   - add helper_fzf_fugitive.vim (and source it conditionally on fzf and fugtive)
@@ -15,36 +9,40 @@ PRIORITIES
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
+  also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
+* In GCP vim, delete key sometimes doesn't work in insert mode
 
 KEYMAPS
 * Reorg keymaps by helper file (including overwrites to document keymap and add whichkey text)
       Confirm that disable, which-key and vim-which-key have compatible formats
 * Add organize imports with coc with keymap for ":call CocAction('runCommand', 'editor.action.organizeImport')"
-* Add :e $VIMRC
-* Add :echo $VIMRC
+* Add <Leader>vv for :view $VIMRC    (read only)
 * Add block alignment script and keymap
           esp for docstrings like 'parameter:      mytext'
 * Page (or 1/2 or 2/3 page) up and down keeping cursor in middle of page (see old configs)
           or simply add "M" after full page scroll
-* Remove keymaps that cause muscle memory to change text
+* Remove keymaps that cause muscle memory to change text (never map Ctrl-s, Ctrl-x or Ctrl-z)
 * Keymap to set a .vimrc paramter for color theme
 * Use del key to delete without yank (and update copypaste hint at top of this .vimrc file)
 * Add a keymap to trigger WhichKey from visual line mode
 
 FZF SEARCH
-* Help file content
+* Help files
 * Keymap and verbose(where keybind def) keymap searches using vim-which-key.
         See https://jay-baker.com/posts/vim-1-which-key/
 * :[b|p|d]Lines and :[b|p|d]Files  (b=curr buffer, bb=open buff files, p=project, d=specify dir)
-* :Commits and :BCommits commands as in
+* :Commits and :BCommits commands with Fugitive as in
         https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
-        Try other fzf - pattern match, key maps, MRU files sorted by MRU or alpha,
+        Try other fzf - pattern match, key maps, MRU files sorted by MRU (eg last accessed time) or alpha,
         diagnostiics, current buffer files, file content etc
         MRU or same dir files...  nnoremap <silent> <Space>. :Files <C-r>=expand("%:h")<CR>/<CR>
 * Add :verbose map
 * fzf key bindings (and verbose version of fzf keymaps)
 * :Files search with dotfiles included
 * Find all vim swap files in dir or git project
+
+BROWSER
+* TUI browsers with and without javascript
 
 GIT
 * Integrate with git diff?
@@ -53,7 +51,7 @@ GIT
 
 STATUS LINE
 * Add filetype to status line
-* Add git branch name to status line (see lightline info about using vim-gitbranch)
+* Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
 
 FILE EXPLORER
 * Open file explorer using vim cwd OR curr buff file dir OR proj dir
@@ -63,23 +61,21 @@ FILE EXPLORER
 * Add nvim-tree.lua for nvim (https://github.com/nvim-tree/nvim-tree.lua) no deps but nice
 
 BUFFERS AND TABS
-* Close buffer (:bd)
 * Keymaps for next and previous tab... gt or gT
 * Buffer and tab rename
 * Open buffers as new tabs (if not already a tab)
 * Close all tabs (wihtout error on last one) but keep buffers
-* Open file in new split or tab (after selecting in netrw also?)
+* Open a file in new split or tab (after selecting in netrw also?)
 
 LANGUAGE SERVER
-* Diagnostics: Show list and do Previous/Next or fzf search
-* format or format on save or format from project folder
+* format on save; format a project folder
 * coc working folders (and see other items in :CocList)
 
 FILE DIFFS
 * Integrate with external diff, colordiff, nbdiff, difftastic, vimdiff, github.com/dandavison/delta
         Also see github.com/whiteinge/diffconflicts for vim-diffconflicts
 
-TERMINALS
+TERMINALS (<Leader>t)
 * Keymaps for :terminal, :vertical terminal, :vertical <modifier> terminal,
       where <modifier> is... lefta[bove], abo[veleft], bel[owright], rightb[elow]
       See https://www.baeldung.com/linux/vim-terminal-open-position
@@ -105,6 +101,7 @@ TMUX SUPPORT
 WINDOWS
 * Better splits and windows - see https://github.com/Aster89/WinZoZ/tree/main
 * Add a <leader> version of <C-W> commands
+* Can we synchronize split window content? What does that mean, and when useful? Eg merge conflicts or diff windows?
 
 TESTS
 * Code and unit test - fast process
@@ -155,6 +152,7 @@ PLUGIN MANAGEMENT
 * Add plusin required dependencies documentation
 
 MISC
+* See my help file content using :view <helpfilename>
 * Check licensing so can distribute
 * Make some branches private
   24ways.org/2013/keeping-parts-of-your-codebase-private-on-github/

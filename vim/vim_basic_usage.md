@@ -51,10 +51,12 @@ Vim
 * Sessions... \<Leader\>vss and \<Leader\>vsr to save or restore vim sessions
 * $MYVIMRC... \<Leader\>vce and \<Leader\>vcr for config edit or reload
 * Redraw window... \<Leader\>wr (does :redraw!)
-* Keymaps... \<Leader\>fml literal or \<Leader\>fmf fuzzy
-* Show current keymap for the normal mode K... :map K
-* TODO - Add the builtin Keymap Commands...
 * After accidental Ctrl-z, return with $ fg
+
+Key Mappings
+* fzf keymaps... :Maps or \<Leader\>fml literal or \<Leader\>fmf fuzzy
+* Current normal mode keymap(s) for K... :map K
+* TODO - Add the builtin Keymap Commands...
 
 Python LSP - CoC stuff
 * \<Leader\>l prefix
@@ -73,18 +75,18 @@ Python LSP - CoC stuff
 Cut and Paste                                                                                                                  
 * Copy paste from sys clipboard variations...                                                                          
         select: visual mode or select with mouse                                                                       
-        copy:   Ctrl-c | Ctrl+Insert | Shift+Insert                                                                    
+        copy:   Ctrl-c | Ctrl+Insert | Shift+Insert    
+        copy:   SHIFT select your test, then copy with Ctrl-C (GCP JupyterLab terminal)
         copy:   SHIFT select your text, then copy with CTRL+SHIFT+C (from WSL/CA to Windows)                           
         cut: Shift+Del                                                                                                 
         paste:  Ctrl-v | Shift RightClick | middle mouse button                                                        
-        replace: copy and then visual select the destination text to replace, then p                                   
+* Vim copy/replace: copy and then visual select the destination text to be replaced, then p                                   
                                                                                                                        
-        If you paste from system clipboard into vim and get ^M at end of line,                                         
-        try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)            
-
+        Note: If you paste from system clipboard into vim and get ^M at end of line,                                         
+              try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)            
 
 Git                                                                                                                    
-    # IF FUGITIVE AVAIL: fzf current buffer git history... :BCommits   or project git history... :Commits
+    # IF FUGITIVE AVAIL: :fzf current buffer git history... :BCommits   or project git history... :Commits
     # To see changes in a vim buffer not yet saved, use <Leader>ds                                                     
     # To see changes in a local saved, unstaged file vs previous commit, use $ git diff                                
     # To see changes in a local saved, staged file vs previous commit, use $ git diff --staged                         
