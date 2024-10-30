@@ -95,7 +95,7 @@ Cut and Paste
 
 Git                                                                                                                    
     # If fugitive is avail, fzf current buffer git history... :BCommits   or project git history... :Commits
-    # :Blame - Git blame using a bash git command
+    # :Blame - Git blame using a bash git command (:bd to remove the results window)
     # To see changes in a vim buffer not yet saved, use <Leader>ds                                                     
     # To see changes in a local saved, unstaged file vs previous commit, use $ git diff                                
     # To see changes in a local saved, staged file vs previous commit, use $ git diff --staged                         
