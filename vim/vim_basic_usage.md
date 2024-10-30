@@ -4,7 +4,8 @@ For the default .vimrc config, \<Leader\> is \<space\>, and it opens vim-whichke
 
 Open file for editing
 * fzf... :Files (non dot files in directory) or :GFiles (git files)
-* \<Leader\>o for file explorer
+* In netrw... \<Leader\>o for file explorer
+* In nvimtree (nvim only)... \<Leader\>e for file explorer
 
 Editing Tips
 * Esc Insert Mode... jj

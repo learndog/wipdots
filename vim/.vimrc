@@ -5,24 +5,37 @@
 " ###################################################################################
 " Select functionality... choose a value
    let g:install_plug_lsp = 'coc'                   " Options: ['coc'], 'disable', 'ale'
-   let g:install_plug_vimwhichkey = 'vim-which-key' " [vim-which-key], disable, which-key
-   let g:install_plug_filetree = 'netrw'            " [netrw], nvimtree
    let g:install_plug_fzf = 1                       " [1] or 0 (for true or false)
       let g:install_plug_fzfbat = 1                 " [1] or 0 (for true or false)
    let g:install_plug_comments = 'manual'           " [manual] or commentary
    let g:install_plug_gitcmds = 'disable'           " [disable], fugitive
+   let g:install_plug_vimwhichkey = 'enable'        " [enable], disable - (will be autoconfigured later)
 " ###################################################################################
+
+"Auto configure features based on vim or nvim 
+if has('nvim')
+   if g:install_plug_vimwhichkey == 'enable'
+      let g:install_plug_vimwhichkey = 'which-key' " [vim-which-key], disable, which-key
+   endif
+   let g:install_plug_filetree = 'nvimtree'   " [netrw], nvimtree
+elseif !has('nvim')
+   if g:install_plug_vimwhichkey == 'enable'
+      let g:install_plug_vimwhichkey = 'vim-which-key' " [vim-which-key], disable, which-key
+   endif
+   let g:install_plug_filetree = 'netrw'   " [netrw], nvimtree
+else
+   let g:install_plug_vimwhichkey = 'disable'   " [vim-which-key], disable, which-key
+   let g:install_plug_filetree = 'netrw'   " [netrw], nvimtree
+endif
 
 " ###################################################################################
 " #### START VIM CONFIGURATION
 " ###################################################################################
 "
 " Set leader to <space>
-"let mapleader = "\<Space>"
-let g:mapleader = " "
+"let mapleader = '\<Space>'
+let g:mapleader = ' '
 let g:maplocalleader = ' '     " Added for vim-which-key (default was ,)
-nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
-nnoremap <silent> <localleader> :<c-u>WhichKey  '<Space>'<CR>
 
 " Allow mouse clicks anywhere (eg past column 88) if supported
 " xterm2 has been removed in nvim

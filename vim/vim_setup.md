@@ -29,8 +29,8 @@
   "   coc                                                                                                                  
   "     https://github.com/neoclide/coc.nvim                                                                               
   "     release branch                                                                                                     
-  "     Vim 8.1.1719+ or Neovim 0.4.0+                                                                                     
-  "     nodejs 14.14+                                                                                                      
+  "     Vim 8.1.1719+ or Neovim 0.4.0+
+  "     required: { node: '^18.18.0 || >=20.0.0' }
                                                                                                                            
   "   ale                                                                                                                  
   "     https://github.com/dense-analysis/ale                                                                              
@@ -39,7 +39,7 @@
   "   folke which-key                                                                                                      
   "     main branch                                                                                                        
   "     https://github.com/folke/which-key.nvim                                                                            
-  "     Also includes functionality for marks, registers, spelling, etc                                                    
+  "     Also includes functionality for marks, registers, spelling, etc
 
   """""""""""""""""""""""""""""""""""""""""""""""                                                                          
   " VIM/NVIM INSTALLS: ADDITIONAL INFO:                                                                                    
@@ -194,7 +194,13 @@
   "     git clone wipdots into ~/dev                                                                                       
   "     ln -s $HOME/dev/wipdots/.vimrc $HOME/.vimrc                                                                        
   "     ln -s $HOME/dev/wipdots/.vimrc_helpers/ $HOME/.vimrc_helpers                                                       
-                                                                                                                           
+
+  " Install node with NVM
+    https://github.com/nvm-sh/nvm?tab=readme-ov-file#install--update-script
+    command -v nvm       (should output nvm if installed successfully)
+    nvm install node
+    nvm use node
+    
   " First run...                                                                                                           
   " :PlugInstall should run automatically                                                                                  
   " :CocInstall coc-pyright coc-jedi                                                                                       
