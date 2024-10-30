@@ -166,3 +166,7 @@ GIT SUPPORT
         and github.com/frontaid/git-cli-tools
         and github.com/rhysd/conflict-marker.vim
 
+IDEAS
+* Undo Tree
+* Harpoon (or other jump to plugin)
+* 
