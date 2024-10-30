@@ -2,7 +2,7 @@
 
 For the default .vimrc config, \<Leader\> is \<space\>, and it opens vim-whichkey
 
-WARNING: In GCP JupyterLab in a Vertex AI VM, <Ctrl-W> by default will close the browser tab!!!!
+WARNING: In GCP JupyterLab in a Vertex AI VM, Ctrl-W by default will close the browser tab!!!!
 
 Open file for editing
 * fzf... :Files (non dot files in directory) or :GFiles (git files)
@@ -36,10 +36,13 @@ Commenting
     
 Diffs    
 * Open a split with two files, and on each one issue the command :diffthis to see the differences side by side
-    :diffoff to turn diff off
-    From bash, $ vimdiff file1 file2
-* TODO: Complete this section and try it out
-
+    OR from bash $ vimdiff file1 file2
+    Commands...
+        ]c or [c - move to next or prev difference
+        dp - :diffput - put the curr version into a new window
+        do - :diffput - bring the changes 'over here' from another window to the curr window
+        :diffupdate - rescan the files for new changes
+        :diffoff - turn off diff mode
 Moving Text (Visual line selections only)
 * Move and keep selection... \<Leader\>ARROW
 * Indent/Outdent... < and > after selecting lines (use . to repeat)
@@ -82,6 +85,9 @@ Windows
 * Maximizer Toggle... \<Leader\>m
 * Resize with META-ARROW (Alt key usually) but it may not work. 
     Try dragging the divider line with a mouse.
+* Switch splits
+    From Vertical to Horiz split... \<Leader\>wK  (also CtrlW-K)
+    From Horiz to Vertical split... \<Leader\>wH  (also CtrlW-H)
 
 Terminal
 * Terminal commands are prefix \<Leader\>t

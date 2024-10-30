@@ -47,3 +47,9 @@ nnoremap <Leader>lcp :pclose<CR>
 
 noremap <C-w><C-w> <C-w><C-w>
 
+" Switch from Vertical to Horiz Split
+nnoremap <Leader>wK <C-W>K
+
+" Switch from Horiz to Vertical Split
+nnoremap <Leader>wH <C-W>H
+
