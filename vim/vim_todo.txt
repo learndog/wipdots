@@ -41,6 +41,7 @@ FZF SEARCH
 * fzf key bindings (and verbose version of fzf keymaps)
 * :Files search with dotfiles included
 * Find all vim swap files in dir or git project
+* Try something like :GLines (maybe using my command line search for text in git commits/diffs)
 
 BROWSER
 * TUI browsers with and without javascript

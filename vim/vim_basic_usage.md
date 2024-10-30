@@ -5,7 +5,12 @@ For the default .vimrc config, \<Leader\> is \<space\>, and it opens vim-whichke
 Open file for editing
 * fzf... :Files (non dot files in directory) or :GFiles (git files)
 * In netrw... \<Leader\>o for file explorer
-* In nvimtree (nvim only)... \<Leader\>e for file explorer
+* In nvimtree (nvim only)...
+  * \<Leader\>e for file explorer prefix
+  * \<Leader\>ee to toggle nvimtree window
+  * Ctrl-] to make current folder the root of the tree
+  * Dbl click header or type "-" to chg root to the parent of current root
+  * Dbl click or \<Enter\> to open file or open/close folder
 
 Editing Tips
 * Esc Insert Mode... jj
