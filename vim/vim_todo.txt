@@ -33,6 +33,7 @@ FZF SEARCH
 * :[b|p|d]Lines and :[b|p|d]Files  (b=curr buffer, bb=open buff files, p=project, d=specify dir)
 * :Commits and :BCommits commands with Fugitive as in
         https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
+        NOTE: Seems to work without fugitive!
         Try other fzf - pattern match, key maps, MRU files sorted by MRU (eg last accessed time) or alpha,
         diagnostiics, current buffer files, file content etc
         MRU or same dir files...  nnoremap <silent> <Space>. :Files <C-r>=expand("%:h")<CR>/<CR>
@@ -137,8 +138,7 @@ IPYTHON
          (7) undefined. https://github.com/jupyter-vim/vim-notebook.git.
 
 PLUGIN MANAGEMENT
-* Use specified commit or version for plugins
-* Use forked fugitive, maximizer, tmuxvimnavigator, whichkey, autoformat, ...
+* Use specified commit or version for plugins?
 * Fix or confirm proper plugin branches are available and installed in the forked repos
         To ensure that the forked versions of coc.nvim and coc-pyright are installed,
         you can specify the URL of your forked repositories in your .vimrc file.

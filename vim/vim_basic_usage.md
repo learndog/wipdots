@@ -94,16 +94,16 @@ Cut and Paste
               try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)            
 
 Git                                                                                                                    
-    # If fugitive is avail, fzf current buffer git history... :BCommits   or project git history... :Commits
-    # :Blame - Git blame using a bash git command (:bd to remove the results window)
-    # To see changes in a vim buffer not yet saved, use <Leader>ds                                                     
-    # To see changes in a local saved, unstaged file vs previous commit, use $ git diff                                
-    # To see changes in a local saved, staged file vs previous commit, use $ git diff --staged                         
-    # To compare two local branches (or remote) use git fetch, and git diff branch1 branch2                            
-    # To compare committed changes in a local branch vs remote branch changes between branches use                     
-      git, fetch and git diff my_local_branch origin/my_local_branch                                                   
-    # To compare two commits use git diff commit1 commit2                                                              
-      Use HEAD for last commit. HEAD^ or HEAD~1 for the previous commit.                                               
-      HEAD~2, HEAD~3, etc before that.                                                                                 
-      HEAD^2 refers to the 2nd parent of the current commit.                                                           
-             It is NOT the grandparent of the current commit, and it is only valid for merge commits.                  
+* :BCommits - current buffer git history fzf
+* :Commits  - project git history fzf
+* :Blame    - git blame using a bash git command (:bd to remove the results window)
+* \<Leader\>ds - See changes in a vim buffer, not yet saved
+* $ git diff          - See changes in a local saved, unstaged file vs previous commit
+* $ git diff --staged - See changes in a local saved, staged file vs previous commit
+* $ git fetch and git diff branch1 branch2 - Compare two local branches (or remotes)
+* $ git fetch and git diff my_branch origin/my_branch - Compare committed changes in local branch vs remote branch                     
+* $ git diff commit1 commit2 - Compare two commits 
+    > Use HEAD for last commit
+    > HEAD~1 for the previous commit, HEAD^ is the prev parent
+    > HEAD~2, HEAD~3, etc for earlier commits                                                                                 
+    > HEAD^2, HEAD^3, etc for earlier parents (only valid for merge commits)                                                           
