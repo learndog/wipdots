@@ -33,6 +33,22 @@ Moving Text (Visual line selections only)
 
 Search
 * / to search text in curr buffer (n or N for next or prev)
+* :%s/search/replace/gc - search and replace with confirmation
+     where % is all lines in the file; g is global... all occurances in the line; c for confirm
+  or :\<line_nbr\>s/old/new/gc
+  or :\<startline_nbr\>,\<endline_nbr\>s/old/new/gc where line numbers can be
+        1 - first line
+        $ - last line
+        . - current line
+        +2 - the line two below the current line
+        Note: Ranges must be from smaller line nbr to larger line nbr or will get error
+        Note: Line nbr ranges are inclusive
+        eg :23s/old/new/gc will replace only on line 23
+        eg :10,20s/old/new/gc will replace from line 10-20
+        eg :.,+2s/old/new/gc will replace from current line to the line 2 below the current line
+  Note: Problematic characters that need escaping... /,&,\,*,.
+        Can escape with \
+        Can use a different old/new delimiter character like #, eg :%s#/home#/root#g
 * :BLines or \<Leader\>fb to fzf lines in the curr buffer (dbl click to go there)
 * Toggle highlighting... \<Leader\>h: Toggle highlighting
 * TODO: rg fzf search in curr dir and in curr git repos 
