@@ -10,6 +10,7 @@ BUGS
 * In GCP vim, delete key sometimes doesn't work in insert mode
 * jl to escape insert mode will move cursor left afterwards
 * exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
+* Sometimes can't bksp in insert mode
 
 CONVENIENCE ITEMS
 * Terminal helper with various keymaps
@@ -19,15 +20,16 @@ BIG TICKET ITEMS
 * Support for additional languages
 
 KEYMAPS
-* Add <Leader>vv for :view $MYVIMRC    (read only)
 * Add block alignment script and keymap
           esp for docstrings like 'parameter:      mytext'
 * Page (or 1/2 or 2/3 page) up and down keeping cursor in middle of page (see old configs)
           or simply add "M" after full page scroll
-* Remove keymaps that cause muscle memory to change text (never map Ctrl-s, Ctrl-x or Ctrl-z)
-* Keymap to set a .vimrc paramter for color theme
+* Safe, non destructive, keymaps for muscle memory
+  map C-s to :w<CR> and C-S to :wa<CR>
+  map Ctrl-x to close terminal?
+  map Ctrl-z to folds?
+* Keymap to set a .vimrc paramter for color theme?
 * Use del key to delete without yank (and update copypaste hint at top of this .vimrc file)
-* Add a keymap to trigger WhichKey from visual line mode
 
 FZF SEARCH
 * Help files
