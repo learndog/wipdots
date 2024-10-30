@@ -84,7 +84,8 @@ call plug#begin()
    if g:install_plug_filetree == 'nvimtree' | Plug 'nvim-tree/nvim-tree.lua'  | endif
    if g:install_plug_gitcmds == 'fugitive' | Plug 'tpope/vim-fugitive' | endif
    Plug 'learndog/vim-maximizer'  "From szw/vim-maximizer to secure old repos content
-   Plug 'learndog/vim-gitgutter', {'branch': 'release'} "From airblade/vim-gitgutter to secure repos content
+"    Plug 'learndog/vim-gitgutter', {'branch': 'release'} "From airblade/vim-gitgutter to secure repos content
+   Plug 'learndog/vim-gitgutter', {'branch': 'main'} "From airblade/vim-gitgutter to secure repos content
    Plug 'learndog/lightline.vim' "From itchyny/lightline.vim to secure repos content
    if g:install_plug_comments == 'commentary' | Plug 'tpope/vim-commentary' | endif
 call plug#end()
