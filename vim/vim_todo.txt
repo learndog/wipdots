@@ -1,11 +1,7 @@
 Vim Todo
 
 PRIORITIES
-* Implement Fugitive
-  - use learndog version
-  - add helper_fzf_fugitive.vim (and source it conditionally on fzf and fugtive)
-    with configuration for BCommits and Commits
-  - Fix usage for BCommits and Commits (if nec)
+* Terminal helper with various keymaps
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
@@ -50,6 +46,9 @@ GIT
 * Integrate with git diff?
 * git mergetool keymap for select local/remote/base (OR lazygit? magit? github.com/mkchoi212/fac?)
 * Synch scroll for git blame sidebar
+* Implement Fugitive (might not really need it)
+  - add helper_fzf_fugitive.vim (and source it conditionally on fzf and fugtive)
+    with configuration for BCommits and Commits
 
 STATUS LINE
 * Add filetype to status line

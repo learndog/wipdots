@@ -32,7 +32,7 @@ Moving Text (Visual line selections only)
 * Move and keep selection... \<Leader\>ARROW
 
 Search
-* / to search text in curr buffer (n or N for next or prev)
+* / to search text in curr buffer (n or N for next or prev; \ as escape character)
 * :%s/search/replace/gc - search and replace with confirmation
      where % is all lines in the file; g is global... all occurances in the line; c for confirm
   or :\<line_nbr\>s/old/new/gc
