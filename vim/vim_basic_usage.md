@@ -2,6 +2,8 @@
 
 For the default .vimrc config, \<Leader\> is \<space\>, and it opens vim-whichkey
 
+WARNING: In GCP JupyterLab in a Vertex AI VM, <Ctrl-W> by default will close the browser tab!!!!
+
 Open file for editing
 * fzf... :Files (non dot files in directory) or :GFiles (git files)
 * In netrw... 
@@ -27,9 +29,20 @@ Editing Tips
 * Join two lines, from first line in normal mode... J
 * TODO - Don't autoclose at position 1. Move cursor inside quotes (or just use jh/jl?)
 
+Commenting
+* \<Leader\>/ will comment or uncomment current line or visual lines
+* \<Leader\>// will comment current line or visual lines even if already commented
+
+    
+Diffs    
+* Open a split with two files, and on each one issue the command :diffthis to see the differences side by side
+    :diffoff to turn diff off
+    From bash, $ vimdiff file1 file2
+* TODO: Complete this section and try it out
+
 Moving Text (Visual line selections only)
-* Indent/Outdent... < and < after selecting lines (use . to repeat)
 * Move and keep selection... \<Leader\>ARROW
+* Indent/Outdent... < and > after selecting lines (use . to repeat)
 
 Search
 * / to search text in curr buffer (n or N for next or prev; \ as escape character)
@@ -61,8 +74,24 @@ Buffers
 
 Windows
 * Switch windows... \<Leader\>ARROW or Ctrl-ARROW
+* Window operations use \<Leader\>w prefix
 * Close, Split, etc... \<Leader\>w
+    Close window... :q   (closing a window will keep the buffer)
+    Horiz split command... :split or :sp
+    Vert split command...  :vsplit or :vsp
 * Maximizer Toggle... \<Leader\>m
+* Resize with META-ARROW (Alt key usually) but it may not work. 
+    Try dragging the divider line with a mouse.
+
+Terminal
+* Terminal commands are prefix \<Leader\>t
+* :term for split above, ie horiz split (i is req'd in nvim to type commands)
+* :vsplit term for vertical split
+* :tab term for terminal in a new tab
+* nvim open term in same buffer... :enew | term (plus type i)
+* :bd to delete the terminal buffer
+* In nvim... Ctrl-W q to close the term window (but keep the buffer)
+* In nvim... Ctrl-W " to paste into the terminal from Vim
 
 Folds
 * Toggle folding... \<Leader\>z
@@ -75,10 +104,6 @@ zE: Delete all folds in the current window.
 zo: Open a fold at the cursor (unfold).
 zc: Close a fold at the cursor.
 ```
-
-Commenting
-* \<Leader\>/ will comment or uncomment line or visual lines
-* \<Leader\>// will comment line or visual lines even if already commented
 
 Vim
 * Sessions... \<Leader\>vss and \<Leader\>vsr to save or restore vim sessions

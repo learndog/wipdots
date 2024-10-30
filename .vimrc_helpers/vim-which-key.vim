@@ -11,3 +11,4 @@ autocmd FileType which_key highlight WhichKeyDesc ctermbg=17 ctermfg=7
 autocmd FileType which_key highlight WhichKeyFloating ctermbg=17 ctermfg=7
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
+vnoremap <silent> <leader> :WhichKey '<Space>'<CR>

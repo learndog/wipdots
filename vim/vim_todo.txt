@@ -1,12 +1,17 @@
 Vim Todo
 
 PRIORITIES
-* Terminal helper with various keymaps
+* 
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
 * In GCP vim, delete key sometimes doesn't work in insert mode
+* jl to escape insert mode will move cursor left afterwards
+* exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
+
+CONVENIENCE ITEMS
+* Terminal helper with various keymaps
 
 KEYMAPS
 * Reorg keymaps by helper file (including overwrites to document keymap and add whichkey text)
