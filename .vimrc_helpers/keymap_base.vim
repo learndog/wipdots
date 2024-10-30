@@ -20,10 +20,6 @@ nnoremap jh F(l
 " To replace the lost defeault <C-L> mapping
 nnoremap <Leader>wr :redraw!<CR>
 
-" Open a file (finish in command line). Maybe can use $(fzf)?
-nnoremap <Leader>of :open .<CR>
-" Save <Leader>f... for find
-
 
 " #### SECTION: Move blocks around (and preserve selection)
 
