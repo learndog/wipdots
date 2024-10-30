@@ -12,7 +12,7 @@
    let g:install_plug_vimwhichkey = 'enable'        " [enable], disable - (will be autoconfigured later)
 " ###################################################################################
 
-"Auto configure features based on vim or nvim 
+"Auto configure features based on vim or nvim
 if has('nvim')
    if g:install_plug_vimwhichkey == 'enable'
       let g:install_plug_vimwhichkey = 'which-key' " [vim-which-key], disable, which-key
@@ -39,7 +39,7 @@ let g:maplocalleader = ' '     " Added for vim-which-key (default was ,)
 
 " Allow mouse clicks anywhere (eg past column 88) if supported
 " xterm2 has been removed in nvim
-" if has("mouse_sgr")            
+" if has("mouse_sgr")
 "    set ttymouse=sgr
 " else
 "    set ttymouse=xterm2

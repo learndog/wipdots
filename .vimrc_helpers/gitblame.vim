@@ -4,6 +4,7 @@ function! GitBlame()
    let l:filename = expand('%')
    let l:dirname = expand('%:p:h')
    let l:blame = system('cd ' . l:dirname . ' && git blame ' . l:filename)
+"    let l:blame = system('cd ' . ' && git blame ' . l:filename)
    vnew
    setlocal buftype=nofile
    setlocal bufhidden=hide

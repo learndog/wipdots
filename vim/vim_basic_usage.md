@@ -42,7 +42,14 @@ Windows
 Folds
 * Toggle folding... \<Leader\>z
 * Set fold level... :Z0 (collapse all) thru :Z9 (expand 9 levels)
-* Current fold... Open... zo    Close... zc
+* Built in fold commands
+```
+zf in Visual mode: Create a fold for the selected text.
+zd: Delete the fold at the cursor.
+zE: Delete all folds in the current window.
+zo: Open a fold at the cursor (unfold).
+zc: Close a fold at the cursor.
+```
 
 Commenting
 * \<Leader\>/ will comment or uncomment line or visual lines
@@ -87,7 +94,8 @@ Cut and Paste
               try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)            
 
 Git                                                                                                                    
-    # IF FUGITIVE AVAIL: :fzf current buffer git history... :BCommits   or project git history... :Commits
+    # If fugitive is avail, fzf current buffer git history... :BCommits   or project git history... :Commits
+    # :Blame - Git blame using a bash git command
     # To see changes in a vim buffer not yet saved, use <Leader>ds                                                     
     # To see changes in a local saved, unstaged file vs previous commit, use $ git diff                                
     # To see changes in a local saved, staged file vs previous commit, use $ git diff --staged                         

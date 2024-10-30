@@ -66,6 +66,7 @@ BUFFERS AND TABS
 * Open buffers as new tabs (if not already a tab)
 * Close all tabs (wihtout error on last one) but keep buffers
 * Open a file in new split or tab (after selecting in netrw also?)
+* Open a buffer in new split or tab
 
 LANGUAGE SERVER
 * format on save; format a project folder
