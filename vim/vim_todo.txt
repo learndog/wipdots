@@ -1,7 +1,8 @@
 Vim Todo
 
 PRIORITIES
-* 
+* Add vim version of grep -rni -- "searchText" to find text across files
+
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
@@ -13,11 +14,12 @@ BUGS
 CONVENIENCE ITEMS
 * Terminal helper with various keymaps
 
+BIG TICKET ITEMS
+* Python debugger with TUI (potentially a command line tool)
+* Support for additional languages
+
 KEYMAPS
-* Reorg keymaps by helper file (including overwrites to document keymap and add whichkey text)
-      Confirm that disable, which-key and vim-which-key have compatible formats
-* Add organize imports with coc with keymap for ":call CocAction('runCommand', 'editor.action.organizeImport')"
-* Add <Leader>vv for :view $VIMRC    (read only)
+* Add <Leader>vv for :view $MYVIMRC    (read only)
 * Add block alignment script and keymap
           esp for docstrings like 'parameter:      mytext'
 * Page (or 1/2 or 2/3 page) up and down keeping cursor in middle of page (see old configs)

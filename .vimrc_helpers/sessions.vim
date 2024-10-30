@@ -53,4 +53,5 @@ nnoremap <leader>vsr :call SessionRestore()<CR>
 
 " Map key for reload vimrc into current session (vim..config..restore/edit)
 nnoremap <Leader>vcr :source $MYVIMRC<CR>
-nnoremap <leader>vce :edit $MYVIMRC
+nnoremap <leader>vce :edit $MYVIMRC<CR>
+nnoremap <leader>vcv :view $MYVIMRC<CR>

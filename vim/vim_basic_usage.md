@@ -19,9 +19,10 @@ Open file for editing
   * Dbl click or \<Enter\> to open file or open/close folder
 
 Editing Tips
+* Insert mode ;; will cycle begin and end of line
 * Esc Insert Mode... jj
-* Cmd line from normal mode... ;
-* Cycle line begin, nonspace begin, nonspace end, line end... ;;
+* Insert or Normal... ;; will cycle line begin, nonspace begin, nonspace end, line end
+* Normal mode ; is command line
 * Copy text... On GCP JupyterLab Terminals use Shift select before Ctrl-C
 * Jmp past closing quote or bracket... jl
 * Jump to first character after left paren before cursor... jh
@@ -104,11 +105,12 @@ Folds
 * Set fold level... :Z0 (collapse all) thru :Z9 (expand 9 levels)
 * Built in fold commands
 ```
-zf in Visual mode: Create a fold for the selected text.
-zd: Delete the fold at the cursor.
-zE: Delete all folds in the current window.
-zo: Open a fold at the cursor (unfold).
-zc: Close a fold at the cursor.
+zf in Visual mode: Create a fold for the selected text
+zd: Delete the fold at the cursor
+zE: Delete all folds in the current window
+zo: Open a fold at the cursor - unfold it
+zc: Close a fold at the cursor
+za: Toggle a fold at the cursor
 ```
 
 Vim
@@ -116,11 +118,13 @@ Vim
 * $MYVIMRC... \<Leader\>vce and \<Leader\>vcr for config edit or reload
 * Redraw window... \<Leader\>wr (does :redraw!)
 * After accidental Ctrl-z, return with $ fg
+* List all commands for each mode... :help index
 
 Key Mappings
 * fzf keymaps... :Maps or \<Leader\>fml literal or \<Leader\>fmf fuzzy
 * Current normal mode keymap(s) for K... :map K
-* TODO - Add the builtin Keymap Commands...
+* List current keymaps... :map (and by mode... :nmap :vmap :imap)
+* Verbose list of keymaps... :verbose_map
 
 Python LSP - CoC stuff
 * \<Leader\>l prefix
