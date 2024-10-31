@@ -69,5 +69,8 @@ nnoremap <Leader>fb :BLines<CR>
 nnoremap <leader>fml :call LiteralFindKeyMappings()<CR>
 nnoremap <leader>fmf :call FuzzyFindKeyMappings()<CR>
 
+" Vim theme selection (from fzf, set colorscheme)
+nnoremap <Leader>vt :Colors<CR>
+
 " END - FUZZY FIND KEY MAPS
 " ############# END FUZZY FIND SETUP (NON-LSP)

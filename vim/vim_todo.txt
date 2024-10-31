@@ -3,7 +3,6 @@ Vim Todo
 PRIORITIES
 * Add vim version of grep -rni -- "searchText" to find text across files
 
-
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
@@ -11,9 +10,7 @@ BUGS
 * jl to escape insert mode will move cursor left afterwards
 * exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
 * Sometimes can't bksp in insert mode
-
-CONVENIENCE ITEMS
-* Terminal helper with various keymaps
+* Land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
 
 BIG TICKET ITEMS
 * Python debugger with TUI (potentially a command line tool)
@@ -30,8 +27,10 @@ KEYMAPS
   map Ctrl-z to folds?
 * Keymap to set a .vimrc paramter for color theme?
 * Use del key to delete without yank (and update copypaste hint at top of this .vimrc file)
+* Add Ctrl-ARROWS as another alias for Leader-ARROWS? (move visual line selections or switch windows) Or save for TMUX?
 
 FZF SEARCH
+* TODO: rg fzf search in curr dir and in curr git repos 
 * Help files
 * Keymap and verbose(where keybind def) keymap searches using vim-which-key.
         See https://jay-baker.com/posts/vim-1-which-key/
@@ -52,7 +51,14 @@ BROWSER
 * TUI browsers with and without javascript
 
 GIT
-* Integrate with git diff?
+* Add vim shortcuts for gitdiff cmds...
+*       :diffg RE  # get from REMOTE
+*       :diffg BA  # get from BASE
+*       :diffg LO  # get from LOCAL
+* Add delta to improve diff viewing - so many things can be better
+  See https://github.com/dandavison/delta
+  See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
+  See 
 * git mergetool keymap for select local/remote/base (OR lazygit? magit? github.com/mkchoi212/fac?)
 * Synch scroll for git blame sidebar
 * Implement Fugitive (might not really need it)

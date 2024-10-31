@@ -12,7 +12,8 @@
 " * python3... pip install black pyright                                                                                 
 " * linux...   nodejs, npm, fzf, bat (batcat), rg (ripgrep), delta                                                       
 " * pyright -> pip install pyright (for coc python linting)                                                              
-" * Debian 11+ or Ubuntu 22+ preferred                                                                                   
+" * Debian 11+ or Ubuntu 22+ preferred
+" * 
 
 
   """""""""""""""""""""""""""""""""""""""""""""""                                                                          
@@ -73,7 +74,17 @@
   " * Optionally install VIM or NVIM with snap                                                                             
                                                                                                                            
   " * Optionally install NEOVIM instead..."                                                                                
-  "     Install nvim on Debian 10 (Buster)                                                                                 
+  
+  "     Install simply from release package on Debian
+  "         Which release to install depends on the version of glibc
+  "         > Older linux like Debian 10 (Buster)... https://github.com/neovim/neovim-releases (built on glibc 2.17)
+  "         > Recent versions... https://github.com/neovim/neovim/releases/
+  "         Install process
+  "         > Download nvim-linux64.tar.gz
+  "         > Extract: tar xzvf nvim-linux64.tar.gz
+  "         > Run ./nvim-linux64/bin/nvim
+  
+  "     Install nvim on Debian 10 (Buster) with appimage
   "     Following https://github.com/neovim/neovim/wiki/Installing-Neovim                                                  
   "     # NOTE: Don't install FUSE because requires a privileged container                                                 
   "       Install neovim                                                                                                   
