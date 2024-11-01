@@ -52,6 +52,10 @@ GROOMED BACKLOG
 * Vim - Command or keymap to find all vim swap files in dir or git project
 
 BACKLOG
+* Keymap - Control sign column (gutter) visibility
+    Leader-vgn :set scl=no   " force the signcolumn to disappear
+    Leader-vgy :set scl=yes  " force the signcolumn to appear
+    Leader-vga :set scl=auto " return the signcolumn to the default behaviour
 * Status line - Add filetype to status line
 * Better splits and windows - see https://github.com/Aster89/WinZoZ/tree/main
 * Keymap - Block alignment of 2nd column, eg docstrings like 'parameter:      mytext'
@@ -96,11 +100,6 @@ in ~/Library/Application_Support/lazygit/config.yml...
         ```	
 * Synch scroll for git blame sidebar (vimdiff?)
 * Add plusin required dependencies documentation
-
-TERMINALS (<Leader>t)
-* Keymaps for :tab terminal
-
-SNIPPETS
 
 OLD VIM VERSIONS
 * fix sign column toggle for vim 7.4-

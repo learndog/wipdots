@@ -37,6 +37,8 @@ endif
 let g:mapleader = ' '
 let g:maplocalleader = ' '     " Added for vim-which-key (default was ,)
 
+set signcolumn=auto            " Show signcolumn, ie gutter... [yes|no|auto] 
+
 " Allow mouse clicks anywhere (eg past column 88) if supported
 " xterm2 has been removed in nvim
 " if has("mouse_sgr")
