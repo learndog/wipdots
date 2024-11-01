@@ -16,10 +16,12 @@ nnoremap jl %%l
 " Jump to first character after left paren before cursor
 inoremap <expr> jh getline('.')[col('.')-1] =~ '[)"'']' && col('.') == col('$')-1 ? '<ESC>A' : '<ESC>F(l'
 nnoremap jh F(l
-
+ 
 " To replace the lost defeault <C-L> mapping
 nnoremap <Leader>wr :redraw!<CR>
 
+" Map cut paste keystrokes safely
+" nnoremap <C-s>:w<CR> "Mapping broken - Doesn't seem to work - due to JupyterLab term?
 
 " #### SECTION: Move blocks around (and preserve selection)
 
