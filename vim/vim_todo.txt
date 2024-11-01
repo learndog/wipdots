@@ -19,7 +19,7 @@ GROOMED BACKLOG
 * LSP - autoformat on save
 * LSP - format a folder
 * Status line - Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
-* Help - View usage file read only (Leader-vhu)
+* Help - :view <helpfilename> read only (Leader-vhu), keymap strategy (Leader-vhk), setup instructions (Leader-vh0)
 * Add vim shortcuts for gitdiff cmds...
     * :diffg RE  # get from REMOTE
     * :diffg BA  # get from BASE
@@ -43,16 +43,16 @@ GROOMED BACKLOG
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
         and kickstarter (or is it lazyvim?) for debug ui config 
-
 * File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
 * Diffs - Use delta to improve diff viewing
     See https://github.com/dandavison/delta
     See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
     Also take a look at colordiff and difftastic
 * Vim - Command or keymap to find all vim swap files in dir or git project
+* Support for additional languages
 
 BACKLOG
-* Keymap - Control sign column (gutter) visibility
+* Keymap - Sign column (gutter) visibility
     Leader-vgn :set scl=no   " force the signcolumn to disappear
     Leader-vgy :set scl=yes  " force the signcolumn to appear
     Leader-vga :set scl=auto " return the signcolumn to the default behaviour
@@ -74,13 +74,12 @@ BACKLOG
 * Search - fzf for vim help files
 * Snippets - Simple manual snippets (and keep in git - manual updates get pushed, no on-the-fly additions)
 * Keymap - For :terminal, :vertical terminal, :vertical <modifier> terminal,
-      where <modifier> is... lefta[bove], abo[veleft], bel[owright], rightb[elow]
-      See https://www.baeldung.com/linux/vim-terminal-open-position
+        where <modifier> is... lefta[bove], abo[veleft], bel[owright], rightb[elow]
+        See https://www.baeldung.com/linux/vim-terminal-open-position
 * Keymap - Regular and verbose(where keybind def) keymap searches using vim-which-key and which-key.
         See https://jay-baker.com/posts/vim-1-which-key/
-* Lazygit...
-From lazyvim video on mac,
-in ~/Library/Application_Support/lazygit/config.yml...
+* Git - Lazygit...from lazyvim video on mac,
+        Put in ~/Library/Application_Support/lazygit/config.yml...
         ```
         keybinding:
           universal:
@@ -98,22 +97,22 @@ in ~/Library/Application_Support/lazygit/config.yml...
             colorArg: never
             pager: delta --dark --paging=never
         ```	
+* Git - Investigate other TUI tools
+        See dev.to/mainendra/terminal-ui-for-git-283p
+        and github.com/frontaid/git-cli-tools
+        and github.com/rhysd/conflict-marker.vim
 * Synch scroll for git blame sidebar (vimdiff?)
 * Add plusin required dependencies documentation
+* Tests - Runners for code and unit tests - fast and easy from vim
+* Navigation in i mode
+        Left, Rgt, Up, Dwn and begin and end
+        Maybe C-hljk? and C-0/C-$? C-b/C-e? Conflicts?
+* Make some branches private while developing
+        24ways.org/2013/keeping-parts-of-your-codebase-private-on-github/
+        stackoverflow.com/questions/7983204/having-a-private-branch-of-a-public-repo-on-github
+        GitHub Gist... amir-aniyan/create-private-branch-of-a-public-repository.md
 
-OLD VIM VERSIONS
-* fix sign column toggle for vim 7.4-
-      see https://stackoverflow.com/questions/18319284/vim-sign-column-toggle
-* Add support for old (cavim) versions, eg https://github.com/ctrlpvim/ctrlp.vim
-
-WINDOWS
-* Add a <leader> version of <C-W> commands
-* Can we synchronize split window content? What does that mean, and when useful? Eg merge conflicts or diff windows?
-
-TESTS
-* Code and unit test - fast process
-
-IPYTHON
+IPYTHON - ON HOLD
 * Add vim-ipython-cell (run cells inside .py files in Vim)
       and/or jupyter console with script to start kernel and connect to it (lastest one)
         See locally saved discussion
@@ -138,23 +137,3 @@ IPYTHON
          (7) undefined. https://github.com/jupyter-vim/vim-notebook.git.
 
 
-MISC
-* Support for additional languages
-* See my help file content using :view <helpfilename>
-* Check licensing so can distribute
-* Make some branches private
-  24ways.org/2013/keeping-parts-of-your-codebase-private-on-github/
-  stackoverflow.com/questions/7983204/having-a-private-branch-of-a-public-repo-on-github
-  GitHub Gist... amir-aniyan/create-private-branch-of-a-public-repository.md
-
-GIT SUPPORT
-        For git TUI tools, see dev.to/mainendra/terminal-ui-for-git-283p
-        and github.com/frontaid/git-cli-tools
-        and github.com/rhysd/conflict-marker.vim
-
-IDEAS
-* Undo Tree
-* Harpoon (or other jump to plugin)
-* Navigation in i mode
-  Left, Rgt, Up, Dwn and begin and end
-  Maybe C-hljk? and C-0/C-$? C-b/C-e? Conflicts?
