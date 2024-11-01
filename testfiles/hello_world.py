@@ -15,9 +15,23 @@ def say_hello2() -> None:
 def say_hello3():
     """Docstring for say_hello.
     """
+    say_hello()
     print("Hello, world!")
 
 def say_hello4() -> None:
+    """Docstring for say_hello2"""
+    say_hello()
+
+def say_hello5() -> None:
+    """Docstring for say_hello2"""
+    say_hello()
+
+def say_hello6():
+    """Docstring for say_hello.
+    """
+    print("Hello, world!")
+
+def say_hello7() -> None:
     """Docstring for say_hello2"""
     say_hello()
 

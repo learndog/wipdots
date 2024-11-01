@@ -193,6 +193,7 @@ Vim
 * Colorschemes... Leader-vt
 * Redraw window... Leader-wr (does :redraw!)
 * After accidental Ctrl-z, return with $ fg
+* Leader-vw... Find all vim swap files in curr dir recursively
 
 See Key Mappings and Commands
 * fzf keymaps... :Maps or Leader-fml literal or Leader-fmf fuzzy
@@ -204,11 +205,12 @@ See Key Mappings and Commands
 Python LSP - CoC stuff
 * Leader-l prefix
 * Shift-K for LSP hover to see fn defn
+* Ctrl-Space(vim) or Ctrl-@(nvim..maybe) to trigger autocomplete (if not already available)
 * Leader-n to rename symbol
 * gd or Leader-ld jump to defn
-* gr for fzf references (incoming calls)
-* gi or Leader-li side split with incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)
-* go or Leader-lI side split with outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
+* gr for fzf references (incoming calls) BONUS...Select item, then Tab for menu of actions
+* gi or Leader-li show coctree with incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)
+* go or Leader-lI show coctree with outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
 * Leader-lf format
 * Leader-ly organize imports
 * Leader-lo or Leader-ll for lsp symbol outline with fzf (up arrow or start typing)
