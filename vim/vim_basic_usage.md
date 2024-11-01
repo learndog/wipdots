@@ -20,7 +20,7 @@ Open file in vim for editing
   * Dbl click header or type "-" to chg root dir
   * Dbl click or Enter to open file or open/close folder
 
-Basic Navigation Tips
+Navigation
 * Std vim navigation
 *   gg for top, G for bottom
 *   Arrows or hjkl to move around
@@ -34,8 +34,23 @@ Basic Navigation Tips
 * Normal mode ; is command line
 * Jmp past closing quote or bracket... jl
 * Jump to first character after left paren before cursor... jh
+* Shift cursor up or down along with text... Ctrl-e or Ctrl-y
+* Move current line to top, middle, bottom of screen... zt, zz, zb
 
-Other Editing Tips
+Cut and Paste                                                                                                                  
+* Copy paste from sys clipboard variations...                                                                          
+        select: visual mode or select with mouse                                                                       
+        copy:   Ctrl-c | Ctrl+Insert | Shift+Insert    
+        copy:   SHIFT select your test, then copy with Ctrl-C (GCP JupyterLab terminal)
+        copy:   SHIFT select your text, then copy with CTRL+SHIFT+C (from WSL/CA to Windows)                           
+        cut: Shift+Del                                                                                                 
+        paste:  Ctrl-v | Shift RightClick | middle mouse button                                                        
+* Vim copy/replace: copy and then visual select the destination text to be replaced, then p                                   
+                                                                                                                       
+        Note: If you paste from system clipboard into vim and get ^M at end of line,                                         
+              try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)            
+
+More Editing
 * u in normal mode to undo, Ctrl-r to redo
 * Vim clipboard...    Shift-V to select lines, v to select characters
 *                     y to copy, d to cut, p to paste (yy and dd for current line)
@@ -43,6 +58,11 @@ Other Editing Tips
 *                     Paste system clipboard with Ctrl-p
 * J from the first line in normal mode will join the next line at the end of it
 * Leader-ARROW to move visual line selections around (will switch windows if no selection)
+* Insert text into multiple lines before cursor column
+    Enter visual block mode with :Vb
+    Arrows to highlight lines to act on
+    Shift-i to type the text to insert
+    ESC to act on all the lines
 
 Commenting
 * Leader-/ will comment or uncomment current line or visual lines
@@ -170,42 +190,30 @@ Git
 Vim
 * Sessions... Leader-vss and Leader-vsr to save or restore vim sessions
 * $MYVIMRC... Leader-vce and Leader-vcr for config edit or reload
+* Colorschemes... Leader-vt
 * Redraw window... Leader-wr (does :redraw!)
 * After accidental Ctrl-z, return with $ fg
-* List all commands for each mode... :help index
 
-Key Mappings
+See Key Mappings and Commands
 * fzf keymaps... :Maps or Leader-fml literal or Leader-fmf fuzzy
 * Current normal mode keymap(s) for K... :map K
 * List current keymaps... :map (and by mode... :nmap :vmap :imap)
 * Verbose list of keymaps... :verbose_map
+* List all commands for each mode... :help index
 
 Python LSP - CoC stuff
 * Leader-l prefix
-* Leader-r is shortcut for rename symbol
-* Leader-lo or Leader-ll for lsp symbol outline with fzf (up arrow or start typing)
+* Shift-K for LSP hover to see fn defn
 * Leader-ld jump to defn
 * Leader-li incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)
 * Leader-lI outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
-* Leader-lf format
+* Leader-lo or Leader-ll for lsp symbol outline with fzf (up arrow or start typing)
 * Leader-la fzf list of problems (F4/F5/F6/F7 for first/prev/next/last)
+* Leader-r to rename symbol
+* Leader-lf format
 * Leader-ly organize imports
 * Leader-lc code actions for curser location
 * Leader-ls code actions for source code
-* Shift-K for LSP hover to see fn defn
-
-Cut and Paste                                                                                                                  
-* Copy paste from sys clipboard variations...                                                                          
-        select: visual mode or select with mouse                                                                       
-        copy:   Ctrl-c | Ctrl+Insert | Shift+Insert    
-        copy:   SHIFT select your test, then copy with Ctrl-C (GCP JupyterLab terminal)
-        copy:   SHIFT select your text, then copy with CTRL+SHIFT+C (from WSL/CA to Windows)                           
-        cut: Shift+Del                                                                                                 
-        paste:  Ctrl-v | Shift RightClick | middle mouse button                                                        
-* Vim copy/replace: copy and then visual select the destination text to be replaced, then p                                   
-                                                                                                                       
-        Note: If you paste from system clipboard into vim and get ^M at end of line,                                         
-              try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)            
 
 Terminal
 * Terminal commands are prefix Leader-t
@@ -217,8 +225,7 @@ Terminal
 * In nvim... Ctrl-W q to close the term window (but keep the buffer)
 * In nvim... Ctrl-W " to paste into the terminal from Vim
 
-Debugging
-* Currently recommend using terminal debugger for Python
+Python terminal debugger
 *    builtin...     pdb. Always available with python.
 *    enhanced...    pdb++ at https://github.com/pdbpp/pdbpp
                     adds syntax highlighting, completion and convenience functions

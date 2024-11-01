@@ -1,7 +1,38 @@
 Vim Todo
 
-PRIORITIES
-* Add vim version of grep -rni -- "searchText" to find text across files
+BACKLOG
+* Debug - pudb and ipdb command line tool - see usage info
+* Status line - Add filetype to status line
+* Status line - Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
+* Keymap - Block alignment of 2nd column, eg docstrings like 'parameter:      mytext'
+* LSP - format on save
+* LSP - format a folder
+* Browser - TUI browsers with and without javascript
+* Search - Add vim version of grep -rni -- "searchText" to find text across files
+* Keymap - clean up both which-key mappings
+* Keymap - Check coc popups scrolling with Ctrl-f and Ctrl-b
+* Keymap - Use del key to delete without yank
+* Keymap -  Safety keymaps
+    * map C-s to :w<CR> and C-S to :wa<CR>
+    * map Ctrl-x to close terminal?
+    * map Ctrl-z to folds?
+* Keymap - For git diff
+* Add vim shortcuts for gitdiff cmds...
+    * :diffg RE  # get from REMOTE
+    * :diffg BA  # get from BASE
+    * :diffg LO  # get from LOCAL
+* Help - View usage file read only (Leader-vhu)
+* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
+* Buffers - 
+    * Buffer rename
+    * Open a buffer in new split
+* Tabs - 
+    * Tab rename
+    * Open buffers as new tabs (if not already a tab)
+    * Close all tabs (wihtout error on last one) but keep buffers
+* tmux - Fix Ctrl-arrows and status line colors for vim running in tmux
+* Keymap - Leader vm?... for :verbose map
+
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
@@ -13,21 +44,34 @@ BUGS
 * Land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
 
 BIG TICKET ITEMS
-* Python debugger with TUI (potentially a command line tool)
-* Support for additional languages
+* fzf searches - https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
+* Add delta to improve diff viewing
+  See https://github.com/dandavison/delta
+  See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
+  Also take a look at colordiff and difftastic
+* Keymaps for :terminal, :vertical terminal, :vertical <modifier> terminal,
+      where <modifier> is... lefta[bove], abo[veleft], bel[owright], rightb[elow]
+      See https://www.baeldung.com/linux/vim-terminal-open-position
+* Lazygit...
+From lazyvim video on mac,
+in ~/Library/Application_Support/lazygit/config.yml...
+        ```
+        keybinding:
+          universal:
+            return: '<c-\>'
 
-KEYMAPS
-* Add block alignment script and keymap
-          esp for docstrings like 'parameter:      mytext'
-* Page (or 1/2 or 2/3 page) up and down keeping cursor in middle of page (see old configs)
-          or simply add "M" after full page scroll
-* Safe, non destructive, keymaps for muscle memory
-  map C-s to :w<CR> and C-S to :wa<CR>
-  map Ctrl-x to close terminal?
-  map Ctrl-z to folds?
-* Keymap to set a .vimrc paramter for color theme?
-* Use del key to delete without yank (and update copypaste hint at top of this .vimrc file)
-* Add Ctrl-ARROWS as another alias for Leader-ARROWS? (move visual line selections or switch windows) Or save for TMUX?
+        gui:
+          theme:
+              selectedLineBgColor:
+                - underline
+              selectedRangeBgColor:
+                - underline
+
+        git:
+          paging:
+            colorArg: never
+            pager: delta --dark --paging=never
+        ```	
 
 FZF SEARCH
 * TODO: rg fzf search in curr dir and in curr git repos 
@@ -35,67 +79,14 @@ FZF SEARCH
 * Keymap and verbose(where keybind def) keymap searches using vim-which-key.
         See https://jay-baker.com/posts/vim-1-which-key/
 * :[b|p|d]Lines and :[b|p|d]Files  (b=curr buffer, bb=open buff files, p=project, d=specify dir)
-* :Commits and :BCommits commands with Fugitive as in
-        https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
-        NOTE: Seems to work without fugitive!
-        Try other fzf - pattern match, key maps, MRU files sorted by MRU (eg last accessed time) or alpha,
-        diagnostiics, current buffer files, file content etc
-        MRU or same dir files...  nnoremap <silent> <Space>. :Files <C-r>=expand("%:h")<CR>/<CR>
-* Add :verbose map
-* fzf key bindings (and verbose version of fzf keymaps)
 * :Files search with dotfiles included
 * Find all vim swap files in dir or git project
 * Try something like :GLines (maybe using my command line search for text in git commits/diffs)
 
-BROWSER
-* TUI browsers with and without javascript
-
 GIT
-* Add vim shortcuts for gitdiff cmds...
-*       :diffg RE  # get from REMOTE
-*       :diffg BA  # get from BASE
-*       :diffg LO  # get from LOCAL
-* Add delta to improve diff viewing - so many things can be better
-  See https://github.com/dandavison/delta
-  See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
-  See 
-* git mergetool keymap for select local/remote/base (OR lazygit? magit? github.com/mkchoi212/fac?)
 * Synch scroll for git blame sidebar
-* Implement Fugitive (might not really need it)
-  - add helper_fzf_fugitive.vim (and source it conditionally on fzf and fugtive)
-    with configuration for BCommits and Commits
-
-STATUS LINE
-* Add filetype to status line
-* Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
-
-FILE EXPLORER
-* Open file explorer using vim cwd OR curr buff file dir OR proj dir
-* :cd to project top level folder or to current buffer file location
-* TUI FIle manager... https://terminaltrove.com/superfile/, ranger, mc,...  (outside of VIM can launch in vim?)
-* launch external file TUI at curr dir / proj folder
-* Add nvim-tree.lua for nvim (https://github.com/nvim-tree/nvim-tree.lua) no deps but nice
-
-BUFFERS AND TABS
-* Keymaps for next and previous tab... gt or gT
-* Buffer and tab rename
-* Open buffers as new tabs (if not already a tab)
-* Close all tabs (wihtout error on last one) but keep buffers
-* Open a file in new split or tab (after selecting in netrw also?)
-* Open a buffer in new split or tab
-
-LANGUAGE SERVER
-* format on save; format a project folder
-* coc working folders (and see other items in :CocList)
-
-FILE DIFFS
-* Integrate with external diff, colordiff, nbdiff, difftastic, vimdiff, github.com/dandavison/delta
-        Also see github.com/whiteinge/diffconflicts for vim-diffconflicts
 
 TERMINALS (<Leader>t)
-* Keymaps for :terminal, :vertical terminal, :vertical <modifier> terminal,
-      where <modifier> is... lefta[bove], abo[veleft], bel[owright], rightb[elow]
-      See https://www.baeldung.com/linux/vim-terminal-open-position
 * Keymaps for :tab terminal
 
 SNIPPETS
@@ -111,9 +102,6 @@ NATIVE NVIM
 * Commenting should start at first nonws char, not col pos 1 (works in vim)
 * Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
 * Try debug capabilities
-
-TMUX SUPPORT
-* Fix Ctrl-arrows and status line colors for vim running in tmux
 
 WINDOWS
 * Better splits and windows - see https://github.com/Aster89/WinZoZ/tree/main
@@ -168,6 +156,7 @@ PLUGIN MANAGEMENT
 * Add plusin required dependencies documentation
 
 MISC
+* Support for additional languages
 * See my help file content using :view <helpfilename>
 * Check licensing so can distribute
 * Make some branches private
