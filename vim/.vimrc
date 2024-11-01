@@ -102,6 +102,7 @@ if g:install_plug_fzf          | source $HOME/.vimrc_helpers/fzf.vim | endif
 if g:install_plug_lsp == 'coc' | source $HOME/.vimrc_helpers/coc2_boilerplate.vim | endif
 if g:install_plug_lsp == 'ale' && g:install_plug_fzf | source $HOME/.vimrc_helpers/alefzf_config.vim | endif
 source $HOME/.vimrc_helpers/keymap_base.vim
+source $HOME/.vimrc_helpers/find_vim_swap_files.vim
 if g:install_plug_comments == 'commentary' | source $HOME/.vimrc_helpers/commentary.vim | endif
 if g:install_plug_comments == 'manual' | source $HOME/.vimrc_helpers/comments_manual.vim | endif
 source $HOME/.vimrc_helpers/lightline.vim

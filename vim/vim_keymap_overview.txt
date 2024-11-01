@@ -1,0 +1,79 @@
+Keymap Overview
+
+General Strategy
+* Keep vim default keymaps
+* Have alternate mappings for unreliable keys
+  - Meta (Usually Alt)
+  - Maybe Shift ARROW
+  - Maybe Shift ;
+
+Bare key prefixes
+g - goto (lsp stuff like gd,gr,gi,go plus gg top)
+G - Goto bottom line (built in)
+z - folds and content scroll(zt, zz, zb) 
+K - LSP hover
+
+Leader Prefix Groups
+a - 
+A - 
+b - buffers and tabs
+B - 
+c - 
+C - 
+d - debug
+D - 
+e - explore files
+E - 
+f - find (ff:find files, fw:find words, fb:find buffers, fh:find help, fm:find keymaps)
+F - 
+g - goto (keep gg,ga and add lsp gotos like gd 'def', gD 'Declaration', gI 'Implementation', gp "type defn")
+G - Git commands
+h - 
+H - 
+i - 
+I - 
+j - 
+J - 
+k - 
+K - 
+l - lsp
+L - 
+m - 
+M - 
+n - 
+N - 
+o - open
+O - 
+p - 
+P - 
+q - 
+Q - 
+r - 
+R - 
+s - 
+S - 
+t - terminal
+T - 
+u - 
+U - 
+v - vim stuff (plugins, sessions, themes, help, config) - Move to V?
+V - 
+w - 
+W - 
+x - 
+X - 
+y - 
+Y - 
+z - 
+Z - 
+
+<Ctrl-W> Windows commands
+<Alt-W> Resize Windows
+
+TMUX
+Only use <Ctrl-B> to avoid stealing vim keys
+<C-B>ARROW = Switch windows (panes?)
+<C-B>AltARROW = Resize windows
+     or Ctrl-ARROW?
+     or Shift-ARROW?
+Switch sessions...?

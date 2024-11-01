@@ -1,40 +1,7 @@
 Vim Todo
 
-BACKLOG
-* Debug - pudb and ipdb command line tool - see usage info
-* Status line - Add filetype to status line
-* Status line - Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
-* Keymap - Block alignment of 2nd column, eg docstrings like 'parameter:      mytext'
-* LSP - format on save
-* LSP - format a folder
-* Browser - TUI browsers with and without javascript
-* Search - Add vim version of grep -rni -- "searchText" to find text across files
-* Keymap - clean up both which-key mappings
-* Keymap - Check coc popups scrolling with Ctrl-f and Ctrl-b
-* Keymap - Use del key to delete without yank
-* Keymap -  Safety keymaps
-    * map C-s to :w<CR> and C-S to :wa<CR>
-    * map Ctrl-x to close terminal?
-    * map Ctrl-z to folds?
-* Keymap - For git diff
-* Add vim shortcuts for gitdiff cmds...
-    * :diffg RE  # get from REMOTE
-    * :diffg BA  # get from BASE
-    * :diffg LO  # get from LOCAL
-* Help - View usage file read only (Leader-vhu)
-* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
-* Buffers - 
-    * Buffer rename
-    * Open a buffer in new split
-* Tabs - 
-    * Tab rename
-    * Open buffers as new tabs (if not already a tab)
-    * Close all tabs (wihtout error on last one) but keep buffers
-* tmux - Fix Ctrl-arrows and status line colors for vim running in tmux
-* Keymap - Leader vm?... for :verbose map
-
-
 BUGS
+* Leader-vn is hanging until timeout for coc rename
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
 * In GCP vim, delete key sometimes doesn't work in insert mode
@@ -42,16 +9,71 @@ BUGS
 * exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
 * Sometimes can't bksp in insert mode
 * Land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
+* Commenting should start at first nonws char, not col pos 1 (works in vim)
+* Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
 
-BIG TICKET ITEMS
-* fzf searches - https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
-* Add delta to improve diff viewing
-  See https://github.com/dandavison/delta
-  See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
-  Also take a look at colordiff and difftastic
-* Keymaps for :terminal, :vertical terminal, :vertical <modifier> terminal,
+GROOMED BACKLOG
+* Keymap - change zh to 25zh and zl to 25zl (faster moving the contents right and left on the screen)
+* Keymap - gn for lsp rename, gi for incoming, go for outgoing, gd for defn (eg <Plug>(coc-definition))
+* Code outlines filtered for functions/methods
+* LSP - autoformat on save
+* LSP - format a folder
+* Status line - Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
+* Help - View usage file read only (Leader-vhu)
+* Add vim shortcuts for gitdiff cmds...
+    * :diffg RE  # get from REMOTE
+    * :diffg BA  # get from BASE
+    * :diffg LO  # get from LOCAL
+* Search - :FilesAll that includes dotfiles in the results
+* Search - :[B|P|D]Lines and :[B|P|D]Files[All]  (b=curr buffer, bb=open buff files, p=project, d=dir and optionally specify dir)
+           See https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
+           Also... :GLines (maybe using my command line search for text in git commits/diffs)
+* Browser - TUI browsers with and without javascript
+* Keymap - Use Shift-G and Leader-Shift-G for version control (git) commands
+* Keymap - For git diff in new buffer (not split)
+* Keymap - Check coc popups scrolling with Ctrl-f and Ctrl-b
+* Keymap - Use del key to delete without yank
+* Keymap -  Safety keymaps
+    * map C-s to :w<CR> and C-S to :wa<CR>
+    * map Ctrl-x to close terminal?
+    * map Ctrl-z to folds?
+* Keymap - Leader vm?... for :verbose map
+* Tmux - Fix Ctrl-arrows and status line colors for vim running in tmux
+* Debug - pudb and ipdb command line tool - see usage info
+        Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
+        If nec, try vimspector... https://github.com/puremourning/vimspector for vim
+        and kickstarter (or is it lazyvim?) for debug ui config 
+
+* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
+* Diffs - Use delta to improve diff viewing
+    See https://github.com/dandavison/delta
+    See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
+    Also take a look at colordiff and difftastic
+* Vim - Command or keymap to find all vim swap files in dir or git project
+
+BACKLOG
+* Status line - Add filetype to status line
+* Better splits and windows - see https://github.com/Aster89/WinZoZ/tree/main
+* Keymap - Block alignment of 2nd column, eg docstrings like 'parameter:      mytext'
+* Search - Add vim version of grep -rni -- "searchText" to find text across files
+* Buffers - 
+    * Buffer rename
+    * Open a buffer in new split
+* Tabs - 
+    * Tab rename
+    * Open buffers as new tabs (if not already a tab)
+      :bufdo tab split  (or a script is better)
+    * Close all tabs (without error on last one) but keep buffers
+      :tabdo close   (keeps the buffers, but won't close the last tab?)
+    * Tab prev/next
+* LSP - Code outlines filtered for Classes&Types / Variables
+* Search - fzf for vim help files
+* Snippets - Simple manual snippets (and keep in git - manual updates get pushed, no on-the-fly additions)
+* Keymap - For :terminal, :vertical terminal, :vertical <modifier> terminal,
       where <modifier> is... lefta[bove], abo[veleft], bel[owright], rightb[elow]
       See https://www.baeldung.com/linux/vim-terminal-open-position
+* Keymap - Regular and verbose(where keybind def) keymap searches using vim-which-key and which-key.
+        See https://jay-baker.com/posts/vim-1-which-key/
 * Lazygit...
 From lazyvim video on mac,
 in ~/Library/Application_Support/lazygit/config.yml...
@@ -72,49 +94,25 @@ in ~/Library/Application_Support/lazygit/config.yml...
             colorArg: never
             pager: delta --dark --paging=never
         ```	
-
-FZF SEARCH
-* TODO: rg fzf search in curr dir and in curr git repos 
-* Help files
-* Keymap and verbose(where keybind def) keymap searches using vim-which-key.
-        See https://jay-baker.com/posts/vim-1-which-key/
-* :[b|p|d]Lines and :[b|p|d]Files  (b=curr buffer, bb=open buff files, p=project, d=specify dir)
-* :Files search with dotfiles included
-* Find all vim swap files in dir or git project
-* Try something like :GLines (maybe using my command line search for text in git commits/diffs)
-
-GIT
-* Synch scroll for git blame sidebar
+* Synch scroll for git blame sidebar (vimdiff?)
+* Add plusin required dependencies documentation
 
 TERMINALS (<Leader>t)
 * Keymaps for :tab terminal
 
 SNIPPETS
-* Simple manual snippets (and keep in git - manual updates get pushed, no on-the-fly additions)
 
 OLD VIM VERSIONS
 * fix sign column toggle for vim 7.4-
       see https://stackoverflow.com/questions/18319284/vim-sign-column-toggle
 * Add support for old (cavim) versions, eg https://github.com/ctrlpvim/ctrlp.vim
 
-NATIVE NVIM
-* Nvim compatibility
-* Commenting should start at first nonws char, not col pos 1 (works in vim)
-* Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
-* Try debug capabilities
-
 WINDOWS
-* Better splits and windows - see https://github.com/Aster89/WinZoZ/tree/main
 * Add a <leader> version of <C-W> commands
 * Can we synchronize split window content? What does that mean, and when useful? Eg merge conflicts or diff windows?
 
 TESTS
 * Code and unit test - fast process
-
-DEBUG
-* Debug python in terminal
-        See www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
-* Try vimspector... https://github.com/puremourning/vimspector
 
 IPYTHON
 * Add vim-ipython-cell (run cells inside .py files in Vim)
@@ -140,20 +138,6 @@ IPYTHON
          (6) undefined. https://github.com/jupyter-vim/jupyter-vim.git.
          (7) undefined. https://github.com/jupyter-vim/vim-notebook.git.
 
-PLUGIN MANAGEMENT
-* Use specified commit or version for plugins?
-* Fix or confirm proper plugin branches are available and installed in the forked repos
-        To ensure that the forked versions of coc.nvim and coc-pyright are installed,
-        you can specify the URL of your forked repositories in your .vimrc file.
-        Here’s an example of how you can do this:
-          Replace 'your-username' with your GitHub username
-          Plug 'your-username/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
-          Plug 'your-username/coc-pyright', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
-          or Plug 'fannheyward/coc-pyright', {'do': 'yarn install --frozen-lockfile'}
-        After updating your .vimrc file, you can run :PlugInstall to install the plugins from your forked
-        repositories. You don’t need to run :CocInstall coc-pyright since you have already
-        specified the forked repositories in your .vimrc file.
-* Add plusin required dependencies documentation
 
 MISC
 * Support for additional languages
@@ -172,4 +156,6 @@ GIT SUPPORT
 IDEAS
 * Undo Tree
 * Harpoon (or other jump to plugin)
-* 
+* Navigation in i mode
+  Left, Rgt, Up, Dwn and begin and end
+  Maybe C-hljk? and C-0/C-$? C-b/C-e? Conflicts?

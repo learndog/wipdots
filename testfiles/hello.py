@@ -12,8 +12,7 @@ def hello2(name):
 
 b = 3
 
-
-
+MY_CONSTANT = 4
 
 a = 5 * (3+b) 
 

@@ -196,24 +196,25 @@ Vim
 
 See Key Mappings and Commands
 * fzf keymaps... :Maps or Leader-fml literal or Leader-fmf fuzzy
-* Current normal mode keymap(s) for K... :map K
 * List current keymaps... :map (and by mode... :nmap :vmap :imap)
+* Current normal mode keymap(s) for K... :map K
 * Verbose list of keymaps... :verbose_map
 * List all commands for each mode... :help index
 
 Python LSP - CoC stuff
 * Leader-l prefix
 * Shift-K for LSP hover to see fn defn
-* Leader-ld jump to defn
-* Leader-li incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)
-* Leader-lI outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
-* Leader-lo or Leader-ll for lsp symbol outline with fzf (up arrow or start typing)
-* Leader-la fzf list of problems (F4/F5/F6/F7 for first/prev/next/last)
-* Leader-r to rename symbol
+* Leader-n to rename symbol
+* gd or Leader-ld jump to defn
+* gr for fzf references (incoming calls)
+* gi or Leader-li side split with incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)
+* go or Leader-lI side split with outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
 * Leader-lf format
 * Leader-ly organize imports
+* Leader-lo or Leader-ll for lsp symbol outline with fzf (up arrow or start typing)
+* Leader-la fzf list of problems (F4/F5/F6/F7 for first/prev/next/last)
 * Leader-lc code actions for curser location
-* Leader-ls code actions for source code
+* Leader-ls goto symbol
 
 Terminal
 * Terminal commands are prefix Leader-t
