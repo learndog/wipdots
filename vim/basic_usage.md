@@ -197,12 +197,11 @@ Vim
 * Leader-vw... Find all vim swap files in curr dir recursively
 
 See Key Mappings and Commands
-* fzf keymaps... :Maps or Leader-fml literal or Leader-fmf fuzzy
-* List all custom keymaps... :map (and by mode... :nmap :vmap :imap)
-*    or filter by value eg custom normal mode keymap for K... :map K
+* Show help file for builtin commands with keymaps... Leader-fmh or :help index
 * Verbose list of keymaps... :verbose_map
-* List builtin commands with keymaps... :help index (or :help normal-index, :help insert-index, :help visual-index)
-* Search builtin normal mode commands... :NormalModeKeybinds
+* Search builtin normal mode commands... Leader-fmb or :NormalModeKeybinds
+* Search custom keymaps... :Maps or Leader-fml literal or Leader-fmf fuzzy
+* List custom keymaps... :map (and by mode... :nmap :vmap :imap), Can filter for K, eg... :nmap K
 
 Python LSP - CoC stuff
 * Leader-l prefix

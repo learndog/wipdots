@@ -205,6 +205,9 @@ nnoremap <Leader>fb :BLines<CR>
 " Map <leader>fm to call LiteralFindKeyMappings or FuzzyFindKeyMappings
 nnoremap <leader>fml :call LiteralFindKeyMappings()<CR>
 nnoremap <leader>fmf :call FuzzyFindKeyMappings()<CR>
+" Find builtin normal mode keybinds (g and brackets and windows maps - see help index)
+nnoremap <Leader>fmb :NormalModeKeybinds<CR>
+nnoremap <Leader>fmh :help index<CR>
 
 " Vim theme selection (from fzf, set colorscheme)
 nnoremap <Leader>vt :Colors<CR>
