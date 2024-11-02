@@ -13,6 +13,9 @@ BUGS
 * Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
 
 GROOMED BACKLOG
+* Add swap files to .gitignore (see swap file search in basic usage info file)
+* Add fzf for built in keymaps (all n i v)
+* Keymap - Use del key to delete without yank
 * Keymap - change zh to 25zh and zl to 25zl (faster moving the contents right and left on the screen)
 * Keymap - gn for lsp rename, gi for incoming, go for outgoing, gd for defn (eg <Plug>(coc-definition))
 * Code outlines filtered for functions/methods
@@ -32,7 +35,6 @@ GROOMED BACKLOG
 * Keymap - Use Shift-G and Leader-Shift-G for version control (git) commands
 * Keymap - For git diff in new buffer (not split)
 * Keymap - Check coc popups scrolling with Ctrl-f and Ctrl-b
-* Keymap - Use del key to delete without yank
 * Keymap - Leader vm?... for :verbose map
 * Tmux - Fix Ctrl-arrows and status line colors for vim running in tmux
 * Debug - pudb and ipdb command line tool - see usage info

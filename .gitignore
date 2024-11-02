@@ -41,3 +41,4 @@ luac.out
 
 *.gitconfig
 **/.ipynb_checkpoints/
+**/*.swp

@@ -7,11 +7,13 @@ General Strategy
   - Maybe Shift ARROW
   - Maybe Shift ;
 
-Bare key prefixes (Note: Use caps sparingly to avoid accidental operations when caps lock is on)
-g - goto (lsp stuff like gd,gr,gi,go plus gg top)
+Bare keys (Note: Use caps sparingly to avoid accidental operations when caps lock is on)
+b/B - Word motion
+g - PREFIX goto (lsp stuff like gd,gr,gi,go plus gg top)
 G - Goto bottom line (built in)
-z - folds and content scroll(zt, zz, zb) 
+z - PREFIX folds and content scroll(zt, zz, zb) 
 K - LSP hover
+w/W - Word motion
 
 Leader Prefix Groups
 a - 

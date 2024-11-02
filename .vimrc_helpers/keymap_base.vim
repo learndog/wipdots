@@ -20,6 +20,10 @@ nnoremap jh F(l
 " To replace the lost defeault <C-L> mapping
 nnoremap <Leader>wr :redraw!<CR>
 
+" Use cap word motions for reverse direction
+nnoremap W b
+nnoremap B w
+
 " Map cut paste keystrokes safely
 " nnoremap <C-s>:w<CR> "Mapping broken - Doesn't seem to work - due to JupyterLab term?
 
