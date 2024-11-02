@@ -133,6 +133,16 @@ Folds
     zx: Update folds
     ```
 
+Macros
+    ```
+    qa          " Start recording into register 'a' (Can use any single letter or digit)
+    <commands>  " Perform the commands you want to record
+    q           " Stop recording keystrokes
+    
+    @a          " Run the macro at the current position
+    @@          " Run the last run macro again at the current position
+    ````
+
 Diffs    
 * Open a split with two files, and on each one issue the command :diffthis to see the differences side by side
     OR from bash $ vimdiff file1 file2
