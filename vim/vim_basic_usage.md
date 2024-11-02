@@ -206,7 +206,7 @@ Python LSP - CoC stuff
 * Leader-l prefix
 * Shift-K for LSP hover to see fn defn
 * Ctrl-Space(vim) or Ctrl-@(nvim..maybe) to trigger autocomplete (if not already available)
-* Leader-n to rename symbol
+* Leader-ln to rename symbol
 * gd or Leader-ld jump to defn
 * gr for fzf references (incoming calls) BONUS...Select item, then Tab for menu of actions
 * gi or Leader-li show coctree with incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)

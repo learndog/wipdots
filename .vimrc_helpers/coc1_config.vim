@@ -91,9 +91,7 @@ nmap <silent> gr <Plug>(coc-references)
 
 noremap <leader>ld :call CocAction('jumpDefinition')<CR>
 nnoremap <leader>lr :call CocAction('jumpReferences')<CR>
-"nnoremap <leader>lc :call CocAction('references')<CR> "Already mapped to coc list commands
-nmap <leader>rn <Plug>(coc-rename)
-nnoremap <leader>ln :call CocAction('rename')<CR>
+nnoremap <leader>ln :call CocActionAsync('rename')<CR>
 nnoremap <leader>la :call CocAction('codeAction')<CR>
 nnoremap <leader>li :call CocAction('showIncomingCalls')<CR>
 nnoremap gi :call CocAction('showIncomingCalls')<CR>
@@ -101,6 +99,8 @@ nnoremap <leader>lI :call CocAction('showOutgoingCalls')<CR>
 nnoremap go :call CocAction('showOutgoingCalls')<CR>
 nnoremap <silent><nowait> <Leader>ll  :<C-u>CocList outline<cr>
 nnoremap <leader>ly :call CocAction('runCommand', 'editor.action.organizeImport')<CR>
+
+"Note: <Plug>(coc-rename) causes timeout because not async
 
 " ACTIONS
 

@@ -7,7 +7,7 @@ General Strategy
   - Maybe Shift ARROW
   - Maybe Shift ;
 
-Bare key prefixes
+Bare key prefixes (Note: Use caps sparingly to avoid accidental operations when caps lock is on)
 g - goto (lsp stuff like gd,gr,gi,go plus gg top)
 G - Goto bottom line (built in)
 z - folds and content scroll(zt, zz, zb) 
