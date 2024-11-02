@@ -50,6 +50,7 @@ Cut and Paste
                                                                                                                        
         Note: If you paste from system clipboard into vim and get ^M at end of line,                                         
               try instead to enter INSERT mode first, and use Ctrl-v to paste. (Probably a Windows->Linux thing.)            
+* Non-yank Del key... it will not change the yank buffer when you delete with the Del key (not the std Vim behavior)
 
 More Editing
 * u in normal mode to undo, Ctrl-r to redo

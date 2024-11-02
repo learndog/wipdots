@@ -24,6 +24,10 @@ nnoremap <Leader>wr :redraw!<CR>
 nnoremap W b
 nnoremap B w
 
+" Non-yanking deletes (preserves the yank buffer)
+nnoremap <Del> "_x
+inoremap <Del> <C-o>"_x
+
 " Map cut paste keystrokes safely
 " nnoremap <C-s>:w<CR> "Mapping broken - Doesn't seem to work - due to JupyterLab term?
 
