@@ -198,10 +198,10 @@ Vim
 
 See Key Mappings and Commands
 * fzf keymaps... :Maps or Leader-fml literal or Leader-fmf fuzzy
-* List current keymaps... :map (and by mode... :nmap :vmap :imap)
-* Current normal mode keymap(s) for K... :map K
+* List all custom keymaps... :map (and by mode... :nmap :vmap :imap)
+*    or filter by value eg custom normal mode keymap for K... :map K
 * Verbose list of keymaps... :verbose_map
-* List all commands for each mode... :help index
+* List builtin commands with keymaps... :help index, :help normal-index, :help insert-index, :help visual-index
 
 Python LSP - CoC stuff
 * Leader-l prefix
