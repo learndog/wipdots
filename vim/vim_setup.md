@@ -48,7 +48,7 @@
   " * Vim 8.2.3555+ with +python3 (see www.reddit.com/r/vim/comments/qub6j9/comment/hsi5rgq/)                              
   "     Check python3 support with vim --version or :echo has('python3')                                                   
   "     It may also work on Vim 7, but will not modify the default status line                                             
-  "     coc.nvim requires at least Vim 8.1.1719 or Neovim 0.4.0                                                            
+  "     coc.vim requires at least Vim 8.1.1719 or Neovim 0.4.0                                                            
   "     Debian 11 package manager has Vim 9.0.1378-2 (sudo apt install vim) +python3 +lua                                  
   "     Ubuntu 24.04 has Vim 9.1 with +python3                                                                             
   "     Enable the +python3 feature in Vim by installing the vim-gtk package.                                              
@@ -76,9 +76,10 @@
   " * Optionally install NEOVIM instead..."                                                                                
   
   "     Install simply from release package on Debian
-  "         Which release to install depends on the version of glibc
+  "         Which release to install depends on the version of glibc (with $ ldd --version)
   "         > Older linux like Debian 10 (Buster)... https://github.com/neovim/neovim-releases (built on glibc 2.17)
-  "         > Recent versions... https://github.com/neovim/neovim/releases/
+  "         > Recent versions... https://github.com/neovim/neovim/releases/   (glibc 2.31 or newer is required)
+  "           Note that Ubuntu 24.04.1 LTS has 2.39, so it can use the regular Debian nvim release package
   "         Install process
   "         > Download nvim-linux64.tar.gz
   "         > Extract: tar xzvf nvim-linux64.tar.gz
