@@ -39,6 +39,18 @@ luac.out
 *.x86_64
 *.hex
 
+# Git
 *.gitconfig
+
+# Temp python stuff
 **/.ipynb_checkpoints/
+**/*.pyc
+
+# Vim swap files
 **/*.swp
+**/*.swo
+**/*.swn
+**/*.swm
+**/*.swl
+**/*.swh
+**/*.un~
