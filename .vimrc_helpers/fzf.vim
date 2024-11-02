@@ -50,6 +50,104 @@ function! LiteralFindKeyMappings()
             \})
 endfunction
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Fuzzy find built in keymaps
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:NormalModeIndexFzf()
+  " Save current window layout
+  let save_win_view = winsaveview()
+  try
+    " Open the help for normal-index in a scratch buffer
+    execute 'silent noswapfile keepjumps keepalt help normal-index'
+
+    " Get the buffer number of the help buffer
+    let help_bufnr = bufnr('%')
+
+    " Get all lines from the help buffer
+    let help_lines = getbufline(help_bufnr, 1, '$')
+
+    " Close the help buffer
+    execute 'bdelete! ' . help_bufnr
+
+    " Restore the original window layout
+    call winrestview(save_win_view)
+  catch /E149/  " Catch "No help for normal-index" error
+    echoerr "Could not open help for normal-index."
+    return
+  endtry
+
+  " Extract keybinding lines
+  let keybind_lines = []
+
+  for line in help_lines
+    " Skip empty lines
+    if line =~# '^\s*$'
+      continue
+    endif
+
+    " Skip separator lines
+    if line =~# '^\s*[-=]\{3,\}\s*$'
+      continue
+    endif
+
+    " Skip lines starting with specific non-keybinding words
+    if line =~# '^\s*\(CHAR\|WORD\|N\|Nmove\|SECTION\|note:\|tag\)\>'
+      continue
+    endif
+
+    " Split the line into columns based on at least two spaces
+    let columns = split(line, '\s\{2,\}')
+
+    " Ensure there are at least two columns
+    if len(columns) < 2
+      continue
+    endif
+
+    " The second column should not be empty
+    if empty(columns[1])
+      continue
+    endif
+
+    " Add the line to the keybindings list
+    call add(keybind_lines, line)
+  endfor
+
+  if empty(keybind_lines)
+    echoerr "Could not extract keybindings from help content."
+    return
+  endif
+
+  " Use fzf to display and filter the keybindings
+  call fzf#run(fzf#wrap({
+        \ 'source': keybind_lines,
+        \ 'sink*': function('s:OpenHelpForKeybind'),
+        \ 'options': '--prompt="Normal Mode Keybind> "',
+        \ 'placeholder': 'Type to filter keybindings...',
+        \}))
+endfunction
+
+function! s:OpenHelpForKeybind(selected)
+  for line in a:selected
+    " Split the line into columns
+    let columns = split(line, '\s\{2,\}')
+    if len(columns) >= 2
+      " Use the second column as the keybinding
+      let keybind = columns[1]
+      " Open the help page for the keybinding
+      execute 'help' keybind
+    endif
+  endfor
+endfunction
+
+command! NormalModeKeybinds call s:NormalModeIndexFzf()
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+
+
+
+
 " ONLY IF FUGITIVE IS AVAILABLE
 " Configure for :BCommits and :Commits
 " let g:fzf_commits_log_options = '--graph --color=always
