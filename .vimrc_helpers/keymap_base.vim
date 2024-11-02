@@ -28,6 +28,10 @@ nnoremap B w
 nnoremap <Del> "_x
 inoremap <Del> <C-o>"_x
 
+" Make screen viewport shifts bigger
+nnoremap zh 25zh
+nnoremap zl 25zl
+
 " Map cut paste keystrokes safely
 " nnoremap <C-s>:w<CR> "Mapping broken - Doesn't seem to work - due to JupyterLab term?
 

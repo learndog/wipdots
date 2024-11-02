@@ -37,6 +37,7 @@ Navigation
 * Shift cursor up or down along with text... Ctrl-e or Ctrl-y
 * Move current line to top, middle, bottom of screen... zt, zz, zb
 * Reverse nav by word... w is fwd by word, W is bkwd by word; b is back word, B is fwd word
+* zh and zl move along screen viewport right and left along a line (has been supercharged to 25 cols per move)
 
 Cut and Paste                                                                                                                  
 * Copy paste from sys clipboard variations...                                                                          
