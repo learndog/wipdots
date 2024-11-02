@@ -54,9 +54,9 @@ endfunction
 " Fuzzy find built in keymaps
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:NormalModeIndexFzf()
-  " Save current window layout
-  let save_win_view = winsaveview()
   try
+    " Save current window layout
+    let save_win_view = winsaveview()
     " Open the help for normal-index in a scratch buffer
     execute 'silent noswapfile keepjumps keepalt help normal-index'
 
@@ -71,59 +71,98 @@ function! s:NormalModeIndexFzf()
 
     " Restore the original window layout
     call winrestview(save_win_view)
-  catch /E149/  " Catch "No help for normal-index" error
-    echoerr "Could not open help for normal-index."
-    return
+
+    " Extract keybinding lines
+    let keybind_lines = []
+    let in_section = 0
+
+    " Iterate over help_lines with index
+    let idx = 0
+    while idx < len(help_lines)
+      let line = help_lines[idx]
+      " Output the current line for debugging
+"       echom 'Line ' . (idx + 1) . ': ' . line
+
+      " Check for the start of the keybindings section
+      if line =~# '^tag\s\+char\s\+note\s\+action in Normal mode\s*\~$'
+        " Check if the next line is a line of hyphens
+        if idx + 1 < len(help_lines) && help_lines[idx + 1] =~# '^\-*$'
+          let in_section = 1
+          echom 'Entering keybindings section at line ' . (idx + 1)
+          " Skip the hyphens line
+          let idx += 2
+          continue
+        else
+          echom 'Hyphens line not found after start marker at line ' . (idx + 2)
+        endif
+      endif
+
+      " Check for the end of the keybindings section
+      if in_section && line =~# '^\s*=*\s*$'
+        if idx + 1 < len(help_lines) && help_lines[idx + 1] =~# '^\s*2\.1\s\+Text objects'
+          let in_section = 0
+          echom 'Exiting keybindings section at line ' . (idx + 1)
+          break
+        endif
+      endif
+
+      if in_section
+        " Skip empty lines and separator lines
+        if line =~# '^\s*$' || line =~# '^\-*$' || line =~# '^\s*=*\s*$'
+          let idx += 1
+          continue
+        endif
+
+        " Output the line being processed
+"         echom 'Processing line: ' . line
+
+        " Split the line into columns based on tabs
+        let columns = split(line, '\t\+')
+
+        " Ensure there are at least two columns
+        if len(columns) < 2
+"           echom 'Skipping line due to insufficient columns at line ' . (idx + 1)
+          let idx += 1
+          continue
+        endif
+
+        " Remove vertical bars '|' from columns[0] and columns[1]
+        let columns[0] = substitute(columns[0], '[|]', '', 'g')
+        let columns[1] = substitute(columns[1], '[|]', '', 'g')
+
+        " Reconstruct the line
+        let new_line = join(columns, '  ')
+
+        " Add the line to the keybindings list
+        call add(keybind_lines, new_line)
+"         echom 'Added keybinding: ' . new_line
+      endif
+
+      let idx += 1
+    endwhile
+
+    if empty(keybind_lines)
+      echoerr "Could not extract keybindings from help content."
+      return
+    endif
+
+    " Output the total number of keybindings extracted
+    echom 'Total keybindings extracted: ' . len(keybind_lines)
+
+    " Sort the keybind_lines alphabetically
+    call sort(keybind_lines)
+
+    " Use fzf to display and filter the keybindings
+    call fzf#run(fzf#wrap({
+          \ 'source': keybind_lines,
+          \ 'sink*': function('s:OpenHelpForKeybind'),
+          \ 'options': '--exact --prompt="Normal Mode Keybind> "',
+          \ 'placeholder': 'Type to filter keybindings...',
+          \}))
+  catch /.*/
+    echoerr "An error occurred: " . v:exception
+    echoerr "Error at line number: " . v:lnum
   endtry
-
-  " Extract keybinding lines
-  let keybind_lines = []
-
-  for line in help_lines
-    " Skip empty lines
-    if line =~# '^\s*$'
-      continue
-    endif
-
-    " Skip separator lines
-    if line =~# '^\s*[-=]\{3,\}\s*$'
-      continue
-    endif
-
-    " Skip lines starting with specific non-keybinding words
-    if line =~# '^\s*\(CHAR\|WORD\|N\|Nmove\|SECTION\|note:\|tag\)\>'
-      continue
-    endif
-
-    " Split the line into columns based on at least two spaces
-    let columns = split(line, '\s\{2,\}')
-
-    " Ensure there are at least two columns
-    if len(columns) < 2
-      continue
-    endif
-
-    " The second column should not be empty
-    if empty(columns[1])
-      continue
-    endif
-
-    " Add the line to the keybindings list
-    call add(keybind_lines, line)
-  endfor
-
-  if empty(keybind_lines)
-    echoerr "Could not extract keybindings from help content."
-    return
-  endif
-
-  " Use fzf to display and filter the keybindings
-  call fzf#run(fzf#wrap({
-        \ 'source': keybind_lines,
-        \ 'sink*': function('s:OpenHelpForKeybind'),
-        \ 'options': '--prompt="Normal Mode Keybind> "',
-        \ 'placeholder': 'Type to filter keybindings...',
-        \}))
 endfunction
 
 function! s:OpenHelpForKeybind(selected)

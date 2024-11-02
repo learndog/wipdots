@@ -201,7 +201,8 @@ See Key Mappings and Commands
 * List all custom keymaps... :map (and by mode... :nmap :vmap :imap)
 *    or filter by value eg custom normal mode keymap for K... :map K
 * Verbose list of keymaps... :verbose_map
-* List builtin commands with keymaps... :help index, :help normal-index, :help insert-index, :help visual-index
+* List builtin commands with keymaps... :help index (or :help normal-index, :help insert-index, :help visual-index)
+* Search builtin normal mode commands... :NormalModeKeybinds
 
 Python LSP - CoC stuff
 * Leader-l prefix
