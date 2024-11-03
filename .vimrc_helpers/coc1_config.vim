@@ -54,21 +54,21 @@ function! CocShowFilteredSymbols(kind)
     endif
 
     " Create a new scratch buffer for filtered symbols
-    new
+    belowright vsplit
+    enew
     setlocal buftype=nofile
     setlocal bufhidden=wipe
     setlocal noswapfile
+    setlocal nobuflisted
 
     " Populate the new buffer with filtered symbols
     for l:symbol in l:filtered_symbols
-        " Extract the required information
         if has_key(l:symbol, 'range') && has_key(l:symbol, 'text')
             let l:line = l:symbol.range.start.line + 1
             let l:col = l:symbol.range.start.character + 1
             let l:text = l:symbol.text
-            call append('$', printf('Line %d, Col %d: %s', l:line, l:col, l:text))
-        else
-            echo "Skipping symbol due to missing keys"
+            let l:formatted_line = printf('%-30s Line %d, Col %d', l:text, l:line, l:col)
+            call append('$', l:formatted_line)
         endif
     endfor
 
@@ -76,15 +76,15 @@ function! CocShowFilteredSymbols(kind)
     normal! gg
 
     " Allow jumping to symbol locations when pressing Enter on a line
-    nnoremap <buffer> <CR> :call CocJumpToSymbol()<CR>
+    nnoremap <buffer> <CR> :call CocJumpToSymbolFromBuffer()<CR>
 endfunction
 
-function! CocJumpToSymbol()
+function! CocJumpToSymbolFromBuffer()
     " Get the line under the cursor
     let l:line = getline('.')
 
     " Extract the line number and column number from the line
-    let l:parts = matchlist(l:line, 'Line \(\d\+\), Col \(\d\+\):')
+    let l:parts = matchlist(l:line, 'Line \(\d\+\), Col \(\d\+\)')
     if len(l:parts) < 3
         echo "Invalid line format"
         return
@@ -92,7 +92,7 @@ function! CocJumpToSymbol()
     let l:lnum = str2nr(l:parts[1])
     let l:col = str2nr(l:parts[2])
 
-    " Jump to the specified location
+    " Jump to the specified location in the original buffer
     execute l:lnum
     execute 'normal!' l:col . '|'
 endfunction
