@@ -67,6 +67,7 @@ function! CocShowFilteredSymbols(kind)
     " Populate the new buffer with filtered symbols and store symbol information
     let b:symbol_locations = []
 
+    " Start appending from line 0 to avoid an initial blank line
     for l:symbol in l:filtered_symbols
         if has_key(l:symbol, 'range') && has_key(l:symbol, 'text')
             let l:line = l:symbol.range.start.line + 1
@@ -75,7 +76,7 @@ function! CocShowFilteredSymbols(kind)
             let l:formatted_line = printf('%-30s Line %d, Col %d', l:text, l:line, l:col)
 
             " Append the formatted line to the buffer
-            call append('$', l:formatted_line)
+            call append(line('$') - 1, l:formatted_line)
 
             " Store the line and column details for easy lookup later
             call add(b:symbol_locations, {'line': l:line, 'col': l:col})
@@ -91,11 +92,11 @@ endfunction
 
 function! CocJumpToSymbolFromBuffer()
     " Get the line number in the buffer where the cursor is located
-    let l:current_line_num = line('.') - 1  " Subtract 1 to match the list index (0-based)
+    let l:current_line_num = line('.')  " Use line('.') directly, without subtracting 1
 
     " Retrieve the symbol location from the stored buffer list
-    if l:current_line_num >= 0 && l:current_line_num < len(b:symbol_locations)
-        let l:symbol_location = b:symbol_locations[l:current_line_num]
+    if l:current_line_num >= 1 && l:current_line_num <= len(b:symbol_locations)
+        let l:symbol_location = b:symbol_locations[l:current_line_num - 1]  " Adjust to 0-based index
         let l:lnum = l:symbol_location['line']
         let l:col = l:symbol_location['col']
 
