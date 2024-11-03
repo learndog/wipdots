@@ -268,3 +268,10 @@ Python terminal debugger
      3. Or do the import from command line when running the script as... 
         python -c "import pudb; pu.db; exec(open('my_script.py').read())"
 
+Troubleshooting LSP
+* :CocInfo             for detailed info about active language servers and any errors
+* :CocList services    to see language servers currently running for the file type 
+* :CocList extensions  for detailed information on loaded extensions
+* :CocCommand workspace.showOutput (choose what to output, but don't save the resulting buffer) 
+
+

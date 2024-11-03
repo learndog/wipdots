@@ -1,6 +1,7 @@
 Vim Todo
 
 BUGS
+* After reload of vim config, highlighting gets turned on.
 * Leader-vn is hanging until timeout for coc rename (cant reproduce on WSL... try GCP VM)
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
@@ -12,12 +13,25 @@ BUGS
 * Commenting should start at first nonws char, not col pos 1 (works in vim)
 * Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
 
+BIG TICKET ITEMS
+* Tmux - Fix Ctrl-arrows and status line colors for vim running in tmux
+* Debug - pudb and ipdb command line tool - see usage info
+        Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
+        If nec, try vimspector... https://github.com/puremourning/vimspector for vim
+        and kickstarter (or is it lazyvim?) for debug ui config 
+* Diffs - Use delta to improve diff viewing
+    See https://github.com/dandavison/delta
+    See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
+    Also take a look at colordiff and difftastic
+* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
+* Support for additional languages
+
+
 GROOMED BACKLOG
 * Keymaps for outline and outline functions, etc
   Leader-lsf for functions
   Leader-lsi for interactive (current map for L-ls)
   Leader-lss for all symbols (but might not show which type each one is)
-* Code outlines filtered for functions/methods
 * LSP - autoformat on save
 * LSP - format a folder
 * Status line - Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
@@ -35,18 +49,6 @@ GROOMED BACKLOG
 * Keymap - For git diff in new buffer (not split)
 * Keymap - Check coc popups scrolling with Ctrl-f and Ctrl-b
 * Keymap - Leader vm?... for :verbose map
-* Tmux - Fix Ctrl-arrows and status line colors for vim running in tmux
-* Debug - pudb and ipdb command line tool - see usage info
-        Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
-        If nec, try vimspector... https://github.com/puremourning/vimspector for vim
-        and kickstarter (or is it lazyvim?) for debug ui config 
-* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
-* Diffs - Use delta to improve diff viewing
-    See https://github.com/dandavison/delta
-    See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
-    Also take a look at colordiff and difftastic
-* Vim - Command or keymap to find all vim swap files in dir or git project
-* Support for additional languages
 
 BACKLOG
 * Keymap - Sign column (gutter) visibility
