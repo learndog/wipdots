@@ -231,6 +231,7 @@ Python LSP - CoC stuff
 * Leader-lc code actions for curser location
 * Leader-ls goto symbol
 * Leader-lof or :call CocShowFilteredSymbols('Function') List and goto symbol location
+  dbl click to close and must switch windows back to source to see location unless it must scroll the window
 
 Terminal
 * Terminal commands are prefix Leader-t
