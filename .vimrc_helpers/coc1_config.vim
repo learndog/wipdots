@@ -35,8 +35,9 @@ let g:coc_user_config = {
 " Function to select symbols of given kind
 "
 function! CocShowFilteredSymbols(kind)
-    " Save the current buffer number (original source buffer) in a global variable
+    " Save the current buffer number (original source buffer) and window number in global variables
     let g:original_buf = bufnr('%')
+    let g:original_win = winnr()
 
     " Get document symbols using CocAction
     let l:symbols = CocAction('documentSymbols')
@@ -88,6 +89,12 @@ function! CocShowFilteredSymbols(kind)
 
     " Allow jumping to symbol locations when pressing Enter on a line
     nnoremap <buffer> <CR> :call CocJumpToSymbolFromBuffer()<CR>
+
+    " Allow jumping to symbol locations when single-clicking with the mouse
+    nnoremap <buffer> <LeftMouse> :call CocJumpToSymbolFromBuffer()<CR>
+
+    " Allow jumping and closing the split when double-clicking with the mouse
+    nnoremap <buffer> <2-LeftMouse> :call CocJumpToSymbolAndClose()<CR>
 endfunction
 
 function! CocJumpToSymbolFromBuffer()
@@ -100,11 +107,12 @@ function! CocJumpToSymbolFromBuffer()
         let l:lnum = l:symbol_location['line']
         let l:col = l:symbol_location['col']
 
-        " Switch back to the original buffer using the global variable
-        if exists('g:original_buf')
-            execute 'buffer' g:original_buf
+        " Switch back to the original window using the global variable
+        if exists('g:original_win') && exists('g:original_buf')
+            execute g:original_win . "wincmd w"
+            execute "buffer " . g:original_buf
         else
-            echo "Original buffer not found"
+            echo "Original window or buffer not found"
             return
         endif
 
@@ -114,6 +122,14 @@ function! CocJumpToSymbolFromBuffer()
     else
         echo "Invalid line number"
     endif
+endfunction
+
+function! CocJumpToSymbolAndClose()
+    " Call the function to jump to the symbol location
+    call CocJumpToSymbolFromBuffer()
+
+    " Close the current split window (right-hand buffer)
+    execute 'quit'
 endfunction
 
 nnoremap <Leader>loo :call CocShowFilteredSymbols('Function')<CR> " Functions
