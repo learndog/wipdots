@@ -32,6 +32,62 @@ let g:coc_user_config = {
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function to select symbols of given kind
+"
+function! CocShowFilteredSymbols(kind)
+    " Get document symbols using CocAction
+    let l:symbols = CocAction('documentSymbols')
+
+    " Filter symbols based on the kind provided (e.g., Function, Variable, Class)
+    let l:filtered_symbols = filter(l:symbols, {_, v -> v.kind == a:kind})
+
+    " If there are no symbols of the specified kind, display a message
+    if empty(l:filtered_symbols)
+        echo "No symbols of the specified kind found"
+        return
+    endif
+
+    " Use the filtered symbols to generate an argument list for CocList
+    let l:list_args = []
+    for l:symbol in l:filtered_symbols
+        call add(l:list_args, {
+                    \ 'name': l:symbol.name,
+                    \ 'kind': l:symbol.kind,
+                    \ 'filename': fnamemodify(l:symbol.location.uri, ':p'),
+                    \ 'lnum': l:symbol.location.range.start.line + 1,
+                    \ 'col': l:symbol.location.range.start.character + 1,
+                    \ 'text': l:symbol.name
+                    \ })
+    endfor
+
+    " Display the filtered symbols using CocList
+    call coc#list#start({'items': l:list_args, 'title': 'Filtered Symbols'})
+endfunction
+
+nnoremap <Leader>loo :call CocShowFilteredSymbols("\u0192")<CR> " Functions
+nnoremap <Leader>lof :call CocShowFilteredSymbols(12)<CR> " Functions
+nnoremap <Leader>lov :call CocShowFilteredSymbols(13)<CR> " Variables
+nnoremap <Leader>loc :call CocShowFilteredSymbols(5)<CR>  " Classes
+" List of most coc symbols available for filtering
+"    1: File
+"    2: Module
+"    3: Namespace
+"    4: Package
+"    5: Class
+"    6: Method
+"    7: Property
+"    8: Field
+"    9: Constructor
+"    10: Enum
+"    11: Interface
+"    12: Function
+"    13: Variable
+"    14: Constant
+"    15: String
+"    16: Number
+"    17: Boolean
+"    18: Array
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Deactivate coc-implementation (Not available for jedi, and conflicts with goto last insert pos)
 "nmap <silent> gi <Plug>(coc-implementation)
 
