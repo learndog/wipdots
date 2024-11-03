@@ -38,8 +38,14 @@ function! CocShowFilteredSymbols(kind)
     " Get document symbols using CocAction
     let l:symbols = CocAction('documentSymbols')
 
-    " Filter symbols based on the kind provided (e.g., Function, Variable, Class)
-    let l:filtered_symbols = filter(l:symbols, {_, v -> v.kind == a:kind})
+    " Check if the result is null or not a list
+    if type(l:symbols) != type([]) || l:symbols == v:null
+        echo "No symbols found in the current document"
+        return
+    endif
+
+    " Filter symbols based on the kind provided (e.g., 'Function', 'Variable', 'Class')
+    let l:filtered_symbols = filter(l:symbols, {_, v -> has_key(v, 'kind') && v.kind == a:kind})
 
     " If there are no symbols of the specified kind, display a message
     if empty(l:filtered_symbols)
@@ -47,46 +53,73 @@ function! CocShowFilteredSymbols(kind)
         return
     endif
 
-    " Use the filtered symbols to generate an argument list for CocList
-    let l:list_args = []
+    " Create a new scratch buffer for filtered symbols
+    new
+    setlocal buftype=nofile
+    setlocal bufhidden=wipe
+    setlocal noswapfile
+
+    " Populate the new buffer with filtered symbols
     for l:symbol in l:filtered_symbols
-        call add(l:list_args, {
-                    \ 'name': l:symbol.name,
-                    \ 'kind': l:symbol.kind,
-                    \ 'filename': fnamemodify(l:symbol.location.uri, ':p'),
-                    \ 'lnum': l:symbol.location.range.start.line + 1,
-                    \ 'col': l:symbol.location.range.start.character + 1,
-                    \ 'text': l:symbol.name
-                    \ })
+        " Extract the required information
+        if has_key(l:symbol, 'range') && has_key(l:symbol, 'text')
+            let l:line = l:symbol.range.start.line + 1
+            let l:col = l:symbol.range.start.character + 1
+            let l:text = l:symbol.text
+            call append('$', printf('Line %d, Col %d: %s', l:line, l:col, l:text))
+        else
+            echo "Skipping symbol due to missing keys"
+        endif
     endfor
 
-    " Display the filtered symbols using CocList
-    call coc#list#start({'items': l:list_args, 'title': 'Filtered Symbols'})
+    " Move cursor to the top
+    normal! gg
+
+    " Allow jumping to symbol locations when pressing Enter on a line
+    nnoremap <buffer> <CR> :call CocJumpToSymbol()<CR>
 endfunction
 
-nnoremap <Leader>loo :call CocShowFilteredSymbols("\u0192")<CR> " Functions
-nnoremap <Leader>lof :call CocShowFilteredSymbols(12)<CR> " Functions
-nnoremap <Leader>lov :call CocShowFilteredSymbols(13)<CR> " Variables
-nnoremap <Leader>loc :call CocShowFilteredSymbols(5)<CR>  " Classes
-" List of most coc symbols available for filtering
-"    1: File
-"    2: Module
-"    3: Namespace
-"    4: Package
-"    5: Class
-"    6: Method
-"    7: Property
-"    8: Field
-"    9: Constructor
-"    10: Enum
-"    11: Interface
-"    12: Function
-"    13: Variable
-"    14: Constant
-"    15: String
-"    16: Number
-"    17: Boolean
-"    18: Array
+function! CocJumpToSymbol()
+    " Get the line under the cursor
+    let l:line = getline('.')
+
+    " Extract the line number and column number from the line
+    let l:parts = matchlist(l:line, 'Line \(\d\+\), Col \(\d\+\):')
+    if len(l:parts) < 3
+        echo "Invalid line format"
+        return
+    endif
+    let l:lnum = str2nr(l:parts[1])
+    let l:col = str2nr(l:parts[2])
+
+    " Jump to the specified location
+    execute l:lnum
+    execute 'normal!' l:col . '|'
+endfunction
+
+nnoremap <Leader>loo :call CocShowFilteredSymbols('Function')<CR> " Functions
+nnoremap <Leader>lof :call CocShowFilteredSymbols('Function')<CR> " Functions
+nnoremap <Leader>lov :call CocShowFilteredSymbols('Variable')<CR> " Variables
+nnoremap <Leader>loc :call CocShowFilteredSymbols('Class')<CR>  " Classes
+" List of some coc symbol values available for filtering
+"    File
+"    Module
+"    Namespace
+"    Package
+"    Class
+"    Method
+"    Property
+"    Field
+"    Constructor
+"    Enum
+"    Interface
+"    Function
+"    Variable
+"    Constant
+"    String
+"    Number
+"    Boolean
+"    Array
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Deactivate coc-implementation (Not available for jedi, and conflicts with goto last insert pos)
 "nmap <silent> gi <Plug>(coc-implementation)
