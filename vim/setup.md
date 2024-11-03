@@ -135,11 +135,6 @@
   "     mkdir ~/.vimrc_helpers/                                                                                            
   "     stow -t ~/.vimrc_helpers/ ~/dev/wipdots/vim/.vimrc_helpers  # Create symlinks in ~/.vimrc_helpers/                 
                                                                                                                            
-  " TMUX                                                                                                                   
-  "     # See https://github.com/gpakosz/.tmux for oh my tmux (requires tmux 2.4)                                          
-  "     # Or a basic simple config at https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/                 
-  "     # This .vimrc saves Alt-a for tmux prefix (map as <M-a>)                                                           
-                                                                                                                           
   " Install Python with pyenv                                                                                              
   "     Your .bashrc or .profile may already contain the 'echo' content                                                    
   "     # Install pyenv and latest python version using github.com/pyenv/pyenv#installation                                

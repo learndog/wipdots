@@ -16,7 +16,17 @@ BUGS
 * Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
 
 BIG TICKET ITEMS
-* Tmux - Fix Ctrl-arrows and status line colors for vim running in tmux
+* Tmux
+  - Fix vim maps for splits... L-wj L-wk for horiz splits below/above; L-wh L-wl for vert left/right; L-wv for vert
+    but L-wh will be confusing! (Intuitively, it should be a default horiz split)
+    Is there any better way to do all four splits plus vert and horiz?
+  - Session list, save, load
+  - Ctrl-arrows work in vim to switch Tmux windows (Ctrl-B Ctrl-B ARROW as backup if conflict)
+  - Ctrl-A as replacement/additional tmux prefix?
+  - Status line colors for vim running in tmux (eg chg gray rhs to pink or dark gray or brown?)
+  - See https://github.com/gpakosz/.tmux for oh my tmux (requires tmux 2.4)                                          
+  -   or a basic simple config at https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/                 
+                                                                                                                           
 * Debug - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
