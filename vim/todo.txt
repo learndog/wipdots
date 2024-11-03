@@ -1,8 +1,11 @@
 Vim Todo
 
+TESTING
+* Test linting progress in status line for large python file
+* Test GCP VM with Leader-vn hangs for coc rename
+
 BUGS
 * After reload of vim config, highlighting gets turned on.
-* Leader-vn is hanging until timeout for coc rename (cant reproduce on WSL... try GCP VM)
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
 * In GCP vim, delete key sometimes doesn't work in insert mode

@@ -7,7 +7,7 @@
 let g:lightline = {
     \ 'active': {
     \     'left': [ [ 'bufferstatus', 'mode', 'gitbranch', 'filepath', 'filename' ] ],
-    \     'right': [ ['venv', 'cwd', 'fileinfo', 'cocstatus', 'datetime', 'percent', 'lineinfo' ] ],
+    \     'right': [ ['venv', 'cwd', 'fileinfo', 'filetype', 'cocstatus', 'linterstatus', 'datetime', 'percent', 'lineinfo' ] ],
     \ },
     \ 'component_function': {
     \   'bufferstatus': 'LightlineBufferStatus',
@@ -18,14 +18,18 @@ let g:lightline = {
     \   'datetime': 'LightlineDatetime',
     \   'cwd': 'LightlineCwd',
     \   'fileinfo': 'LightlineFileInfo',
+    \   'filetype': 'LightlineFiletype',
+    \   'linterstatus': 'LightlineLinterStatus',
     \ },
     \ 'priority': {
     \   'bufferstatus': 10,
     \   'mode': 20,
-    \   'cocstatus': 30,
+    \   'cocstatus': 130,
     \   'gitbranch': 40,
     \   'filepath': 120,
     \   'filename': 50,
+    \   'filetype': 140,
+    \   'fileinfo': 45,
     \   'venv': 60,
     \   'cwd': 70,
     \   'fileformat': 80,
@@ -72,6 +76,11 @@ function! LightlineFilepath()
   return expand('%:p:h')
 endfunction
 
+function! LightlineFiletype()
+  " Return the file type of the current buffer
+  return &filetype != '' ? &filetype : 'No Filetype'
+endfunction
+
 function! LightlineGitBranch()
   if !isdirectory('.git')
     return ''
@@ -85,6 +94,13 @@ function! LightlineFileInfo()
   let l:format = &fileformat
   let l:encoding = &fileencoding
   return l:format . ':' . l:encoding
+endfunction
+
+" Show linting progress from coc
+function! LightlineLinterStatus()
+  " Return an indication if linting is in progress
+  let l:status = get(b:, 'coc_diagnostic_running', 0)
+  return l:status ? 'Linting...' : 'Linting Done'
 endfunction
 
 " #### End LightLine configuration
