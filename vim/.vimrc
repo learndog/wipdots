@@ -121,7 +121,7 @@ source $HOME/.vimrc_helpers/bufferselect.vim
 source $HOME/.vimrc_helpers/tmux.vim
 source $HOME/.vimrc_helpers/togglezero.vim
 source $HOME/.vimrc_helpers/togglehighlight.vim
-source $HOME/.vimrc_helpers/sessions.vim
+source $HOME/.vimrc_helpers/vim_admin.vim
 source $HOME/.vimrc_helpers/terminal.vim
 source $HOME/.vimrc_helpers/trailingspaces.vim
 source $HOME/.vimrc_helpers/config_endstuff.vim
