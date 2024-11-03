@@ -230,6 +230,7 @@ Python LSP - CoC stuff
 * Leader-la fzf list of problems (F4/F5/F6/F7 for first/prev/next/last)
 * Leader-lc code actions for curser location
 * Leader-ls goto symbol
+* Leader-lof or :call CocShowFilteredSymbols('Function') List and goto symbol location
 
 Terminal
 * Terminal commands are prefix Leader-t

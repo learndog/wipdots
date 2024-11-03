@@ -13,6 +13,10 @@ BUGS
 * Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
 
 GROOMED BACKLOG
+* Keymaps for outline and outline functions, etc
+  Leader-lsf for functions
+  Leader-lsi for interactive (current map for L-ls)
+  Leader-lss for all symbols (but might not show which type each one is)
 * Code outlines filtered for functions/methods
 * LSP - autoformat on save
 * LSP - format a folder

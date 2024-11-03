@@ -65,6 +65,9 @@ function! CocShowFilteredSymbols(kind)
     setlocal noswapfile
     setlocal nobuflisted
 
+    " Save the current window number of the list window
+    let g:list_win = winnr()
+
     " Populate the new buffer with filtered symbols and store symbol information
     let b:symbol_locations = []
 
@@ -107,18 +110,26 @@ function! CocJumpToSymbolFromBuffer()
         let l:lnum = l:symbol_location['line']
         let l:col = l:symbol_location['col']
 
-        " Switch back to the original window using the global variable
+        " Switch back to the original window and buffer using the global variables
         if exists('g:original_win') && exists('g:original_buf')
+            " Switch to the original window
             execute g:original_win . "wincmd w"
+
+            " Switch to the original buffer
             execute "buffer " . g:original_buf
+
+            " Jump to the specified location in the original buffer
+            execute l:lnum
+            execute 'normal!' l:col . '|'
+
+            " Switch focus back to the symbol list window
+            if exists('g:list_win')
+                execute g:list_win . "wincmd w"
+            endif
         else
             echo "Original window or buffer not found"
             return
         endif
-
-        " Jump to the specified location in the original buffer
-        execute l:lnum
-        execute 'normal!' l:col . '|'
     else
         echo "Invalid line number"
     endif
