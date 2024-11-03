@@ -5,7 +5,6 @@ TESTING
 * Test GCP VM with Leader-vn hangs for coc rename
 
 BUGS
-* After reload of vim config, highlighting gets turned on.
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
 * In GCP vim, delete key sometimes doesn't work in insert mode

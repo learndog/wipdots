@@ -1,3 +1,5 @@
+" Various vim admin functions
+"
 " #### SECTION: Save and restore sessions
 
 " Create the sessions directory if it doesn't exist
@@ -52,6 +54,7 @@ nnoremap <leader>vss :call SessionSave()<CR>
 nnoremap <leader>vsr :call SessionRestore()<CR>
 
 " Map key for reload vimrc into current session (vim..config..restore/edit)
-nnoremap <Leader>vcr :source $MYVIMRC<CR>
+" nnoremap <Leader>vcr :source $MYVIMRC<CR>
+nnoremap <Leader>vcr :source $MYVIMRC \| nohlsearch<CR>
 nnoremap <leader>vce :edit $MYVIMRC<CR>
 nnoremap <leader>vcv :view $MYVIMRC<CR>
