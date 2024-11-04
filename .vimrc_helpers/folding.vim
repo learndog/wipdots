@@ -1,7 +1,17 @@
 " #### BEGIN - CODE FOLDING (vanilla)
-set foldlevelstart=99
-highlight Folded guifg=white guibg=grey30 ctermfg=white ctermbg=lightgrey
+
+" Apply the global manual folding method (fold coc will overwrite for specific lsp supported languages)
+set foldmethod=syntax
+" Modify it for python
 autocmd FileType python setlocal foldmethod=indent
+
+" Fold when opening a file 
+set foldlevelstart=1
+" set foldlevelstart=99
+
+" Fold color
+highlight Folded guifg=white guibg=grey45 ctermfg=lightgrey ctermbg=darkgrey
+
 " END - CODE FOLDING (vanilla)
 
 " #### BEGIN - CUSTOM CODE FOLDING FEATURES
@@ -68,9 +78,6 @@ endfunction
 
 " Command-line mode mapping
 command! -nargs=* Z call SafeFoldToLevel(<f-args>) " Set fold level (0-9)
-
-" Universal folding behavior
-set foldmethod=indent
 
 " Note: z0-z9 are available to be mapped (but calls to SafeFold didnt work)
 
