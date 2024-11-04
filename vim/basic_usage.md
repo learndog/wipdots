@@ -133,7 +133,7 @@ Folds
     ```
     zf in Visual mode: Create a fold for the selected text
     zd: Delete the fold at the cursor
-    zE: Delete all folds in the current window
+    zE: Delete all folds in the current window (including manual folds you created)
     zo: Open a fold at the cursor - unfold it
     zv: Open folds for this line
     zc: Close a fold at the cursor
@@ -143,6 +143,9 @@ Folds
     zm: Fold more
     zr: Fold less
     zx: Update folds
+        after editing syntax based folds may become outdated. this refreshes without removing manual folds
+        after lots of editing you may need to use zE and start fresh
+    Note that we are using syntax fold method, but indent and level 1 is used for python
     ```
 
 Macros

@@ -1,13 +1,15 @@
 " #### BEGIN - CODE FOLDING (vanilla)
 
+set foldenable
+
 " Apply the global manual folding method (fold coc will overwrite for specific lsp supported languages)
 set foldmethod=syntax
 " Modify it for python
-autocmd FileType python setlocal foldmethod=indent
+autocmd FileType python setlocal foldmethod=indent foldlevelstart=1
 
-" Fold when opening a file 
-set foldlevelstart=1
-" set foldlevelstart=99
+" Specify fold level when opening a file 
+set foldlevelstart=99
+" set foldlevelstart=1
 
 " Fold color
 highlight Folded guifg=white guibg=grey45 ctermfg=lightgrey ctermbg=darkgrey
