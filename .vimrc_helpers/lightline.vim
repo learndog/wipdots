@@ -7,7 +7,7 @@
 let g:lightline = {
     \ 'active': {
     \     'left': [ [ 'bufferstatus', 'mode', 'gitbranch', 'filepath', 'filename' ] ],
-    \     'right': [ ['venv', 'cwd', 'fileinfo', 'filetype', 'cocstatus', 'linterstatus', 'datetime', 'percent', 'lineinfo' ] ],
+    \     'right': [ ['venv', 'cwd', 'fileinfo', 'filetype', 'datetime', 'percent', 'lineinfo' ] ],
     \ },
     \ 'component_function': {
     \   'bufferstatus': 'LightlineBufferStatus',
