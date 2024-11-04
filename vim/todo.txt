@@ -1,45 +1,14 @@
 Vim Todo
 
-TESTING
-* Test linting progress in status line for large python file
-* Test GCP VM with Leader-vn hangs for coc rename
-
-BUGS
-* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
-  also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
-* In GCP vim, delete key sometimes doesn't work in insert mode
-* jl to escape insert mode will move cursor left afterwards
-* exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
-* Sometimes can't bksp in insert mode
-* Land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
-* Commenting should start at first nonws char, not col pos 1 (works in vim)
-* Ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
-
-BIG TICKET ITEMS
-* Tmux
-  - Fix vim maps for splits... L-wj L-wk for horiz splits below/above; L-wh L-wl for vert left/right; L-wv for vert
-    but L-wh will be confusing! (Intuitively, it should be a default horiz split)
-    Is there any better way to do all four splits plus vert and horiz?
-  - Session list, save, load
-  - Ctrl-arrows work in vim to switch Tmux windows (Ctrl-B Ctrl-B ARROW as backup if conflict)
-  - Ctrl-A as replacement/additional tmux prefix?
-  - Status line colors for vim running in tmux (eg chg gray rhs to pink or dark gray or brown?)
-  - See https://github.com/gpakosz/.tmux for oh my tmux (requires tmux 2.4)                                          
-  -   or a basic simple config at https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/                 
-                                                                                                                           
+PRIORITY - Ready as full replacement for GCP JupyterLab editing
 * Debug - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
         and kickstarter (or is it lazyvim?) for debug ui config 
-* Diffs - Use delta to improve diff viewing
-    See https://github.com/dandavison/delta
-    See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
-    Also take a look at colordiff and difftastic
-* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
-* Support for additional languages
-
-
-GROOMED BACKLOG
+* Test GCP VM with Leader-vn hangs for coc rename
+* Keymaps for jump list (Ctrl-i/o should also be Leader-i/o)
+* Keymap - Add for :CocList diagnostics<CR> to list problems (then  [g ]g to navigate items)
+* Keymap - Add for :call coc#float#close_all()<CR> to close a hover popup
 * Keymaps for outline and outline functions, etc
   Leader-lsf for functions
   Leader-lsi for interactive (current map for L-ls)
@@ -53,6 +22,41 @@ GROOMED BACKLOG
     * :diffg BA  # get from BASE
     * :diffg LO  # get from LOCAL
 * Search - :FilesAll that includes dotfiles in the results
+
+
+TESTING
+* Test linting progress in status line for large python file
+
+BUGS
+* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
+  also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
+* In GCP vim, backspace key sometimes doesn't work in insert mode
+* jl to escape insert mode will move cursor left afterwards
+* exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
+* Land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
+* Nvim - commenting should start at first nonws char, not col pos 1 (works in vim)
+* Nvim - ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
+
+BIG TICKET ITEMS
+* Tmux
+  - Fix vim maps for splits... L-wj L-wk for horiz splits below/above; L-wh L-wl for vert left/right; L-wv for vert
+    but L-wh will be confusing! (Intuitively, it should be a default horiz split)
+    Is there any better way to do all four splits plus vert and horiz?
+  - Session list, save, load
+  - Ctrl-arrows work in vim to switch Tmux windows (Ctrl-B Ctrl-B ARROW as backup if conflict)
+  - Ctrl-A as replacement/additional tmux prefix?
+  - Status line colors for vim running in tmux (eg chg gray rhs to pink or dark gray or brown?)
+  - See https://github.com/gpakosz/.tmux for oh my tmux (requires tmux 2.4)                                          
+  -   or a basic simple config at https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/                 
+* Diffs - Use delta to improve diff viewing
+    See https://github.com/dandavison/delta
+    See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
+    Also take a look at colordiff and difftastic
+* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
+* Support for additional languages
+
+
+GROOMED BACKLOG
 * Search - :[B|P|D]Lines and :[B|P|D]Files[All]  (b=curr buffer, bb=open buff files, p=project, d=dir and optionally specify dir)
            See https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
            Also... :GLines (maybe using my command line search for text in git commits/diffs)
@@ -61,6 +65,8 @@ GROOMED BACKLOG
 * Keymap - For git diff in new buffer (not split)
 * Keymap - Check coc popups scrolling with Ctrl-f and Ctrl-b
 * Keymap - Leader vm?... for :verbose map
+* LSP - Clean up the functionality of code outlines with CocList on RHS, with and wout filtering
+* LSP - List preview and filter problem list
 
 BACKLOG
 * Keymap - Sign column (gutter) visibility
@@ -81,7 +87,6 @@ BACKLOG
     * Close all tabs (without error on last one) but keep buffers
       :tabdo close   (keeps the buffers, but won't close the last tab?)
     * Tab prev/next
-* LSP - Code outlines filtered for Classes&Types / Variables
 * Search - fzf for vim help files
 * Snippets - Simple manual snippets (and keep in git - manual updates get pushed, no on-the-fly additions)
 * Keymap - For :terminal, :vertical terminal, :vertical <modifier> terminal,
@@ -112,8 +117,8 @@ BACKLOG
         See dev.to/mainendra/terminal-ui-for-git-283p
         and github.com/frontaid/git-cli-tools
         and github.com/rhysd/conflict-marker.vim
-* Synch scroll for git blame sidebar (vimdiff?)
-* Add plusin required dependencies documentation
+* Synch scroll for git blame sidebar
+* Add plugin required dependencies documentation
 * Tests - Runners for code and unit tests - fast and easy from vim
 * Navigation in i mode
         Left, Rgt, Up, Dwn and begin and end

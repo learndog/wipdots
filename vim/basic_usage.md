@@ -1,8 +1,17 @@
 # Basic Usage Tips
 
     * The following information is focused on Python (just like the whole vim config)
-    * For the default .vimrc config, Leader is space, and it opens vim-whichkey
+    * For the default .vimrc config, Leader is space, and it opens vim-which-key (which-key on nvim)
     * WARNING: In GCP JupyterLab in a Vertex AI VM, Ctrl-W by default will close the browser tab!!!!
+    * WHY USE THIS?
+       - Works in browser based terminal consoles (like GCP console or VertexAI JupyterLab terminals)
+       - Prevent lost file edits - Network disruptions in GCP JupyterLab cause lost changes on the std editor
+       - Vim everywhere - use in any terminal emulator - one editor builds muscle memory and reduces congnitive load
+       - Vim endures - eg VSCode may look different in the future, and serve MS purposes instead of yours
+       - Plugin Security - optionally review and freeze for full control of what you are running
+       - Customize everything - make the editor work for you
+       - Some downsides... utilitarian UI, learning curve, keystrokes and behavior can be inconsistent or unintuitive,
+                           no proprietary lsp (eg MS pylance)
 
 Open file in vim for editing
 * vim file1 file2 file3 etc for multiple files (in vim use... :edit file)
@@ -26,6 +35,7 @@ Navigation
 *   Arrows or hjkl to move around
 *   Shift-ARROW to page up or down (but not for UI widgets)
 *   H/M/L to move to top, middle or bottom of screen
+*   Ctrl-o and Ctrl-i to jump to prev or next location in jummp list
 *   In command autocomplete, use Tab and Shift-Tab
 *   Exit pop up splits with ESC or q or :bd
 * Insert mode ;; will cycle begin and end of line
@@ -232,6 +242,8 @@ Python LSP - CoC stuff
 * Leader-ls goto symbol
 * Leader-lof or :call CocShowFilteredSymbols('Function') List and goto symbol location
   dbl click to close and must switch windows back to source to see location unless it must scroll the window
+* :CocList diagnostics for a list of linter problems. Dbl click on item to go there
+  or use [g and ]g for next and prev 
 
 Terminal
 * Terminal commands are prefix Leader-t

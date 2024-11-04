@@ -11,7 +11,9 @@ Bare keys (Note: Use caps sparingly to avoid accidental operations when caps loc
 b/B - Word motion
 g - PREFIX goto (lsp stuff like gd,gr,gi,go plus gg top)
 G - Goto bottom line (built in)
+H/M/L - Move cursor top middle bottom of screen
 z - PREFIX folds and content scroll(zt, zz, zb) 
+J - Join lines
 K - LSP hover
 w/W - Word motion
 
@@ -24,7 +26,7 @@ c -
 C - 
 d - debug
 D - 
-e - explore files
+e - explore or open files
 E - 
 f - find (ff:find files, fw:find words, fb:find buffers, fh:find help, fm:find keymaps)
 F - 
@@ -32,7 +34,7 @@ g - goto (keep gg,ga and add lsp gotos like gd 'def', gD 'Declaration', gI 'Impl
 G - Git commands
 h - 
 H - 
-i - 
+i - [not a prefix] Jump previous (in case Ctrl-i conflicts, like GCP JupyterLab) 
 I - 
 j - 
 J - 
@@ -44,7 +46,7 @@ m -
 M - 
 n - 
 N - 
-o - open
+o - [not a prefix] Jump next (in case Ctrl-o conflicts)
 O - 
 p - 
 P - 
