@@ -231,13 +231,12 @@ See Key Mappings and Commands
 Python LSP - CoC stuff
 * Leader-l prefix
 * Shift-K for LSP hover to see fn defn
-* Ctrl-Space(vim) or Ctrl-@(nvim..maybe) to trigger autocomplete (if not already available)
+* Ctrl-Space(vim) or Ctrl-@(nvim...maybe) to trigger autocomplete if it doesn't come up when expected
 * Leader-ln to rename symbol
 * gd or Leader-ld jump to defn
 * gr for fzf references (incoming calls) BONUS...Select item, then Tab for menu of actions
 * gi or Leader-li show coctree with incoming calls to highlighted fn (when done, click on Incoming Calls title and ESC)
 * go or Leader-lI show coctree with outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
-* Leader-lf format
 * Leader-ly organize imports
 * Leader-lo or Leader-ll for lsp symbol outline with fzf (up arrow or start typing)
 * Leader-la fzf list of problems (F4/F5/F6/F7 for first/prev/next/last)
@@ -247,6 +246,14 @@ Python LSP - CoC stuff
   dbl click to close and must switch windows back to source to see location unless it must scroll the window
 * :CocList diagnostics for a list of linter problems. Dbl click on item to go there
   or use [g and ]g for next and prev 
+
+LSP Formatting
+* Leader-lf format
+* Autoformat on save (autopep8)
+       :EnablePythonFormat
+       :DisablePythonFormat
+       :EnableFormat
+       :DisableFormat
 
 Terminal
 * Terminal commands are prefix Leader-t
