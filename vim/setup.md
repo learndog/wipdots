@@ -222,6 +222,9 @@
   "     :PlugUpdate <my-plugin>      updates one plugin                                                                    
   "     :PlugUpgrade                 upgrade vim-plug (MUST RUN :PlugUpdate first)                                         
                                                                                                                            
+  " Note that you might be able to fix a rename timeout from pyright (id with :CocOpenLog) by doing...
+  " npm install -g pyright
+
   " Reset vim to pristine newly installed condition                                                                        
   "       1. Delete the entire ~/.vim directory                                                                            
   "       2. Remove this .vimrc file and .vimrc_helpers (unstow or remove the symlinks)                                    
