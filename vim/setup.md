@@ -4,6 +4,8 @@
   "    ~/.vimrc                                                                                                            
   "    ~/.vimrc_helpers                                                                                                    
                                                                                                                            
+" Required location of wipdots... ~/wipdots
+
   " See bottom of this file for more information                                                                           
   "     including suggested setup on WLS Ubuntu 24.04LTS                                                                   
 

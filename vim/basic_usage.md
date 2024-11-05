@@ -13,6 +13,12 @@
        - Some downsides... utilitarian UI, learning curve, keystrokes and behavior can be inconsistent or unintuitive,
                            no proprietary lsp (eg MS pylance)
 
+Help files
+* <Leader>vhh opens this file as read only
+* <Leader>vhs opens a file with misc setup information
+* <Leader>vht opens a todo list for development on this config
+* <Leader>vhk opens a keyboard mapping overview
+
 Open file in vim for editing
 * vim file1 file2 file3 etc for multiple files (in vim use... :edit file)
 * view file to open as read only (in vim use... :view file)
