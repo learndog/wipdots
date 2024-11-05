@@ -28,6 +28,10 @@ nnoremap B w
 nnoremap <Del> "_x
 inoremap <Del> <C-o>"_x
 
+" Jump list navigation - But what will it do in other modes?
+nnoremap <Leader>i <C-i>
+nnoremap <Leader>o <C-o>
+
 " Make screen viewport shifts bigger
 nnoremap zh 25zh
 nnoremap zl 25zl
