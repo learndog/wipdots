@@ -51,7 +51,15 @@ BIG TICKET ITEMS
     Also take a look at colordiff and difftastic
 * File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
 * Support for additional languages
-
+* Cleanup
+  - Check licensing for distribution
+  - Reorg to allow alternatives to coc and fzf
+  - Reorg to put everything where it logically should belong
+  - What dependencies are there for the .vimrc helpers?
+  - Clean up the extraneous stuff - alternative code approaches, commented info
+         Isolate anything that isn't clean, delete everything that's not needed here.
+  - Evaluate in other contexts - eg other versions of linux or in Windows vim
+* iPython support (see below)
 
 GROOMED BACKLOG
 * Search - :[B|P|D]Lines and :[B|P|D]Files[All]  (b=curr buffer, bb=open buff files, p=project, d=dir and optionally specify dir)
