@@ -25,7 +25,7 @@ B -
 c - 
 C - 
 d - debug
-D - 
+D - diffs and merges
 e - explore or open files
 E - 
 f - find (ff:find files, fw:find words, fb:find buffers, fh:find help, fm:find keymaps)

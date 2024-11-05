@@ -159,29 +159,6 @@ function! CocJumpToSymbolAndClose()
     execute 'quit'
 endfunction
 
-nnoremap <Leader>loo :call CocShowFilteredSymbols('Function')<CR> " Functions
-nnoremap <Leader>lof :call CocShowFilteredSymbols('Function')<CR> " Functions
-nnoremap <Leader>lov :call CocShowFilteredSymbols('Variable')<CR> " Variables
-nnoremap <Leader>loc :call CocShowFilteredSymbols('Class')<CR>  " Classes
-" List of some coc symbol values available for filtering
-"    File
-"    Module
-"    Namespace
-"    Package
-"    Class
-"    Method
-"    Property
-"    Field
-"    Constructor
-"    Enum
-"    Interface
-"    Function
-"    Variable
-"    Constant
-"    String
-"    Number
-"    Boolean
-"    Array
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Deactivate coc-implementation (Not available for jedi, and conflicts with goto last insert pos)
 "nmap <silent> gi <Plug>(coc-implementation)
@@ -210,6 +187,8 @@ xmap <silent> <C-lrs> <Plug>(coc-range-select)
 nnoremap <silent><nowait> <Leader>le  :<C-u>CocList extensions<cr>
 " Show commands
 nnoremap <silent><nowait> <Leader>lc  :<C-u>CocList commands<cr>
+" Close hover popup
+nnoremap <Leader>lch :call coc#float#close_all()<CR>
 " Show all diagnostics
 nnoremap <silent><nowait> <Leader>la  :<C-u>CocList diagnostics<cr>
 " Use `[g` and `]g` to navigate diagnostics
@@ -227,14 +206,37 @@ nnoremap <F7> :CocLast<CR>
 " nnoremap <silent><nowait> <Leader>lo  :<C-u>CocList outline<cr>
 nnoremap <silent><nowait> <Leader>lo  :CocList outline<cr>
 " Search workspace symbols
-nnoremap <silent><nowait> <Leader>ls  :<C-u>CocList -I symbols<cr>
+nnoremap <silent><nowait> <Leader>lsi  :<C-u>CocList -I symbols<cr>
 " Do default action for next item
 nnoremap <silent><nowait> <Leader>lj  :<C-u>CocNext<CR>
 " Do default action for previous item
 nnoremap <silent><nowait> <Leader>lk  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent><nowait> <Leader>lp  :<C-u>CocListResume<CR>
-
+nnoremap <silent><nowait> <Leader>lso  :CocList outline<cr> " Everything
+nnoremap <silent><nowait> <Leader>lss  :CocList outline<cr> " Everything
+nnoremap <Leader>lsf :call CocShowFilteredSymbols('Function')<CR> " Functions
+nnoremap <Leader>lsv :call CocShowFilteredSymbols('Variable')<CR> " Variables
+nnoremap <Leader>lsc :call CocShowFilteredSymbols('Class')<CR>  " Classes
+" List of some coc symbol values available for filtering
+"    File
+"    Module
+"    Namespace
+"    Package
+"    Class
+"    Method
+"    Property
+"    Field
+"    Constructor
+"    Enum
+"    Interface
+"    Function
+"    Variable
+"    Constant
+"    String
+"    Number
+"    Boolean
+"    Array
 " GoTo code navigation
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)

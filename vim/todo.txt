@@ -3,16 +3,6 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
-* Keymap - Add for :call coc#float#close_all()<CR> to close a hover popup
-* Keymap - outline and outline functions
-               Leader-lsf for functions
-               Leader-lsi for interactive (current map for L-ls)
-               Leader-lss for all symbols (but might not show which type each one is)
-         Note... these are currently mapped to <Leader>lo*
-* Keymap - Add vim shortcuts for gitdiff for merge conflicts
-               :diffg RE  # get from REMOTE
-               :diffg BA  # get from BASE
-               :diffg LO  # get from LOCAL
 * Help - :view <helpfilename> read only (Leader-vhu), keymap strategy (Leader-vhk), setup instructions (Leader-vh0)
 * Admin - <Leader>vet for edit the todo file (smilar for guidance, keymap ovrvw, setup)
 * Search - :FilesAll that includes dotfiles in the results

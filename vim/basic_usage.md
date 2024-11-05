@@ -204,9 +204,9 @@ Git
   * Manually edit the MERGED split, or use vim shortcuts to pull bits as desired...
     ```
         ]c or [c - move to next or prev difference (unfortunately all chgs from BASE, not just the conflicts)
-        :diffg RE  # get from REMOTE
-        :diffg BA  # get from BASE
-        :diffg LO  # get from LOCAL
+        :diffg RE  # get from REMOTE     or Leader-Dr    (be careful because the R key is the leftmost of these)
+        :diffg BA  # get from BASE       or Leader-Db
+        :diffg LO  # get from LOCAL      or Leader-Dl
     ```
   * Then save all changes (:wqa, which will send you to the next conflicted file) 
         LOCAL, BASE and REMOTE are temporary files, so don't worry about saving them accidentally

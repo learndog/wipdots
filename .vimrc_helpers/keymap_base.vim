@@ -60,6 +60,11 @@ vnoremap <leader><DOWN> xp`[V`]
 " vnoremap <leader><LEFT> <<`[V`]
 " vnoremap <leader><RIGHT> >>`[V`]
 
+" Vimdiff keymaps for git merge
+nnoremap <Leader>Dr :diffget REMOTE<CR>
+nnoremap <Leader>Db :diffget BASE<CR>
+nnoremap <Leader>Dl :diffget LOCAL<CR>
+
 " Note: Only <C-_> keymaps to upper/lower alphabet are reliable
 "       Intent is to use <C-up/down> for other things in normal mode, but move lines in visual select.
 
