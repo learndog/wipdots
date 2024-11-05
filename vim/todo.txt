@@ -3,24 +3,26 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
+* Keymap - jump list navigation (Ctrl-i/o should also be Leader-i/o)
+* Keymap - Add for :CocList diagnostics<CR> to list problems (then  [g ]g to navigate items)
+* Keymap - Add for :call coc#float#close_all()<CR> to close a hover popup
+* Keymap - outline and outline functions
+               Leader-lsf for functions
+               Leader-lsi for interactive (current map for L-ls)
+               Leader-lss for all symbols (but might not show which type each one is)
+         Note... these are currently mapped to <Leader>lo*
+* Keymap - Add vim shortcuts for gitdiff for merge conflicts
+               :diffg RE  # get from REMOTE
+               :diffg BA  # get from BASE
+               :diffg LO  # get from LOCAL
+* Help - :view <helpfilename> read only (Leader-vhu), keymap strategy (Leader-vhk), setup instructions (Leader-vh0)
+* Admin - <Leader>vet for edit the todo file (smilar for guidance, keymap ovrvw, setup)
+* Search - :FilesAll that includes dotfiles in the results
 * Debug - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
         and kickstarter (or is it lazyvim?) for debug ui config 
-* Keymap - jump list navigation (Ctrl-i/o should also be Leader-i/o)
-* Keymap - Add for :CocList diagnostics<CR> to list problems (then  [g ]g to navigate items)
-* Keymap - Add for :call coc#float#close_all()<CR> to close a hover popup
-* Keymaps for outline and outline functions, etc
-  Leader-lsf for functions
-  Leader-lsi for interactive (current map for L-ls)
-  Leader-lss for all symbols (but might not show which type each one is)
-* Status line - Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
-* Help - :view <helpfilename> read only (Leader-vhu), keymap strategy (Leader-vhk), setup instructions (Leader-vh0)
-* Add vim shortcuts for gitdiff cmds...
-    * :diffg RE  # get from REMOTE
-    * :diffg BA  # get from BASE
-    * :diffg LO  # get from LOCAL
-* Search - :FilesAll that includes dotfiles in the results
+* Test git merge conflicts
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
