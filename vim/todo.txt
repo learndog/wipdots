@@ -23,6 +23,13 @@ PRIORITY - Ready as full replacement for GCP JupyterLab editing
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
         and kickstarter (or is it lazyvim?) for debug ui config 
 * Test git merge conflicts
+* Fix references in rhs coclist (design and use a fn to give functionality and look of gi and go)
+        Specifically, nice list on rhs
+        Interactive click to show location in buffer like preview
+        Double click to goto that buffer location and close the split
+        Maybe also fzf within the window and open/close items in tree?
+        But fundamentally there seem to be fzf lists and coclists, probably hard to combine.
+* Document UI navigation quirks
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
