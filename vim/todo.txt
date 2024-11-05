@@ -1,19 +1,19 @@
 Vim Todo
 
+Note: Keymap changes should also include todo, basic guidance, keymap overview updates
+
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
 * Debug - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
         and kickstarter (or is it lazyvim?) for debug ui config 
-* Keymaps for jump list (Ctrl-i/o should also be Leader-i/o)
+* Keymap - jump list navigation (Ctrl-i/o should also be Leader-i/o)
 * Keymap - Add for :CocList diagnostics<CR> to list problems (then  [g ]g to navigate items)
 * Keymap - Add for :call coc#float#close_all()<CR> to close a hover popup
 * Keymaps for outline and outline functions, etc
   Leader-lsf for functions
   Leader-lsi for interactive (current map for L-ls)
   Leader-lss for all symbols (but might not show which type each one is)
-* LSP - autoformat on save
-* LSP - format a folder
 * Status line - Add git branch name to status line (see lightline info about using vim-gitbranch, or maybe fugitive)
 * Help - :view <helpfilename> read only (Leader-vhu), keymap strategy (Leader-vhk), setup instructions (Leader-vh0)
 * Add vim shortcuts for gitdiff cmds...

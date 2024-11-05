@@ -215,6 +215,8 @@ Git
 
 Vim
 * Sessions... Leader-vss and Leader-vsr to save or restore vim sessions
+              Restore when opening vim...  $ vim -S ~/.vim/sessions/mysession.save
+              Caveat... Save and restore sessions from the same cwd (preferably the project git folder)
 * $MYVIMRC... Leader-vce and Leader-vcr for config edit or reload
 * Colorschemes... Leader-vt
 * Redraw window... Leader-wr (does :redraw!)
@@ -254,6 +256,19 @@ LSP Formatting
        :DisablePythonFormat
        :EnableFormat
        :DisableFormat
+* Format all Python (.py) files in an entire project (CAUTION: These commands have not been tested!)
+  >  with autopep8, black, or yapf from bash
+       autopep8 --in-place --recursive .   # Recursively format all .py files in current directory using autopep8
+                autopep8 --recursive .     # omit --in-place to print changes but not make any changes
+       yapf --in-place --recursive .       # Works the same as autopep8... omit --in-place to preview chgs
+       black .
+  > by selecting them with bash find command for more control (Not recommended - use with extreme caution!)
+       find . -name "*.py" -exec autopep8 --in-place {} +
+       find . -name "*.py" -exec black {} +
+  > while in Vim (must first ensure the correct vim working directory with :pwd and :cd)
+       :args **/*.py | argdo %!autopep8 - --aggressive | update
+       :args **/*.py | argdo silent %!black - | update
+
 
 Terminal
 * Terminal commands are prefix Leader-t
