@@ -3,8 +3,6 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
-* Keymap - jump list navigation (Ctrl-i/o should also be Leader-i/o)
-* Keymap - Add for :CocList diagnostics<CR> to list problems (then  [g ]g to navigate items)
 * Keymap - Add for :call coc#float#close_all()<CR> to close a hover popup
 * Keymap - outline and outline functions
                Leader-lsf for functions

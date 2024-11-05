@@ -241,7 +241,11 @@ Python LSP - CoC stuff
 * go or Leader-lI show coctree with outgoing calls from highlighted fn  (when done, click on Outgoing Calls title and ESC)
 * Leader-ly organize imports
 * Leader-lo or Leader-ll for lsp symbol outline with fzf (up arrow or start typing)
-* Leader-la fzf list of problems (F4/F5/F6/F7 for first/prev/next/last)
+* Leader-la fzf problems list
+       Navigate with F4/F5/F6/F7 for first/prev/next/last
+       or [g ]g prev/next
+       or Ctrl-i/o for prev next
+       or Leader-i/o for prev next (if Ctrl-i conflict)
 * Leader-lc code actions for curser location
 * Leader-ls goto symbol
 * Leader-lof or :call CocShowFilteredSymbols('Function') List and goto symbol location
