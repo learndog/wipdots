@@ -44,3 +44,5 @@ set background=dark            " Or use light
 set laststatus=2               " Enable the status line
 set noshowmode                " Don't show the mode word. (Not needed if status line shows it)
 "set signcolumn=yes            " Delete this for vim 7.3-
+
+set ff=unix                    " Try to fix all the ^M and ^V^M endings for <CR>

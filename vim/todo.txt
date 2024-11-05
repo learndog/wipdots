@@ -3,12 +3,6 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
-* Help files...
-       todo - add <CR> to end of help_files.vim entries
-       todo - add usage updates
-       todo - fix relative location with HOME or ~ etc
-       todo - move wipodots to ~/wipdots (not inside dev)
-* Admin - <Leader>vet for edit the todo file (smilar for guidance, keymap ovrvw, setup)
 * Search - :FilesAll that includes dotfiles in the results
 * Debug - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
@@ -32,6 +26,7 @@ BUGS
 * Land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
 * Nvim - commenting should start at first nonws char, not col pos 1 (works in vim)
 * Nvim - ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
+* Corruption - Config has extraneous characters all over like ^V^M. Why? How to clean up?
 
 BIG TICKET ITEMS
 * Tmux

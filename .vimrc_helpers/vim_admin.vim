@@ -58,3 +58,33 @@ nnoremap <leader>vsr :call SessionRestore()<CR>
 nnoremap <Leader>vcr :source $MYVIMRC \| nohlsearch<CR>
 nnoremap <leader>vce :edit $MYVIMRC<CR>
 nnoremap <leader>vcv :view $MYVIMRC<CR>
+
+
+" Show help files as read only
+
+" Assumes that files are located in $HOME/wipdots/
+nnoremap <Leader>vhh :execute 'view ' . expand('$HOME') . '/wipdots/vim/basic_usage.md'<CR>
+nnoremap <Leader>vhk :execute 'view ' . expand('$HOME') . '/wipdots/vim/keymap_overview.txt'<CR>
+nnoremap <Leader>vhs :execute 'view ' . expand('$HOME') . '/wipdots/vim/setup.md'<CR>
+nnoremap <Leader>vht :execute 'view ' . expand('$HOME') . '/wipdots/vim/todo.txt'<CR>
+
+" And also offer options to edit them with Leader-ve*
+nnoremap <Leader>veh :execute 'edit ' . expand('$HOME') . '/wipdots/vim/basic_usage.md'<CR>
+nnoremap <Leader>vek :execute 'edit ' . expand('$HOME') . '/wipdots/vim/keymap_overview.txt'<CR>
+nnoremap <Leader>ves :execute 'edit ' . expand('$HOME') . '/wipdots/vim/setup.md'<CR>
+nnoremap <Leader>vet :execute 'edit ' . expand('$HOME') . '/wipdots/vim/todo.txt'<CR>
+
+" " Assumes that files are located in $HOME/wipdots/
+" nnoremap <Leader>vhh :view $HOME/wipdots/vim/basic_usage.md<CR>
+" nnoremap <Leader>vhk :view $HOME/wipdots/vim/keymap_overview.txt<CR>
+" nnoremap <Leader>vhs :view $HOME/wipdots/vim/setup.md<CR>
+" nnoremap <Leader>vht :view $HOME/wipdots/vim/todo.txt<CR>
+" 
+" " And also offer options to edit them with Leader-ve*
+" nnoremap <Leader>veh :edit $HOME/wipdots/vim/basic_usage.md<CR>
+" nnoremap <Leader>vek :edit $HOME/wipdots/vim/keymap_overview.txt<CR>
+" nnoremap <Leader>ves :edit $HOME/wipdots/vim/setup.md<CR>
+" nnoremap <Leader>vet :edit $HOME/wipdots/vim/todo.txt<CR>
+
+
+

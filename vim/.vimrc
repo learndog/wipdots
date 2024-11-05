@@ -125,7 +125,6 @@ source $HOME/.vimrc_helpers/vim_admin.vim
 source $HOME/.vimrc_helpers/terminal.vim
 source $HOME/.vimrc_helpers/trailingspaces.vim
 source $HOME/.vimrc_helpers/config_endstuff.vim
-source $HOME/.vimrc_helpers/help_files.vim
 " ###################################################################################
 " #### END VIM CONFIGURATION
 " ###################################################################################
