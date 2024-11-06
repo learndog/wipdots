@@ -3,7 +3,6 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
-* Test git merge conflicts
 * Debug - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
@@ -31,6 +30,7 @@ PRIORITY - Ready as full replacement for GCP JupyterLab editing
         See dev.to/mainendra/terminal-ui-for-git-283p
         and github.com/frontaid/git-cli-tools
         and github.com/rhysd/conflict-marker.vim
+* Test git merge conflicts
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
