@@ -3,10 +3,7 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
-* Debug - pudb and ipdb command line tool - see usage info
-        Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
-        If nec, try vimspector... https://github.com/puremourning/vimspector for vim
-        and kickstarter (or is it lazyvim?) for debug ui config 
+* Try out pudb - see setup file
 * Git - Lazygit...from lazyvim video on mac,
         Put in ~/Library/Application_Support/lazygit/config.yml...
         ```
@@ -75,6 +72,11 @@ BIG TICKET ITEMS
          Isolate anything that isn't clean, delete everything that's not needed here.
   - Evaluate in other contexts - eg other versions of linux or in Windows vim
 * iPython support (see below)
+* Debug - ipdb (if pudb not sufficient)
+* Debug within vim - pudb and ipdb command line tool - see usage info
+        Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
+        If nec, try vimspector... https://github.com/puremourning/vimspector for vim
+        and kickstarter (or is it lazyvim?) for debug ui config 
 
 GROOMED BACKLOG
 * Use $wipdots_parentdir env var (=$HOME) in .vimrc_helpers/vim_admin.vim
