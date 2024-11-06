@@ -3,7 +3,7 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
-* Test git merge conflicts
+* Test vimdiff for git merge conflicts
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
