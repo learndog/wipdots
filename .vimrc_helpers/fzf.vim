@@ -1,5 +1,7 @@
 " #### SECTION: FUZZY FIND NON-LSP SETUP
 
+" Note: Use --exact option with fzf to do literal search instead of fuzzy
+
 nnoremap <Leader>b :Buffer<CR>
 nnoremap <Leader><space> :Buffer<CR>
 
@@ -182,9 +184,40 @@ command! NormalModeKeybinds call s:NormalModeIndexFzf()
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" Command for :FilesDots - find all files recursively from current vim pwd, including dotfiles (but not dotdirs)
+command! FilesDots call fzf#run(fzf#wrap({
+    \ 'source': 'find . -type f -print | sed "s|^\./||"',
+    \ 'sink': 'e',
+    \ 'options': '--preview ''bat --style=numbers --color=always --line-range :500 {} || cat {}''',
+    \ 'window': 'enew'
+    \ }))
+
+" Command for :FilesAll- find files including hidden files and dirs (ie start with a dot)
+command! FilesAll call fzf#run(fzf#wrap({
+    \ 'source': 'find . -type f -print -o -type f -name ".*" -print | sed "s|^\./||"',
+    \ 'sink': 'e',
+    \ 'options': '--preview ''bat --style=numbers --color=always --line-range :500 {} || cat {}''',
+    \ 'window': 'enew'
+    \ }))
+
+" File pattern in current dir files (non recursive)
+" Requires grep, but not rg
+" UNTESTED
+command! -nargs=* FLines call fzf#vim#grep(
+    \ 'grep -nH --color=always '.shellescape(<q-args>).' *',
+    \ 1,
+    \ fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}),
+    \ <bang>0)
 
 
-
+" File pattern in all files from curr vim dir (recursive)
+" Requires rg
+" UNTESTED
+command! -nargs=* FLinesAll call fzf#vim#grep(
+    \ 'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>),
+    \ 1,
+    \ fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}),
+    \ <bang>0)
 
 
 " ONLY IF FUGITIVE IS AVAILABLE
@@ -197,6 +230,8 @@ command! NormalModeKeybinds call s:NormalModeIndexFzf()
 " " Keymaps for fuzzy searches
 nnoremap <C-p> :Files<CR>
 nnoremap <Leader>ff :Files<CR>
+nnoremap <Leader>ffd :FilesDots<CR>
+nnoremap <Leader>ffa :FilesAll<CR>
 nnoremap <Leader>fg :GFiles<CR>
 
 nnoremap <C-s> :BLines<CR>

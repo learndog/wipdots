@@ -23,6 +23,7 @@ Open file in vim for editing
 * vim file1 file2 file3 etc for multiple files (in vim use... :edit file)
 * view file to open as read only (in vim use... :view file)
 * :Files (non dot files in directory) or :GFiles (git files) for opening with fzf file lists
+  :FilesDots to also include dotfiles, :FilesAll to include dotfiles and dotdirs
 * Leader-e for file explorer prefix
 * Leader-ee to toggle nvimtree window
 * In netrw... 
@@ -44,6 +45,7 @@ Navigation
 *   Ctrl-o and Ctrl-i to jump to prev or next location in jummp list
 *   In command autocomplete, use Tab and Shift-Tab
 *   Exit pop up splits with ESC or q or :bd
+*   Try arrows or Ctrl-j and Ctrl-k to navigate fzf lists
 * Insert mode ;; will cycle begin and end of line
 * Esc Insert Mode... jj or ESC
 * Insert or Normal... ;; will cycle line begin, nonspace begin, nonspace end, line end
@@ -113,6 +115,12 @@ Search
 * :BLines or Leader-fb to fzf lines in the curr buffer (dbl click to go there)
 * Find text in curr dir recursively in bash... grep -rn -- "my_case_sensitive_target"
 *       Case insensitive... grep -irn -- "my_case_insensitive_target"
+* :Lines finds all locations of a pattern in the open buffer
+  :BLines finds pattern in all open buffers
+* If rg is available... [untested]
+  :FLines finds pattern in all files in curr directory (non-recursively)
+  :FLinesAll finds pattern in all files recursively
+* In fzf lists, use + as first character to do a literal match
 
 Buffers
 * Switch buffer... Leader-Leader or Leader-bb (or Leader-b if fzf not available)
