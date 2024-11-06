@@ -25,8 +25,9 @@ Open file in vim for editing
 * :Files (non dot files in directory) or :GFiles (git files) for opening with fzf file lists
   :FilesDots to also include dotfiles, :FilesAll to include dotfiles and dotdirs
 * Leader-e for file explorer prefix
-* Leader-ee to toggle nvimtree window
+* Leader-ee to toggle nvimtree or netrw window
 * In netrw... 
+  * Ctrl-ARROW or wbWB will move around
   * Single mouse click to select folder or item
   * :help netrw-quickcom
   * :help netrw-quickmap

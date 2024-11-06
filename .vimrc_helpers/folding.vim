@@ -7,8 +7,9 @@ set foldmethod=syntax
 " Modify it for python
 autocmd FileType python setlocal foldmethod=indent foldlevelstart=1
 
-" Specify fold level when opening a file 
-set foldlevelstart=99
+" Specify fold level when opening a file (Does not seem to apply to netrw opening files)
+set foldlevelstart=9
+" set foldlevelstart=0
 " set foldlevelstart=1
 
 " Fold color
