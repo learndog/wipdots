@@ -3,30 +3,6 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
-* Try out pudb - see setup file
-* Git - Lazygit...from lazyvim video on mac,
-        Put in ~/Library/Application_Support/lazygit/config.yml...
-        ```
-        keybinding:
-          universal:
-            return: '<c-\>'
-
-        gui:
-          theme:
-              selectedLineBgColor:
-                - underline
-              selectedRangeBgColor:
-                - underline
-
-        git:
-          paging:
-            colorArg: never
-            pager: delta --dark --paging=never
-        ```	
-* Git - Investigate other TUI tools
-        See dev.to/mainendra/terminal-ui-for-git-283p
-        and github.com/frontaid/git-cli-tools
-        and github.com/rhysd/conflict-marker.vim
 * Test git merge conflicts
 
 BUGS
@@ -51,6 +27,30 @@ BIG TICKET ITEMS
   - Status line colors for vim running in tmux (eg chg gray rhs to pink or dark gray or brown?)
   - See https://github.com/gpakosz/.tmux for oh my tmux (requires tmux 2.4)                                          
   -   or a basic simple config at https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/                 
+* Git - Lazygit...from lazyvim video on mac,
+        But maybe don't need to integrate with vim? What's the benefit?
+        Put in ~/Library/Application_Support/lazygit/config.yml...
+        ```
+        keybinding:
+          universal:
+            return: '<c-\>'
+
+        gui:
+          theme:
+              selectedLineBgColor:
+                - underline
+              selectedRangeBgColor:
+                - underline
+
+        git:
+          paging:
+            colorArg: never
+            pager: delta --dark --paging=never
+        ```	
+* Git - Investigate other TUI tools
+        See dev.to/mainendra/terminal-ui-for-git-283p
+        and github.com/frontaid/git-cli-tools
+        and github.com/rhysd/conflict-marker.vim
 * Diffs - Use delta to improve diff viewing
     See https://github.com/dandavison/delta
     See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
