@@ -17,7 +17,7 @@ Help files
 * <Leader>vhh opens this file as read only
 * <Leader>vhs opens a file with misc setup information
 * <Leader>vht opens a todo list for development on this config
-* <Leader>vhk opens a keyboard mapping overview
+* <Leader>vhk opens a keyboard mapping overview (more like a strategy than a reference)
 
 Open file in vim for editing
 * vim file1 file2 file3 etc for multiple files (in vim use... :edit file)
@@ -145,6 +145,7 @@ Folds
 * Set fold level... :Z0 (collapse all) thru :Z9 (expand 9 levels)
 * Built in fold commands
     ```
+    zz: Toggle close all / open all (be careful to distinguish from ZZ - write if buffer changed and close window)
     zf in Visual mode: Create a fold for the selected text
     zd: Delete the fold at the cursor
     zE: Delete all folds in the current window (including manual folds you created)
