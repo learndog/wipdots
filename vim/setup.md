@@ -162,6 +162,119 @@
   "     which python                                                                                                       
   "     pip --version                                                                                                      
 
+
+  """""""""""""""""""""""""""""""""""""""""""""""                                                                          
+  " PUDB - TUI Debugger for Python - UNTESTED
+  """""""""""""""""""""""""""""""""""""""""""""""                                                                          
+  https://github.com/inducer/pudb
+  https://documen.tician.de/pudb/misc.html
+  For a tool survey, see https://python.plainenglish.io/cracking-the-code-a-guide-to-python-debugging-tools-70ecc351a457
+
+  Setup
+   * Install... $ pip install pudb
+   * Put this line in .bashrc (Python 3.7+ only)
+        export PYTHONBREAKPOINT="pudb.set_trace()"
+     so breakpoints can be set in source with... set breakpoint()
+
+  Set breakpoints in the source code with
+   * set breakpoint()  # OR pudb.set_trace() if Python <3.7 or PYTHONBREAKPOIN not set
+         
+  To debug
+    * Run script with... python -m pudb.run my_script.py
+      OR run normally adding one of the following imports to the code being debugged...
+           from pudb import set_trace; set_trace()
+           import pudb; pu.db  # Same thing in abbreviated form
+
+  Interactive debug shell
+    * At any point while debugging, 
+            Press Ctrl-x to switch to the built in interactive shell.
+            From here, you can execute Python commands at the current point of the debugger.
+            Press Ctrl-x again to move back to the debugger.
+    * Keyboard shortcuts defined in the internal shell:
+            Enter: Execute the current command
+            Ctrl-v: Insert a newline (for multiline commands)
+            Ctrl-n/p: Browse command history
+            Up/down arrow: Select history
+            TAB: Tab completion
+            +/-: grow/shrink the shell (when a history item is selected)
+            _/=: minimize/maximize the shell (when a history item is selected)
+
+  To use pudb to debug test failures in pytest, run the test like this:
+      $ pytest --pdbcls pudb.debugger:Debugger --pdb --capture=no  # -capture=no (or equiv with... -s) is necessary
+
+  OPTION 1a... With Jupyter
+    * pip install pudb
+    * import into script or Jupyter cell as before
+    * Use pudb.set_trace() to trigger debugging
+
+  OPTION 1b... With iPython
+    * from an iPython terminal, just run the script containing pudb.set_trace()
+      and when the debugger is invoked, you will see the TUI for PuDB
+    * use all the usual commands to inspect vars, step thru code, etc  
+
+  OPTION 2... using %debug in iPythona
+    This allows more flexibility when you hit an error in an iPython or Jupyter nootebook and want to dive deeper
+    * Add the following config in an iPython session to load PuDB as the default debugger
+    ```
+    from IPython.core.debugger import set_trace
+    import pudb
+    set_trace = pudb.set_trace
+    ```
+    Now, whenever you use %devug after an error, it will use PuDB as the debugging tool instead of the default.
+
+  OPTION 3a... using PuDB in term while running Jupyter Notebook
+    Not generally well suited for Jupyter Notebook because it's a TUI, but can use PuDB in a term while running jupyter
+    * Run your code within a function and set a breakpoint with pudb.set_trace()
+    * Execute the code block, and once it hits the breakpoint, PuDB will launch in term where Jupyter was started
+
+  OPTION 3b... with %pudb... using PuDB in term while running Jupyter Notebook
+    Use magic command to drop into PuDB debugger when a cell has some suspicious code.
+    This isn't avail by default, but you can install an extension or define it yourself
+    For example
+    ```
+    from IPython.core.magic import register_line_magic
+    import pudb
+
+    @register_line_magic
+    def pudb(line)
+        return pudb.set_trace()
+
+    # Then in your Jupyter cell, use...
+    %pudb
+    ```
+
+  Features
+    * Syntax-highlighted UI
+      - Source, the stack, breakpoints and variables are all visible at once and continuously updated.
+      - This helps you be more aware of what's going on in your program.
+      - Variable displays can be expanded, collapsed and have various customization options.
+    * Pre-bundled themes
+      - Including dark themes via "Ctrl-P".
+    * Keyboard-based navigation.
+      - PuDB understands cursor-keys and Vi shortcuts for navigation.
+      - Other keys are inspired by the corresponding pdb commands.
+    * Find relevant source code with search
+      or use "m" to invoke the module browser
+        - shows loaded modules
+        - lets you load new ones
+          and reload existing ones.
+    * Breakpoints can be set just by pointing at a source line and hitting "b"
+      and then edited visually in the breakpoints window.
+      - Or hit "t" to run to the line under the cursor.
+    * Drop to a Python shell in the current environment by pressing "!".
+      - Or open a command prompt alongside the source-code via "Ctrl-X".
+    * PuDB places special emphasis on exception handling.
+      - A post-mortem mode makes it easy to retrace a crashing program's last steps.
+    * Control the debugger from a separate terminal.
+    * IPython integration (see wiki)
+    * Should work with Python 3.6 and newer.
+      - Versions 2019.2 and older continue to support Python 2.7.
+
+  Tips
+  * If need to go back to source window from Variables/Stack/Breakpoints view, press left arrow key
+  * If screen content gets messed up, type "reset" (even if you can''t see what you are typing 
+  * At the programming language level, it's the same as pdb command line
+    except pudb instead of pdb, and run is called runstatement
     
   """""""""""""""""""""""""""""""""""""""""""""""                                                                          
   " GETTING STARTED WITH VIM IN UBUNTU 24.04 (WITH WSL)                                                                    

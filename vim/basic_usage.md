@@ -78,7 +78,7 @@ More Editing
 *                     y to copy, d to cut, p to paste (yy and dd for current line)
 * System clipboard... Copy text on GCP JupyterLab Terminals with Shift and mouse select, then Ctrl-c
 *                     Paste system clipboard with Ctrl-p
-* J from the first line in normal mode will join the next line at the end of it
+* J from a line selected in Visual Line mode will join the next line at the end of the current line
 * Leader-ARROW to move visual line selections around (will switch windows if no selection)
 * Insert text into multiple lines before cursor column
     Enter visual block mode with :Vb
