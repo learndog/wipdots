@@ -53,6 +53,7 @@ function! ToggleAllFolds()
 endfunction
 
 nnoremap <Leader>z :call ToggleAllFolds()<CR>
+nnoremap <Leader>zz :call ToggleAllFolds()<CR>
 nnoremap zz :call ToggleAllFolds()<CR>
 
 " Fold everything below the specified level
