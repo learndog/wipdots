@@ -56,6 +56,8 @@ BIG TICKET ITEMS
 * iPython support (see below)
 
 GROOMED BACKLOG
+* Use $wipdots_parentdir env var (=$HOME) in .vimrc_helpers/vim_admin.vim
+* Figure out how session relative and absolute paths work. Save session after opening with :edit /... with abs path ?
 * Search - :[B|P|D]Lines and :[B|P|D]Files[All]  (b=curr buffer, bb=open buff files, p=project, d=dir and optionally specify dir)
            See https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
            Also... :GLines (maybe using my command line search for text in git commits/diffs)
