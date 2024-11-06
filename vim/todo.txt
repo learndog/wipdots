@@ -3,18 +3,34 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
+* Test git merge conflicts
 * Debug - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
         If nec, try vimspector... https://github.com/puremourning/vimspector for vim
         and kickstarter (or is it lazyvim?) for debug ui config 
-* Test git merge conflicts
-* Fix references in rhs coclist (design and use a fn to give functionality and look of gi and go)
-        Specifically, nice list on rhs
-        Interactive click to show location in buffer like preview
-        Double click to goto that buffer location and close the split
-        Maybe also fzf within the window and open/close items in tree?
-        But fundamentally there seem to be fzf lists and coclists, probably hard to combine.
-* Document UI navigation quirks
+* Git - Lazygit...from lazyvim video on mac,
+        Put in ~/Library/Application_Support/lazygit/config.yml...
+        ```
+        keybinding:
+          universal:
+            return: '<c-\>'
+
+        gui:
+          theme:
+              selectedLineBgColor:
+                - underline
+              selectedRangeBgColor:
+                - underline
+
+        git:
+          paging:
+            colorArg: never
+            pager: delta --dark --paging=never
+        ```	
+* Git - Investigate other TUI tools
+        See dev.to/mainendra/terminal-ui-for-git-283p
+        and github.com/frontaid/git-cli-tools
+        and github.com/rhysd/conflict-marker.vim
 
 BUGS
 * autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
@@ -43,6 +59,12 @@ BIG TICKET ITEMS
     See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
     Also take a look at colordiff and difftastic
 * File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
+* Fix references in rhs coclist (design and use a fn to give functionality and look of gi and go)
+        Specifically, nice list on rhs
+        Interactive click to show location in buffer like preview
+        Double click to goto that buffer location and close the split
+        Maybe also fzf within the window and open/close items in tree?
+        But fundamentally there seem to be fzf lists and coclists, probably hard to combine.
 * Support for additional languages
 * Cleanup
   - Check licensing for distribution
@@ -59,7 +81,10 @@ GROOMED BACKLOG
 * Figure out how session relative and absolute paths work. Save session after opening with :edit /... with abs path ?
 * Search - :[B|P|D]Lines and :[B|P|D]Files[All]  (b=curr buffer, bb=open buff files, p=project, d=dir and optionally specify dir)
            See https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
-           Also... :GLines (maybe using my command line search for text in git commits/diffs)
+           Add :GLines (maybe using my command line search for text in git commits/diffs)
+           Rationalize existing searches
+           Fix literal vs fzf with --exact where appropriate
+           Add keymaps for LinesAll and LinesDots and FLines and FLinesALL
 * Browser - TUI browsers with and without javascript
 * Keymap - Use Shift-G and Leader-Shift-G for version control (git) commands
 * Keymap - For git diff in new buffer (not split)
@@ -67,6 +92,7 @@ GROOMED BACKLOG
 * Keymap - Leader vm?... for :verbose map
 * LSP - Clean up the functionality of code outlines with CocList on RHS, with and wout filtering
 * LSP - List preview and filter problem list
+* Document UI navigation quirks
 
 BACKLOG
 * Keymap - Sign column (gutter) visibility
@@ -94,29 +120,6 @@ BACKLOG
         See https://www.baeldung.com/linux/vim-terminal-open-position
 * Keymap - Regular and verbose(where keybind def) keymap searches using vim-which-key and which-key.
         See https://jay-baker.com/posts/vim-1-which-key/
-* Git - Lazygit...from lazyvim video on mac,
-        Put in ~/Library/Application_Support/lazygit/config.yml...
-        ```
-        keybinding:
-          universal:
-            return: '<c-\>'
-
-        gui:
-          theme:
-              selectedLineBgColor:
-                - underline
-              selectedRangeBgColor:
-                - underline
-
-        git:
-          paging:
-            colorArg: never
-            pager: delta --dark --paging=never
-        ```	
-* Git - Investigate other TUI tools
-        See dev.to/mainendra/terminal-ui-for-git-283p
-        and github.com/frontaid/git-cli-tools
-        and github.com/rhysd/conflict-marker.vim
 * Synch scroll for git blame sidebar
 * Add plugin required dependencies documentation
 * Tests - Runners for code and unit tests - fast and easy from vim

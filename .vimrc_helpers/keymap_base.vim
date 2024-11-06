@@ -20,9 +20,9 @@ nnoremap jh F(l
 " To replace the lost defeault <C-L> mapping
 nnoremap <Leader>wr :redraw!<CR>
 
-" Use cap word motions for reverse direction
-nnoremap W b
-nnoremap B w
+" " Use cap word motions for reverse direction - probably not a good idea to overwrite builtin, but might be convenient
+" nnoremap W b
+" nnoremap B w
 
 " Non-yanking deletes (preserves the yank buffer)
 nnoremap <Del> "_x
