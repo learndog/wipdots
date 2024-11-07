@@ -331,4 +331,13 @@ Troubleshooting LSP
 * :CocList extensions  for detailed information on loaded extensions
 * :CocCommand workspace.showOutput (choose what to output, but don't save the resulting buffer) 
 
-
+Related Command Line Tips
+* fzf in bash will search all non-hidden files from current dir recursively (and will echo the selected item)
+   and $ command | fzf will fzf by line based on the output of the command
+   install with $ sudo apt install fzf
+   fzf autocomplete filename in bash command by typing ** and then the TAB key
+   fzf enables three key bindings to the shell:
+        CTRL-R: search on recent history based on $HISTFILE, then return selected entry to the terminal
+        CTRL-T: recursively search for a filename under $PWD, then return selected entries to the terminal
+        ALT-C: recursively search for a directory name under $PWD, then cd into the selected entry
+   Search commit names... git log --oneline | fzf --preview 'git show --color=always --name-only {1}'

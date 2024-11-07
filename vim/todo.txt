@@ -85,8 +85,10 @@ GROOMED BACKLOG
            See https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
            Add :GLines (maybe using my command line search for text in git commits/diffs)
            Rationalize existing searches
-           Fix literal vs fzf with --exact where appropriate
            Add keymaps for LinesAll and LinesDots and FLines and FLinesALL
+* Search - Test using ' to trigger literal match in a fzf search pattern!!!!! If works, then never use literal mode!
+           Test ! as negation
+           Test ^ and $ to specify beginning match or end of line match
 * Browser - TUI browsers with and without javascript
 * Keymap - Use Shift-G and Leader-Shift-G for version control (git) commands
 * Keymap - For git diff in new buffer (not split)
@@ -97,6 +99,9 @@ GROOMED BACKLOG
 * Document UI navigation quirks
 
 BACKLOG
+* Git - Add command to list all gitignored files in project (must combine output of two cmds)
+           git ls-files --others --ignored --exclude-standard --directory
+           git ls-files --others --ignored --exclude-standard
 * Keymap - Sign column (gutter) visibility
     Leader-vgn :set scl=no   " force the signcolumn to disappear
     Leader-vgy :set scl=yes  " force the signcolumn to appear
