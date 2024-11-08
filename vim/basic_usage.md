@@ -135,10 +135,6 @@ Search - Command line
 * grep... find text in curr dir recursively in bash... 
           ```grep -rn -- "my_case_sensitive_target"```        (case sensitive)
        or ```grep -irn -- "my_case_insensitive_target"```     (case insensitive)
-* fzf... trigger fzf completion in command line with **TAB
-          eg..       vim ./vim/** and then TAB key
-          Caution... typing ENTER instead of TAB will open all the files
-          See... https://www.freecodecamp.org/news/fzf-a-command-line-fuzzy-finder-missing-demo-a7de312403ff/
 
 Buffers
 * Switch buffer... Leader-Leader or Leader-bb (or Leader-b if fzf not available)
