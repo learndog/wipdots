@@ -2,6 +2,7 @@
 
     * The following information is focused on Python (just like the whole vim config)
     * For the default .vimrc config, Leader is space, and it opens vim-which-key (which-key on nvim)
+    * If you see lots of phantom characters, eg when using arrow keys to navigate, try switching to nvim
     * WARNING: In GCP JupyterLab in a Vertex AI VM, Ctrl-W by default will close the browser tab!!!!
     * WHY USE THIS?
        - Works in browser based terminal consoles (like GCP console or VertexAI JupyterLab terminals)
@@ -22,8 +23,6 @@ Help files
 Open file in vim for editing
 * vim file1 file2 file3 etc for multiple files (in vim use... :edit file)
 * view file to open as read only (in vim use... :view file)
-* :Files (non dot files in directory) or :GFiles (git files) for opening with fzf file lists
-  :FilesDots to also include dotfiles, :FilesAll to include dotfiles and dotdirs
 * Leader-e for file explorer prefix
 * Leader-ee to toggle nvimtree or netrw window
 * In netrw... 
@@ -36,6 +35,7 @@ Open file in vim for editing
   * Ctrl-] to make current folder the root of the tree
   * Dbl click header or type "-" to chg root dir
   * Dbl click or Enter to open file or open/close folder
+* Also see search options below... fzf file searches can be used to open files in vim
 
 Navigation
 * Std vim navigation
@@ -94,7 +94,7 @@ Moving Text (Visual line selections only)
 * Move and keep selection... Leader-ARROW
 * Indent/Outdent... < and > after selecting lines (use . to repeat)
 
-Search
+Search - Vim Search the current buffer
 * / to search text in curr buffer (n or N for next or prev; \ as escape character)
 * :%s/search/replace/gc - search and replace with confirmation
      where % is all lines in the file; g is global... all occurances in the line; c for confirm
@@ -112,16 +112,33 @@ Search
   Note: Problematic characters that need escaping... /,&,\,*,.
         Can escape with \
         Can use a different old/new delimiter character like #, eg :%s#/home#/root#g
-* Toggle highlighting... Leader-h: Toggle highlighting
-* :BLines or Leader-fb to fzf lines in the curr buffer (dbl click to go there)
-* Find text in curr dir recursively in bash... grep -rn -- "my_case_sensitive_target"
-*       Case insensitive... grep -irn -- "my_case_insensitive_target"
-* :Lines finds all locations of a pattern in the open buffer
-  :BLines finds pattern in all open buffers
-* If rg is available... [untested]
-  :FLines finds pattern in all files in curr directory (non-recursively)
-  :FLinesAll finds pattern in all files recursively
-* In fzf lists, use + as first character to do a literal match
+* Toggle highlighting of search results... Leader-h: Toggle highlighting
+
+Search - With fzf lists
+* :Lines fuzzy find text pattern in all open buffers
+  :BLines or Leader-fb to fzf pattern in lines in the curr buffer (dbl click to go there)
+  :Files (non dot files in directory) or :GFiles (git files) for opening with fzf file lists
+  :FilesDots to also include dotfiles, :FilesAll to include dotfiles and dotdirs
+  If rg is available... [untested]
+  :FLines finds pattern in all files in curr directory (non-recursively) [reqs ripgrep]
+  :FLinesAll finds pattern in all files recursively [reqs ripgrep]
+* Notes
+       In fzf list searches, 
+           ' switches to a literal match, both to escape special chars and to search for consecutive letters
+           ^ to pin pattern to start of line
+           0 andto pin pattern to start or end of line
+           ! to negate the search
+           Can use multiple independent patterns separated by spaces
+               eg 'abc !x will find lines that include the literal string abc, but don't include an x
+
+Search - Command line
+* grep... find text in curr dir recursively in bash... 
+          ```grep -rn -- "my_case_sensitive_target"```        (case sensitive)
+       or ```grep -irn -- "my_case_insensitive_target"```     (case insensitive)
+* fzf... trigger fzf completion in command line with **TAB
+          eg..       vim ./vim/** and then TAB key
+          Caution... typing ENTER instead of TAB will open all the files
+          See... https://www.freecodecamp.org/news/fzf-a-command-line-fuzzy-finder-missing-demo-a7de312403ff/
 
 Buffers
 * Switch buffer... Leader-Leader or Leader-bb (or Leader-b if fzf not available)

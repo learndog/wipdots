@@ -3,18 +3,84 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
+* Only use controlled forks of the vim plugins
 * Test vimdiff for git merge conflicts
+* Explore - Add command to open nvimtree in same folder as current buffer file
+``` 
+   " Initialize nvim-tree
+lua << EOF
+  require'nvim-tree'.setup {}
+EOF
+
+" Function to open nvim-tree at the current file's directory
+function! OpenNvimTreeAtCurrentFile()
+  lua require'nvim-tree'.find_file(true)
+endfunction
+
+" Key binding to open nvim-tree at the current file's directory
+nnoremap <leader>e. :call OpenNvimTreeAtCurrentFile()<CR>
+```
+* Explore - Add command to open nvimtree in specified folder
+```
+-- Initialize nvim-tree
+require'nvim-tree'.setup {}
+
+-- Lua function to open nvim-tree at the specified path
+function ExploreFrom(path)
+  require'nvim-tree'.change_dir(path)
+  require'nvim-tree'.open()
+end
+
+-- Define the custom command
+vim.api.nvim_create_user_command('ExploreFrom', function(opts)
+  ExploreFrom(opts.args)
+end, { nargs = 1 })
+
+" Key binding to open nvim-tree at the path to be entered in the command line
+nnoremap <leader>ep :call OpenNvimTreeAtCurrentFile()
+```
+* Add command to open nvim tree at the directory chosen from a fzf list
+```
+" Initialize nvim-tree
+lua << EOF
+  require'nvim-tree'.setup {}
+EOF
+
+" Function to open fzf and choose a directory
+function! OpenNvimTreeFromFzf()
+  call fzf#run(fzf#wrap({'source': 'find . -type d', 'sink': function('OpenNvimTreeAtChosenDir')}))
+endfunction
+
+" Function to open nvim-tree at the chosen directory
+function! OpenNvimTreeAtChosenDir(path)
+  call v:lua.ExploreFrom(expand(a:path))
+endfunction
+
+" Lua function to change directory and open nvim-tree
+lua << EOF
+  function _G.ExploreFrom(path)
+    require'nvim-tree'.change_dir(path)
+    require'nvim-tree'.open()
+  end
+EOF
+
+" Command to trigger the function
+command! ExploreFromFzf call OpenNvimTreeFromFzf()
+
+" Keymap to open fzf and choose a directory (three e's instead of two)
+nnoremap <leader>eee :call OpenNvimTreeAtCurrentFile()
+```
 
 BUGS
-* autopair brackets - in config file, if {<CR> slowly, it fills in with funny stuff - stop it!
+* Keymap - In GCP vim, backspace key sometimes doesn't work in insert mode
+* Keymap - jl to escape insert mode will move cursor left afterwards
+* UI - exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
+* Search - Fix rg in FLines, FLinesAll
+* Autopair - land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
+* Autopair - in config file, if {<CR> slowly, it fills in with funny stuff
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
-* In GCP vim, backspace key sometimes doesn't work in insert mode
-* jl to escape insert mode will move cursor left afterwards
-* exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
-* Land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
 * Nvim - commenting should start at first nonws char, not col pos 1 (works in vim)
 * Nvim - ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
-* Corruption - Config has extraneous characters all over like ^V^M. Why? How to clean up?
 
 BIG TICKET ITEMS
 * Tmux
