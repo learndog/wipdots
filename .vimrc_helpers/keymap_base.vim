@@ -2,7 +2,8 @@
 
 " <ESC> from INSERT mode (use jj and/or jk)
 " jj is more natural, but jk may be immediate
-inoremap jj <ESC>
+inoremap jj <ESC>h
+inoremap jk <ESC>h
 " Avoid jk to allow jiggling the cursor to close autocomplete dropdown
 " inoremap jk <ESC>
 

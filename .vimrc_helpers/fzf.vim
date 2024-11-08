@@ -200,25 +200,21 @@ command! FilesAll call fzf#run(fzf#wrap({
     \ 'window': 'enew'
     \ }))
 
-" File pattern in current dir files (non recursive)
-" Requires grep, but not rg
-" UNTESTED
+" File pattern in all files from curr vim dir (non-recursive)
+" Requires rg
 command! -nargs=* FLines call fzf#vim#grep(
-    \ 'grep -nH --color=always '.shellescape(<q-args>).' *',
+    \ 'rg --max-depth 1 --hidden --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>),
     \ 1,
     \ fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}),
     \ <bang>0)
-
 
 " File pattern in all files from curr vim dir (recursive)
 " Requires rg
-" UNTESTED
 command! -nargs=* FLinesAll call fzf#vim#grep(
-    \ 'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>),
+    \ 'rg --hidden --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>),
     \ 1,
     \ fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}),
     \ <bang>0)
-
 
 " ONLY IF FUGITIVE IS AVAILABLE
 " Configure for :BCommits and :Commits

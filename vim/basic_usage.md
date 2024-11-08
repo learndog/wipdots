@@ -114,24 +114,23 @@ Search - Vim Search the current buffer
         Can use a different old/new delimiter character like #, eg :%s#/home#/root#g
 * Toggle highlighting of search results... Leader-h: Toggle highlighting
 
-Search - With fzf lists
-* :Lines fuzzy find text pattern in all open buffers
-  :BLines or Leader-fb to fzf pattern in lines in the curr buffer (dbl click to go there)
-  :Files (non dot files in directory) or :GFiles (git files) for opening with fzf file lists
-  :FilesDots to also include dotfiles, :FilesAll to include dotfiles and dotdirs
-  If rg is available... [untested]
-  :FLines finds pattern in all files in curr directory (non-recursively) [reqs ripgrep]
-  :FLinesAll finds pattern in all files recursively [reqs ripgrep]
-* Notes
-       In fzf list searches, 
-           ' switches to a literal match, both to escape special chars and to search for consecutive letters
-           ^ to pin pattern to start of line
-           0 andto pin pattern to start or end of line
-           ! to negate the search
-           Can use multiple independent patterns separated by spaces
-               eg 'abc !x will find lines that include the literal string abc, but don't include an x
-
-Search - Command line
+Search
+With fzf lists
+      :Lines fuzzy find text pattern in all open buffers
+      :BLines or Leader-fb to fzf pattern in lines in the curr buffer (dbl click to go there)
+      :Files (non dot files in directory) or :GFiles (git files) for opening with fzf file lists
+      :FilesDots to also include dotfiles, :FilesAll to include dotfiles and dotdirs
+With results from rg (if installed)...
+      :FLines finds pattern in all files in curr directory (non-recursively incl hidden files) [reqs ripgrep]
+      :FLinesAll finds pattern in all files recursively from curr dir (incl hidden files) [reqs ripgrep]
+In fzf list searches 
+      ' switches to a literal match, both to escape special chars and to search for consecutive letters
+      ^ to pin pattern to start of line
+      0 andto pin pattern to start or end of line
+      ! to negate the search
+      Can use multiple independent patterns separated by spaces
+          eg 'abc !x will find lines that include the literal string abc, but don't include an x
+From terminal command line
 * grep... find text in curr dir recursively in bash... 
           ```grep -rn -- "my_case_sensitive_target"```        (case sensitive)
        or ```grep -irn -- "my_case_insensitive_target"```     (case insensitive)

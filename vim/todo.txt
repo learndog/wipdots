@@ -6,10 +6,6 @@ PRIORITY - Ready as full replacement for GCP JupyterLab editing
 * Test vimdiff for git merge conflicts
 
 BUGS
-* Keymap - In GCP vim, backspace key sometimes doesn't work in insert mode
-* Keymap - jl to escape insert mode will move cursor left afterwards
-* UI - exit terminal requires manual :bd (because of .profile) unless add .profile to .bashrc
-* Search - Fix rg in FLines, FLinesAll
 * Autopair - land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
 * Autopair - in config file, if {<CR> slowly, it fills in with funny stuff
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
@@ -203,6 +199,10 @@ BACKLOG
         24ways.org/2013/keeping-parts-of-your-codebase-private-on-github/
         stackoverflow.com/questions/7983204/having-a-private-branch-of-a-public-repo-on-github
         GitHub Gist... amir-aniyan/create-private-branch-of-a-public-repository.md
+
+CURRENTLY TESTING
+* Keymap - In GCP vim, backspace key sometimes doesn't work in insert mode (set backspace...)
+* Keymap - jl to escape insert mode will move cursor left afterwards
 
 ON HOLD
 

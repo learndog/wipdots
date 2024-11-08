@@ -23,6 +23,7 @@ view = {
 })
 EOF
 
+
 " Note that g? toggles help when NvimTree is active
 nnoremap <Leader>ee :NvimTreeToggle<CR>
 nnoremap <Leader>ef :NvimTreeFocus<CR>

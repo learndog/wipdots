@@ -7,6 +7,7 @@ set noerrorbells               " Alarm style needs to be set/disabled in term em
 set novisualbell               " For MS Term with WSL change in settings per target OS
 set timeoutlen=300             " So it doesn't wait too long for a keymap sequence
 set ttimeoutlen=50             " Time after an ESC waiting for key sequence. Short is good to exit INSERT mode.
+set backspace=indent,eol,start " Help backspace work in insert mode
 " Too small could cause emulator or remote connection problems
 set encoding=utf-8
 set nobackup
