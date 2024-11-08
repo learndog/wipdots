@@ -250,6 +250,7 @@ Vim
 * Sessions... Leader-vss and Leader-vsr to save or restore vim sessions
               Restore when opening vim...  $ vim -S ~/.vim/sessions/mysession.save
               Caveat... Save and restore sessions from the same cwd (preferably the project git folder)
+              Caveat... Restoring sessions will NOT close existing buffers
 * $MYVIMRC... Leader-vce and Leader-vcr for config edit or reload
 * Colorschemes... Leader-vt
 * Redraw window... Leader-wr (does :redraw!)

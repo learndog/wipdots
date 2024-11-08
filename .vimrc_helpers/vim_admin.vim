@@ -2,13 +2,6 @@
 "
 " #### SECTION: Save and restore sessions
 
-" WARNING - THIS IS BROKEN FOR NVIM AND CAN CORRUP SAVED SESSIONS 
-
-" "Make sure nvim uses the same session directory
-" if has('nvim')
-"   let $VIMSESSION = g:session_directory
-" endif
-
 " Define the session directory paths (Should includ a trailing slash)
 let g:vim_session_directory = expand('~/.vim/sessions/')
 let g:nvim_session_directory = expand('~/.config/nvim/sessions/')
@@ -24,10 +17,6 @@ endif
 if !isdirectory(g:session_directory)
   call mkdir(g:session_directory, 'p')
 endif
-
-" if !isdirectory(expand("~/.vim/sessions"))
-"    call mkdir(expand("~/.vim/sessions"), "p")
-" endif
 
 " Function to save the current session
 function! SessionSave()
@@ -51,7 +40,7 @@ function! SessionSave()
    " Check if the session file already exists
    if filereadable(g:session_directory . l:session_name . ".save")
       " Ask the user for confirmation before overwriting the file
-      echo "Session file already exists. Overwrite? (Y/N)"
+      echo "\nSession file already exists. Overwrite? (Y/N)"
       let l:choice = nr2char(getchar())
       while index(['Y', 'N'], l:choice) == -1
          echo "Please enter Y or N"

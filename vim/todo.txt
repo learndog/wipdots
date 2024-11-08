@@ -3,6 +3,12 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
+* Add commented code to modify nvim sessions to behave like vim on restore
+```
+" Optionally align nvim with vim session behavior
+" Close all current buffers and restore the session exactly as saved
+set sessionoptions=blank,buffers,curdir,folds,help,tabpages,winsize
+````
 * Fix nvim sessions save and restore (and keep it in a diff dir than vim due to incompatibility of save formats)
   Use the code example at bottom of this file to make the changes
 * Only use controlled forks of the vim plugins
