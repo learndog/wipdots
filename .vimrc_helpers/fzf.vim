@@ -1,7 +1,5 @@
 " #### SECTION: FUZZY FIND NON-LSP SETUP
 
-" Note: Use --exact option with fzf to do literal search instead of fuzzy
-
 nnoremap <Leader>b :Buffer<CR>
 nnoremap <Leader><space> :Buffer<CR>
 
@@ -47,10 +45,11 @@ function! LiteralFindKeyMappings()
    call fzf#run({
             \ 'source': lines,
             \ 'sink': 'e',
-            \ 'options': '--exact --preview-window right:50%',
+            \ 'options': '--preview-window right:50%',
             \ 'down': '40%'
             \})
 endfunction
+"             \ 'options': '--exact --preview-window right:50%',
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Fuzzy find built in keymaps
@@ -158,7 +157,7 @@ function! s:NormalModeIndexFzf()
     call fzf#run(fzf#wrap({
           \ 'source': keybind_lines,
           \ 'sink*': function('s:OpenHelpForKeybind'),
-          \ 'options': '--exact --prompt="Normal Mode Keybind> "',
+          \ 'options': '--prompt="Normal Mode Keybind> "',
           \ 'placeholder': 'Type to filter keybindings...',
           \}))
   catch /.*/
@@ -166,6 +165,7 @@ function! s:NormalModeIndexFzf()
     echoerr "Error at line number: " . v:lnum
   endtry
 endfunction
+"           \ 'options': '--exact --prompt="Normal Mode Keybind> "',
 
 function! s:OpenHelpForKeybind(selected)
   for line in a:selected
