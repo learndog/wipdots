@@ -2,10 +2,26 @@
 "
 " #### SECTION: Save and restore sessions
 
+" WARNING - THIS IS BROKEN FOR NVIM AND CAN CORRUP SAVED SESSIONS 
+
+" "Make sure nvim uses the same session directory
+" if has('nvim')
+"   let $VIMSESSION = g:session_directory
+" endif
+
+
+" Set the session directory location
+let g:session_directory = expand('~/.vim/sessions')
+
 " Create the sessions directory if it doesn't exist
 if !isdirectory(expand("~/.vim/sessions"))
    call mkdir(expand("~/.vim/sessions"), "p")
 endif
+
+" Get the location of saved vim sessions
+
+
+
 
 " Function to save the current session
 function! SessionSave()

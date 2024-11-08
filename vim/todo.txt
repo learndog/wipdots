@@ -3,6 +3,8 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 PRIORITY - Ready as full replacement for GCP JupyterLab editing
+* Fix nvim sessions save and restore (and keep it in a diff dir than vim due to incompatibility of save formats)
+  Use the code example at bottom of this file to make the changes
 * Only use controlled forks of the vim plugins
 * Test vimdiff for git merge conflicts
 * Explore - Add command to open nvimtree in same folder as current buffer file
@@ -232,3 +234,39 @@ ON HOLD
          (7) undefined. https://github.com/jupyter-vim/vim-notebook.git.
 
 
+EXAMPLE OF CODE FOR SESSION MANAGEMENT FOR VIM AND Nvim
+
+" Define the session directory paths
+let g:vim_session_directory = expand('~/.vim/sessions')
+let g:nvim_session_directory = expand('~/.config/nvim/sessions')
+
+" Set the session directory based on the editor
+if exists('g:NVIM')
+  let g:session_directory = g:nvim_session_directory
+else
+  let g:session_directory = g:vim_session_directory
+endif
+
+" Create the directory if it doesn't exist
+if !isdirectory(g:session_directory)
+  call mkdir(g:session_directory, 'p')
+endif
+
+" Function to save a session
+function! SaveSession(session_name)
+  execute 'mksession!' g:session_directory . '/' . a:session_name . '.vim'
+endfunction
+
+" Function to load a session
+function! LoadSession(session_name)
+  execute 'source' g:session_directory . '/' . a:session_name . '.vim'
+endfunction
+
+" Commands to save and load sessions
+command! -nargs=1 SaveSession call SaveSession(<f-args>)
+command! -nargs=1 LoadSession call LoadSession(<f-args>)
+
+
+" Use like this
+" :SaveSession session_name
+" :LoadSession session_name
