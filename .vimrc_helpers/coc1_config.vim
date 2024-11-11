@@ -241,6 +241,7 @@ nnoremap <Leader>lsc :call CocShowFilteredSymbols('Class')<CR>  " Classes
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gr <Plug>(coc-references)
+nnoremap <silent><nowait> gs  :CocList outline<cr>
 
 noremap <leader>ld :call CocAction('jumpDefinition')<CR>
 nnoremap <leader>lr :call CocAction('jumpReferences')<CR>
@@ -251,6 +252,8 @@ nnoremap gi :call CocAction('showIncomingCalls')<CR>
 nnoremap <leader>lI :call CocAction('showOutgoingCalls')<CR>
 nnoremap go :call CocAction('showOutgoingCalls')<CR>
 nnoremap <silent><nowait> <Leader>ll  :<C-u>CocList outline<cr>
+
+
 nnoremap <leader>ly :call CocAction('runCommand', 'editor.action.organizeImport')<CR>
 
 "Note: <Plug>(coc-rename) causes timeout because not async
