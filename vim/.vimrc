@@ -5,7 +5,7 @@
 " ###################################################################################
 " Select functionality... choose a value
    let g:install_plug_lsp = 'coc'                   " Options: ['coc'], 'disable', 'ale'
-   let g:install_plug_fzf = 1                       " [1] or 0 (for true or false)
+   let g:install_plug_fzf = 1                       " REQUIRED - Set to 1
       let g:install_plug_fzfbat = 1                 " [1] or 0 (for true or false)
    let g:install_plug_comments = 'manual'           " [manual] or commentary
    let g:install_plug_gitcmds = 'disable'           " [disable], fugitive
@@ -75,16 +75,24 @@ source $HOME/.vimrc_helpers/vimplug_autoinstall.vim
 
 " Install the selected plugins
 call plug#begin()
-   if g:install_plug_lsp == 'coc' | Plug 'neoclide/coc.nvim' | endif
-   if g:install_plug_lsp == 'ale' | Plug 'dense-analysis/ale'      | endif
-   "if g:install_plug_fzf          | Plug 'learndog/fzf', { 'do': { -> fzf#install() } } | endif
-   if g:install_plug_fzf          | Plug 'junegunn/fzf' | endif
-   if g:install_plug_fzf          | Plug 'junegunn/fzf.vim' | endif
-   if g:install_plug_fzfbat       | Plug 'sharkdp/bat' | endif
-   if g:install_plug_vimwhichkey == 'which-key' | Plug 'folke/which-key.nvim' | endif
-   if g:install_plug_vimwhichkey == 'vim-which-key' | Plug 'liuchengxu/vim-which-key', {'branch': 'release'} | endif
-   if g:install_plug_filetree == 'nvimtree' | Plug 'nvim-tree/nvim-tree.lua'  | endif
-   if g:install_plug_gitcmds == 'fugitive' | Plug 'tpope/vim-fugitive' | endif
+   if g:install_plug_lsp == 'coc' | Plug 'learndog/coc.nvim' | endif
+"    if g:install_plug_lsp == 'coc' | Plug 'neoclide/coc.nvim' | endif
+   if g:install_plug_lsp == 'ale' | Plug 'learndog/ale'      | endif
+"    if g:install_plug_lsp == 'ale' | Plug 'dense-analysis/ale'      | endif
+   if g:install_plug_fzf          | Plug 'learndog/fzf', { 'do': { -> fzf#install() } } | endif
+"    if g:install_plug_fzf          | Plug 'junegunn/fzf' | endif
+   if g:install_plug_fzf          | Plug 'learndog/fzf.vim' | endif
+"    if g:install_plug_fzf          | Plug 'junegunn/fzf.vim' | endif
+   if g:install_plug_fzfbat       | Plug 'learndog/bat' | endif
+"    if g:install_plug_fzfbat       | Plug 'sharkdp/bat' | endif
+   if g:install_plug_vimwhichkey == 'which-key' | Plug 'learndog/which-key.nvim' | endif
+"    if g:install_plug_vimwhichkey == 'which-key' | Plug 'folke/which-key.nvim' | endif
+   if g:install_plug_vimwhichkey == 'vim-which-key' | Plug 'learndog/vim-which-key', {'branch': 'release'} | endif
+"    if g:install_plug_vimwhichkey == 'vim-which-key' | Plug 'liuchengxu/vim-which-key', {'branch': 'release'} | endif
+   if g:install_plug_filetree == 'nvimtree' | Plug 'learndog/nvim-tree.lua'  | endif
+"    if g:install_plug_filetree == 'nvimtree' | Plug 'nvim-tree/nvim-tree.lua'  | endif
+   if g:install_plug_gitcmds == 'fugitive' | Plug 'learndog/vim-fugitive' | endif
+"    if g:install_plug_gitcmds == 'fugitive' | Plug 'tpope/vim-fugitive' | endif
    Plug 'learndog/vim-maximizer'  "From szw/vim-maximizer to secure old repos content
 "    Plug 'learndog/vim-gitgutter', {'branch': 'release'} "From airblade/vim-gitgutter to secure repos content
    Plug 'learndog/vim-gitgutter', {'branch': 'main'} "From airblade/vim-gitgutter to secure repos content
