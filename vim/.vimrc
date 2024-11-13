@@ -10,6 +10,7 @@
    let g:install_plug_comments = 'manual'           " [manual] or commentary
    let g:install_plug_gitcmds = 'disable'           " [disable], fugitive
    let g:install_plug_vimwhichkey = 'enable'        " [enable], disable - (will be autoconfigured later)
+   let g:install_plug_gitcopilot = 1                " Git Copilot - 1 is yes
 " ###################################################################################
 
 "Auto configure features based on vim or nvim
@@ -98,6 +99,7 @@ call plug#begin()
    Plug 'learndog/vim-gitgutter', {'branch': 'main'} "From airblade/vim-gitgutter to secure repos content
    Plug 'learndog/lightline.vim' "From itchyny/lightline.vim to secure repos content
    if g:install_plug_comments == 'commentary' | Plug 'tpope/vim-commentary' | endif
+   if g:install_plug_gitcopilot   | Plug 'github/copilot.vim'  | endif
 call plug#end()
 
 " Run the associated helper code for selected configuration
@@ -111,6 +113,7 @@ if g:install_plug_lsp == 'ale' | source $HOME/.vimrc_helpers/ale_config.vim | en
 if g:install_plug_fzf          | source $HOME/.vimrc_helpers/fzf.vim | endif
 if g:install_plug_lsp == 'coc' | source $HOME/.vimrc_helpers/coc2_boilerplate.vim | endif
 if g:install_plug_lsp == 'ale' && g:install_plug_fzf | source $HOME/.vimrc_helpers/alefzf_config.vim | endif
+if g:install_plug_gitcopilot | source $HOME/.vimrc_helpers/gitcopilot.vim | endif
 source $HOME/.vimrc_helpers/keymap_base.vim
 source $HOME/.vimrc_helpers/find_vim_swap_files.vim
 if g:install_plug_comments == 'commentary' | source $HOME/.vimrc_helpers/commentary.vim | endif
