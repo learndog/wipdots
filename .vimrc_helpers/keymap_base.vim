@@ -10,6 +10,40 @@ inoremap jk <ESC>h
 " Command line
 nnoremap ; :
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" NOTE: jh and jl will end up to the right of the previous or following quote or bracket
+"       Vim will look for an opening bracket or quote, or a closing bracket or quote
+"       One odd behaviour will be cursor after closing quote because open and close is the same
+"       So if asdf"fasdfasdf"|asdfasdfa, then backward will not move. Forward will look for next one.
+"       Not sure yet if backward should look for another open quote also. Might cause unwanted moves.
+" Function to skip backward in normal mode to just after the first opening character to the left
+function! s:SkipBackwardToOpening()
+  " Get the current line
+  let l:line = getline('.')
+  " Get the current cursor column (1-based index)
+  let l:col = col('.')
+  " Special case: check for double quotes or single quotes just before the cursor
+  if l:col > 2
+    let l:char_before = l:line[l:col - 2] " Character before the current cursor position
+    let l:char_before_prev = l:line[l:col - 3] " Character two positions before the cursor
+    if l:char_before == l:char_before_prev && l:char_before =~# '["'']'
+      " If two identical quotes are found, move the cursor inside the quotes
+      call cursor(line('.'), l:col - 1)
+      return
+    endif
+  endif
+  " Iterate backward from current column to find the first opening character
+  while l:col > 1
+    let l:col -= 1
+    let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
+    " Check if the character is one of the specified opening characters
+    if l:char =~# '[("''\["''{]'
+      " Move cursor to just after the found opening character
+      call cursor(line('.'), l:col + 1)
+      return
+    endif
+  endwhile
+endfunction
 " Function to skip forward to just after the first closing character to the right
 function! s:SkipForwardPastClosing()
   " Get the current line
@@ -31,86 +65,11 @@ function! s:SkipForwardPastClosing()
     let l:col += 1
   endwhile
 endfunction
-" Function to skip backward to just after the first opening character to the left
-function! s:SkipBackwardToOpening()
-  " Get the current line
-  let l:line = getline('.')
-  " Get the current cursor column (1-based index)
-  let l:col = col('.')
-  " Iterate backward from current column to find the first opening character
-  while l:col > 1
-    let l:col -= 1
-    let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
-    " Check if the character is one of the specified opening characters
-    if l:char =~# '[("''\["''{]'
-      " Move cursor to just after the found opening character
-      call cursor(line('.'), l:col + 1)
-      return
-    endif
-  endwhile
-endfunction
 nnoremap <silent> jl :call <SID>SkipForwardPastClosing()<CR>
 nnoremap <silent> jh :call <SID>SkipBackwardToOpening()<CR>
 inoremap <silent> jl <C-o>:call <SID>SkipForwardPastClosing()<CR>
 inoremap <silent> jh <C-o>:call <SID>SkipBackwardToOpening()<CR>
-
-
-
-" " Function to skip backward in normal mode to just after the first opening character to the left
-" function! s:SkipBackwardToOpening()
-"   " Get the current line
-"   let l:line = getline('.')
-"   " Get the current cursor column (1-based index)
-"   let l:col = col('.')
-"   
-"   " Iterate backward from current column to find the first opening character
-"   while l:col > 1
-"     let l:col -= 1
-"     let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
-"     
-"     " Check if the character is one of the specified opening characters
-"     if l:char =~# '[("''\["''{]'
-"       " Move cursor to just after the found opening character
-"       call cursor(line('.'), l:col + 1)
-"       return
-"     endif
-"   endwhile
-" endfunction
-" 
-" nnoremap <silent> jl :call <SID>SkipForwardNormal()<CR>
-" nnoremap <silent> jh :call <SID>SkipBackwardToOpening()<CR>
-" inoremap <silent> jl <C-o>:call <SID>SkipForwardNormal()<CR>
-" inoremap <silent> jh <C-o>:call <SID>SkipBackwardToOpening()<CR>
-
-
-      " " Function to skip forward in normal mode if the next character is one of ) " ' ] }
-      " function! s:SkipForwardInsert()
-      "   Get the character under the cursor (the next character in normal mode)
-      "   let l:next_char = getline('.')[col('.') - 1]
-      "   if l:next_char =~# '[)"''\]"''}]'
-      "     Move right to skip over it
-      "     normal! l
-      "   endif
-      " endfunction
-      " 
-      " " Function to skip backward in normal mode if the previous character is one of ( " ' [ {
-      " function! s:SkipBackwardNormal()
-      "   if col('.') > 1
-      "     Get the character just before the cursor
-      "     let l:prev_char = getline('.')[col('.') - 2]
-      "     if l:prev_char =~# '[("''\["''{]'
-      "       Move left to the opening character, then move right to end just AFTER it
-      "       normal! h
-      "       normal! l
-      "     endif
-      "   endif
-      " endfunction
-      " 
-      " " Keymaps
-      " nnoremap <silent> jl :call <SID>SkipForwardNormal()<CR>
-      " nnoremap <silent> jh :call <SID>SkipBackwardNormal()<CR>
-      " inoremap <silent> jl <C-o>:call <SID>SkipForwardInsert()<CR>
-      " inoremap <silent> jh <C-o>:call <SID>SkipBackwardNormal()<CR>
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
 " " Jump past closing bracket or quote in NORMAL or INSERT mode (stay in same mode)

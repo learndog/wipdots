@@ -14,8 +14,6 @@ BUGS
 * Autopair - land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
 * Autopair - in config file, if {<CR> slowly, it fills in with funny stuff
   also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
-* Nvim - commenting should start at first nonws char, not col pos 1 (works in vim)
-* Nvim - ensure coc organize imports works - See https://github.com/neoclide/coc.nvim/issues/4372
 
 BIG TICKET ITEMS
 * Tmux
@@ -56,7 +54,6 @@ BIG TICKET ITEMS
     See https://github.com/dandavison/delta
     See https://dev.to/cloudx/delta-a-new-git-diff-tool-to-rock-your-productivity-2773
     Also take a look at colordiff and difftastic
-* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
 * Fix references in rhs coclist (design and use a fn to give functionality and look of gi and go)
         Specifically, nice list on rhs
         Interactive click to show location in buffer like preview
@@ -136,8 +133,8 @@ CURRENTLY TESTING
 * Keymap - In GCP vim, backspace key sometimes doesn't work in insert mode (set backspace...)
 * Keymap - jl to escape insert mode will move cursor left afterwards
 
-ON HOLD
-
+ON HOLD / OUT OF SCOPE
+* File Manager - TUI in terminal... https://terminaltrove.com/superfile/, ranger, mc
 * Debug - ipdb (if pudb not sufficient)
 * Debug within vim - pudb and ipdb command line tool - see usage info
         Also see www.reddit.com/r/vim/comments/jg91dt/using_termdebug_for_pythons_pdb_examples/
