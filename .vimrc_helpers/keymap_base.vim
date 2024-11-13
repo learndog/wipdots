@@ -3,9 +3,13 @@
 " <ESC> from INSERT mode (use jj and/or jk)
 " jj is more natural, but jk may be immediate
 inoremap jj <ESC>h
-inoremap jk <ESC>h
-" Avoid jk to allow jiggling the cursor to close autocomplete dropdown
+
+" Use jk to jiggle the cursor to close autocomplete dropdown or close hover in normal mode
 " inoremap jk <ESC>
+" Insert mode: Close autocomplete popup (Coc Pum)
+inoremap <silent> jk <C-o>:call coc#pum#cancel()<CR>
+" Normal mode: Close hover popup
+nnoremap <silent> jk :call coc#float#close_all()<CR>
 
 " Command line
 nnoremap ; :

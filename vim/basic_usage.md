@@ -262,6 +262,8 @@ See Key Mappings and Commands
 Python LSP - CoC stuff
 * Leader-l prefix
 * Shift-K for LSP hover to see fn defn
+* Hide hover (and other stuff) in normal mode with jk
+* Hide autocomplete popups with jk in insert mode 
 * Ctrl-Space(vim) or Ctrl-@(nvim...maybe) to trigger autocomplete if it doesn't come up when expected
 * Leader-ln to rename symbol
 * gd or Leader-ld jump to defn
