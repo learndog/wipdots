@@ -3,12 +3,10 @@ import numpy as np
 import pandas as pd
 
 
-def say_hello():
+def    say_hello():
     """Docstring for say_hello.
     """
     print("Hello, world!")
-
-
 def say_hello2() -> None:
     """Docstring for say_hello2"""
     say_hello()

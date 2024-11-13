@@ -3,7 +3,7 @@ Vim Todo
 Note: Keymap changes should also include todo, basic guidance, keymap overview updates
 
 READINESS
-* Only use controlled forks of the vim plugins
+* 
 
 
 FUNCTIONALITY

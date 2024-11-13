@@ -17,9 +17,14 @@ let g:coc_global_extensions = ['coc-pyright']
 let g:coc_user_config = {
          \ "python.linting.enabled": 1,
          \ "python.linting.pylintEnabled": 1,
-         \ "coc.preferences.formatOnSaveFiletypes": ["python"]
+         \ "python.linting.lintOnSave": 1,
+         \ "python.formatting.provider": "black",
+         \ "python.formatting.blackPath": "black",
+         \ "python.formatting.blackArgs": ["--line-length","100"],
          \ }
-
+"          \ "coc.preferences.formatOnSaveFiletypes": ["python"]
+" jedi by default is used bfor completion and type checking, but pyright should be able to do it.
+"          \ "python.jediEnabled": 0,
 " coc uses autopep8 by default for fomatting
 "          \ "python.formatting.autopep8Path": "autopep8",
 "          \ "python.formatting.provider": "autopep8",
@@ -39,12 +44,12 @@ let g:coc_user_config = {
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Turn on/off Python format on save
 command! DisablePythonFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', filter(g:coc_user_config['coc.preferences.formatOnSaveFiletypes'], {idx, val -> val !=# 'python'}))
-command! EnablePythonFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', add(g:coc_user_config['coc.preferences.formatOnSaveFiletypes'], 'python'))
+" command! EnablePythonFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', add(g:coc_user_config['coc.preferences.formatOnSaveFiletypes'], 'python'))
 " command! TogglePythonFormat if index(get(g:coc_user_config, 'coc.preferences.formatOnSaveFiletypes', []), 'python') >= 0 | exec "DisablePythonFormat" | else | exec "EnablePythonFormat" | endif
 
 " Turn on/off format on save for all languages
 command! DisableFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', [])
-command! EnableFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', ['*'])
+" command! EnableFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', ['*'])
 "command! ToggleFormat if get(g:coc_user_config, 'coc.preferences.formatOnSaveFiletypes', []) == [] | exec "EnableFormat" | else | exec "DisableFormat" | endif
 
 

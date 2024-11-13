@@ -10,13 +10,116 @@ inoremap jk <ESC>h
 " Command line
 nnoremap ; :
 
-" Jump past closing bracket or quote in NORMAL or INSERT mode (stay in same mode)
-inoremap <expr> jl getline('.')[col('.')-1] =~ '[)"'']' && col('.') == col('$')-1 ? '<ESC>A' : '<ESC>%%a'
-nnoremap jl %%l
+" Function to skip forward to just after the first closing character to the right
+function! s:SkipForwardPastClosing()
+  " Get the current line
+  let l:line = getline('.')
+  " Get the current cursor column (1-based index)
+  let l:col = col('.')
+  " Get the length of the line
+  let l:line_length = len(l:line)
+  " Iterate forward from current column to find the first closing character
+  while l:col <= l:line_length
+    let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
+    " Check if the character is one of the specified closing characters
+    if l:char =~# '[)"''\]"''}]'
+      " Move cursor to just after the found closing character
+      call cursor(line('.'), l:col + 1)
+      return
+    endif
+    " Move to the next column
+    let l:col += 1
+  endwhile
+endfunction
+" Function to skip backward to just after the first opening character to the left
+function! s:SkipBackwardToOpening()
+  " Get the current line
+  let l:line = getline('.')
+  " Get the current cursor column (1-based index)
+  let l:col = col('.')
+  " Iterate backward from current column to find the first opening character
+  while l:col > 1
+    let l:col -= 1
+    let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
+    " Check if the character is one of the specified opening characters
+    if l:char =~# '[("''\["''{]'
+      " Move cursor to just after the found opening character
+      call cursor(line('.'), l:col + 1)
+      return
+    endif
+  endwhile
+endfunction
+nnoremap <silent> jl :call <SID>SkipForwardPastClosing()<CR>
+nnoremap <silent> jh :call <SID>SkipBackwardToOpening()<CR>
+inoremap <silent> jl <C-o>:call <SID>SkipForwardPastClosing()<CR>
+inoremap <silent> jh <C-o>:call <SID>SkipBackwardToOpening()<CR>
 
-" Jump to first character after left paren before cursor
-inoremap <expr> jh getline('.')[col('.')-1] =~ '[)"'']' && col('.') == col('$')-1 ? '<ESC>A' : '<ESC>F(l'
-nnoremap jh F(l
+
+
+" " Function to skip backward in normal mode to just after the first opening character to the left
+" function! s:SkipBackwardToOpening()
+"   " Get the current line
+"   let l:line = getline('.')
+"   " Get the current cursor column (1-based index)
+"   let l:col = col('.')
+"   
+"   " Iterate backward from current column to find the first opening character
+"   while l:col > 1
+"     let l:col -= 1
+"     let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
+"     
+"     " Check if the character is one of the specified opening characters
+"     if l:char =~# '[("''\["''{]'
+"       " Move cursor to just after the found opening character
+"       call cursor(line('.'), l:col + 1)
+"       return
+"     endif
+"   endwhile
+" endfunction
+" 
+" nnoremap <silent> jl :call <SID>SkipForwardNormal()<CR>
+" nnoremap <silent> jh :call <SID>SkipBackwardToOpening()<CR>
+" inoremap <silent> jl <C-o>:call <SID>SkipForwardNormal()<CR>
+" inoremap <silent> jh <C-o>:call <SID>SkipBackwardToOpening()<CR>
+
+
+      " " Function to skip forward in normal mode if the next character is one of ) " ' ] }
+      " function! s:SkipForwardInsert()
+      "   Get the character under the cursor (the next character in normal mode)
+      "   let l:next_char = getline('.')[col('.') - 1]
+      "   if l:next_char =~# '[)"''\]"''}]'
+      "     Move right to skip over it
+      "     normal! l
+      "   endif
+      " endfunction
+      " 
+      " " Function to skip backward in normal mode if the previous character is one of ( " ' [ {
+      " function! s:SkipBackwardNormal()
+      "   if col('.') > 1
+      "     Get the character just before the cursor
+      "     let l:prev_char = getline('.')[col('.') - 2]
+      "     if l:prev_char =~# '[("''\["''{]'
+      "       Move left to the opening character, then move right to end just AFTER it
+      "       normal! h
+      "       normal! l
+      "     endif
+      "   endif
+      " endfunction
+      " 
+      " " Keymaps
+      " nnoremap <silent> jl :call <SID>SkipForwardNormal()<CR>
+      " nnoremap <silent> jh :call <SID>SkipBackwardNormal()<CR>
+      " inoremap <silent> jl <C-o>:call <SID>SkipForwardInsert()<CR>
+      " inoremap <silent> jh <C-o>:call <SID>SkipBackwardNormal()<CR>
+
+
+" " Jump past closing bracket or quote in NORMAL or INSERT mode (stay in same mode)
+" inoremap <expr> jl getline('.')[col('.')-1] =~ '[)"'']' && col('.') == col('$')-1 ? '<ESC>A' : '<ESC>%%a'
+" nnoremap jl %%l
+" 
+" " Jump to first character after left paren before cursor
+" inoremap <expr> jh getline('.')[col('.')-1] =~ '[)"'']' && col('.') == col('$')-1 ? '<ESC>A' : '<ESC>F(li<C-o>i'
+" nnoremap jh F(l
  
 " To replace the lost defeault <C-L> mapping
 nnoremap <Leader>wr :redraw!<CR>
