@@ -7,9 +7,9 @@ inoremap <silent><expr> <TAB>
          \ coc#refresh()
 inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
-" CR to accept selected completion (but <C-g>u breaks current undo)
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
-         \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+   " " CR to accept selected completion (but <C-g>u breaks current undo)
+   " inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+   "          \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
 " Suggested by coc.nvim
 function! CheckBackspace() abort

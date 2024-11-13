@@ -88,6 +88,7 @@ GROOMED BACKLOG
 * LSP - Clean up the functionality of code outlines with CocList on RHS, with and wout filtering
 * LSP - List preview and filter problem list
 * Document UI navigation quirks
+* Rationalize vimrc and helper content to account for optional dependencies. Currently assumes fzf and coc?
 
 BACKLOG
 * Git - Add command to list all gitignored files in project (must combine output of two cmds)
