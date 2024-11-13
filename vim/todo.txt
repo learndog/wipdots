@@ -11,9 +11,7 @@ FUNCTIONALITY
 * Rationalize the keybindings and weed out non-preferred comamnds
 
 BUGS
-* Autopair - land inside autoclose of surround chars - move cursor inside quotes after autoclose (or just use jh/jl?)
-* Autopair - in config file, if {<CR> slowly, it fills in with funny stuff
-  also for python reconsider the alignment (for {<CR>, tab too large and closing brackets should be on sep line pos 1)
+* 
 
 BIG TICKET ITEMS
 * Tmux
