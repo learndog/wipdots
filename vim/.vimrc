@@ -10,7 +10,7 @@
    let g:install_plug_comments = 'manual'           " [manual] or commentary
    let g:install_plug_gitcmds = 'disable'           " [disable], fugitive
    let g:install_plug_vimwhichkey = 'enable'        " [enable], disable - (will be autoconfigured later)
-   let g:install_plug_gitcopilot = 1                " Git Copilot - 1 is yes
+   let g:install_plug_gitcopilot = 0                " Git Copilot - 1 is yes
 " ###################################################################################
 
 "Auto configure features based on vim or nvim
