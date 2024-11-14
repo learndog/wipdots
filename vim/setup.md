@@ -73,8 +73,6 @@
   "     sudo make install                                                                                                  
   "     make distclean              # Clean up uneeded configure files and make files after install                        
                                                                                                                            
-  " * Optionally install VIM or NVIM with snap                                                                             
-                                                                                                                           
   " * Optionally install NEOVIM instead..."                                                                                
   
   "     Install simply from release package on Debian
@@ -83,10 +81,16 @@
   "         > Recent versions... https://github.com/neovim/neovim/releases/   (glibc 2.31 or newer is required)
   "           Note that Ubuntu 24.04.1 LTS has 2.39, so it can use the regular Debian nvim release package
   "         Install process
-  "         > Download nvim-linux64.tar.gz
+  "         > cd /opt
+  "         > Download into /opt wget nvim-linux64.tar.gz
   "         > Extract: tar xzvf nvim-linux64.tar.gz
+  "         > Remove temp: rm nvim-linux64.tar.gz
   "         > Run ./nvim-linux64/bin/nvim
-  
+  "         > Add to path in .bashrc or .profile
+  "           export PATH="$PATH:/opt/nvim/bin"
+  "         > Run (after resourcing the profile) from anywhere with $ nvim
+  "         Note: Or may need to extract into temp_install and then move it
+
   "     Install nvim on Debian 10 (Buster) with appimage
   "     Following https://github.com/neovim/neovim/wiki/Installing-Neovim                                                  
   "     # NOTE: Don't install FUSE because requires a privileged container                                                 
@@ -103,6 +107,12 @@
   "       cd && nvim -v                                                                                                    
   "       rm nvim.appimage && nvim -v                                                                                      
                                                                                                                            
+  " * Use .vimrc for nvim
+  " rm ~/.config/nvim/init.vim   # if necessary (but make a backup first)
+  " mkdir -p ~/.config/nvim
+  " ln -s ~/.vimrc ~/.config/nvim/init.vim
+
+
   " Notes...                                                                                                               
   " - pip install pyright will automatically install node (microsoft.github.io/pyright/#/installation)                     
   " - Config for coc-pyright can be found at https://github.com/fannheyward/coc-pyright                                    
@@ -322,6 +332,10 @@
     command -v nvm       (should output nvm if installed successfully)
     nvm install node
     nvm use node
+
+  " Install pylint and black...
+  " pip install pylint black
+  " 
     
   " First run...                                                                                                           
   " :PlugInstall should run automatically                                                                                  
