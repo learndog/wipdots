@@ -51,7 +51,7 @@ command! DisablePythonFormat let g:coc_user_config = coc#config('coc.preferences
 command! DisableFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', [])
 " command! EnableFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', ['*'])
 "command! ToggleFormat if get(g:coc_user_config, 'coc.preferences.formatOnSaveFiletypes', []) == [] | exec "EnableFormat" | else | exec "DisableFormat" | endif
-
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Function to select symbols of given kind
 "
@@ -64,8 +64,12 @@ function! CocShowFilteredSymbols(kind)
     let l:symbols = CocAction('documentSymbols')
 
     " Check if the result is null or not a list
-    if type(l:symbols) != type([]) || l:symbols == v:null
-        echo "No symbols found in the current document"
+    if type(l:symbols) != type([])
+        echo "No symbols found in the current document - not a list"
+        return
+    endif
+    if l:symbols == []
+        echo "No symbols found in the current document - null list"
         return
     endif
 
@@ -80,6 +84,7 @@ function! CocShowFilteredSymbols(kind)
 
     " Create a new scratch buffer for filtered symbols
     belowright vsplit
+    vertical resize 40
     enew
     setlocal buftype=nofile
     setlocal bufhidden=wipe
