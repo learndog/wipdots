@@ -356,3 +356,33 @@ Related Command Line Tips
         CTRL-T: recursively search for a filename under $PWD, then return selected entries to the terminal
         ALT-C: recursively search for a directory name under $PWD, then cd into the selected entry
    Search commit names... git log --oneline | fzf --preview 'git show --color=always --name-only {1}'
+
+Using GitHub Copilot
+* Primary function is to aid in code completion
+* Refactor code 
+    # Refactor the following function to improve readability
+    def process_data(data):
+        # ... existing code ...
+* Add a function
+    # Function to calculate the factorial of a number
+    def calculate_factorial(n): 
+* Generate a unit test
+    # Test the calculate_factorial function
+    def test_calculate_factorial():
+        # ... test code ...
+* Summarize code
+    # Summary of the following function
+    def complex_function(param1, param2):
+        # ... complex code ...
+* Keyboard Shortcuts
+    Ctrl+Space to trigger Copilot suggestions manually.
+    Tab or Enter to accept a suggestion.
+    Ctrl+[ and Ctrl+] to navigate through multiple suggestions. (These keymaps conflict right now.)
+Note: Copilot chat is not available inside [n]vim. Try VSCode or from browser
+
+
+
+
+
+
+
