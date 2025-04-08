@@ -1,0 +1,71 @@
+
+-- Set nvim python version
+vim.g.python3_host_prog = os.getenv("HOME") .. "/.venvs/nvim/bin/python"
+
+--------------------------------------------------------------------------
+--- CONFIG HELPER FILES
+--------------------------------------------------------------------------
+-- vim.opt.runtimepath:append(vim.fn.expand("$HOME/.vim_helpers"))
+
+-- VimScript helper files
+-- vim.cmd("source " .. vim.fn.expand("$HOME/.vim_helpers/my_helper.vim"))
+
+-- Lua helper files
+-- require("lazy_helper").setup() -- OR... local helper = require("lazy_helper"); helper.setup()
+
+-- -----------------------------------------------
+-- BOOTSTRAP LAZYVIM - bootstrap lazy.nvim, LazyVim and your plugins
+-- -----------------------------------------------
+require("config.lazy")
+
+-- -----------------------------------------------
+-- SET COLORSCHEME
+-- -----------------------------------------------
+-- vim.cmd("colorscheme lunaperche")
+--vim.g.catppuccin_flavour = "mocha"
+--vim.cmd("colorscheme catppuccin")
+vim.opt.background = "dark"
+vim.g.tokyonight_style = "moon"
+-- vim.g.tokyonight_style = "night"
+vim.cmd("colorscheme tokyonight")
+
+-- ===============================================
+-- SET OPTIONS
+-- ===============================================
+
+-- Disable smooth scrolling
+vim.g.snacks_animate = false
+
+-- ===============================================
+-- KEYMAPS
+-- ===============================================
+-- Example delete mapping... vim.keymap.del("n", ",")
+
+vim.g.maplocalleader = "\\" -- single escaped backslash
+
+-- Example keymaps for whichkey with groups
+-- require("lazy").setup({
+--   {
+--     "folke/which-key.nvim",
+--     config = function()
+--       local wk = require("which-key")
+--       wk.add({
+--         ["<leader>f"] = {
+--           e = { "<cmd>edit<CR>", "Edit file" },
+--           s = { "<cmd>w<CR>", "Save file" },
+--         },
+--         ["<leader>p"] = {
+--           f = { "<cmd>Telescope find_files<CR>", "Find files" },
+--           g = { "<cmd>Telescope live_grep<CR>", "Live grep" },
+--         },
+--         ["<localleader>e"] = { "<ESC>", "Escape from insert mode" },
+--       }, { prefix = "<leader>" })
+--     end,
+--   },
+-- })
+
+vim.keymap.set("n", "<localleader>e", "<ESC>", { noremap = true, silent = true, desc = "esc from insert mode" })
+
+vim.keymap.set("i", "jj", "<ESC>", { noremap = true, silent = true, desc = "esc from insert mode" })
+
+
