@@ -51,7 +51,7 @@ command! DisablePythonFormat let g:coc_user_config = coc#config('coc.preferences
 command! DisableFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', [])
 " command! EnableFormat let g:coc_user_config = coc#config('coc.preferences.formatOnSaveFiletypes', ['*'])
 "command! ToggleFormat if get(g:coc_user_config, 'coc.preferences.formatOnSaveFiletypes', []) == [] | exec "EnableFormat" | else | exec "DisableFormat" | endif
-
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Function to select symbols of given kind
 "
@@ -64,13 +64,21 @@ function! CocShowFilteredSymbols(kind)
     let l:symbols = CocAction('documentSymbols')
 
     " Check if the result is null or not a list
-    if type(l:symbols) != type([]) || l:symbols == v:null
-        echo "No symbols found in the current document"
+    if type(l:symbols) != type([])
+        echo "No symbols found in the current document - not a list"
+        return
+    endif
+    if l:symbols == []
+        echo "No symbols found in the current document - null list"
         return
     endif
 
-    " Filter symbols based on the kind provided (e.g., 'Function', 'Variable', 'Class')
-    let l:filtered_symbols = filter(l:symbols, {_, v -> has_key(v, 'kind') && v.kind == a:kind})
+    " Filter symbols based on the kind provided (e.g., 'All', 'Function', 'Variable', 'Class')
+    if a:kind == 'All'
+        let l:filtered_symbols = l:symbols
+    else
+        let l:filtered_symbols = filter(l:symbols, {_, v -> has_key(v, 'kind') && v.kind == a:kind})
+    endif
 
     " If there are no symbols of the specified kind, display a message
     if empty(l:filtered_symbols)
@@ -81,6 +89,7 @@ function! CocShowFilteredSymbols(kind)
     " Create a new scratch buffer for filtered symbols
     belowright vsplit
     enew
+    vertical resize 40
     setlocal buftype=nofile
     setlocal bufhidden=wipe
     setlocal noswapfile
@@ -219,7 +228,8 @@ nnoremap <silent><nowait> <Leader>lk  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent><nowait> <Leader>lp  :<C-u>CocListResume<CR>
 nnoremap <silent><nowait> <Leader>lso  :CocList outline<cr> " Everything
-nnoremap <silent><nowait> <Leader>lss  :CocList outline<cr> " Everything
+nnoremap <Leader>lss :call CocShowFilteredSymbols('All')<CR> " Functions
+nnoremap <Leader>lsa :call CocShowFilteredSymbols('All')<CR> " Functions
 nnoremap <Leader>lsf :call CocShowFilteredSymbols('Function')<CR> " Functions
 nnoremap <Leader>lsv :call CocShowFilteredSymbols('Variable')<CR> " Variables
 nnoremap <Leader>lsc :call CocShowFilteredSymbols('Class')<CR>  " Classes
