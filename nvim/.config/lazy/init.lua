@@ -116,40 +116,39 @@ vim.cmd([[
 "       So if asdf"fasdfasdf"|asdfasdfa, then backward will not move. Forward will look for next one.
 "       Not sure yet if backward should look for another open quote also. Might cause unwanted moves.
 " Function to skip backward in normal mode to just after the first opening character to the left
+
 function! s:SkipBackwardToOpening()
-  " Get the current line
-  let l:line = getline('.') getline('.')
-  " Get the current cursor column (1-based index)
-  let l:col = col('.')
-  " Special case: check for double quotes or single quotes just before the cursor
-  if l:col > 2
-    let l:char_before = l:line[l:col - 2] " Character before the current cursor position
-    let l:char_before_prev = l:line[l:col - 3] " Character two positions before the cursor
-    if l:char_before == l:char_before_prev && l:char_before =~# '["'']'
-  " Get the current cursor column (1-based index)
-  let l:col = col('.')
-  " Special case: check for double quotes or single quotes just before the cursor
-  if l:col > 2
-    let l:char_before = l:line[l:col - 2] " Character before the current cursor position
-    let l:char_before_prev = l:line[l:col - 3] " Character two positions before the cursor
-    if l:char_before == l:char_before_prev && l:char_before =~# '["'']'
-      " If two identical quotes are found, move the cursor inside the quotes
-      call cursor(line('.'), l:col - 1)
-      return
+    " Get the current line
+    let s:line = getline('.')
+    
+    " Get the current cursor column (1-based index)
+    let s:col = col('.')
+    
+    " Special case: check for double quotes or single quotes just before the cursor
+    if s:col > 2
+        let s:char_before = s:line[s:col - 2] " Character before the current cursor position
+        let s:char_before_prev = s:line[s:col - 3] " Character two positions before the cursor
+        if s:char_before == s:char_before_prev && s:char_before =~# '["'']'
+            " If two identical quotes are found, move the cursor inside the quotes
+            call cursor(line('.'), s:col - 1)
+            return
+        endif
     endif
-  endif
-  " Iterate backward from current column to find the first opening character
-  while l:col > 1
-    let l:col -= 1
-    let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
-    " Check if the character is one of the specified opening characters
-    if l:char =~# '[("''\["''{]'
-      " Move cursor to just after the found opening character
-      call cursor(line('.'), l:col + 1)
-      return
-    endif
-  endwhile
+    
+    " Iterate backward from current column to find the first opening character
+    while s:col > 1
+        let s:col -= 1
+        let s:char = s:line[s:col - 1] " Note: Vim index is 0-based, col() is 1-based
+        " Check if the character is one of the specified opening characters
+        if s:char =~# '[("''$"''{]'
+            " Move cursor to just after the found opening character
+            call cursor(line('.'), s:col + 1)
+            return
+        endif
+    endwhile
 endfunction
+
+
 " Function to skip forward to just after the first closing character to the right
 function! s:SkipForwardPastClosing()
   " Get the current line
