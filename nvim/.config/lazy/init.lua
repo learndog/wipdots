@@ -141,13 +141,13 @@ vim.keymap.set(
   { "n", "i" },
   "jh",
   jump_to_prev_opening,
-  { noremap = true, silent = true, ddesc = "Jump after previous opening bracket" }
+  { noremap = true, silent = true, desc = "Jump after previous opening bracket" }
 )
 vim.keymap.set(
   { "n", "i" },
   "jl",
   jump_to_next_closing,
-  { noremap = true, silent = true, ddesc = "Jump after next closing bracket" }
+  { noremap = true, silent = true, desc = "Jump after next closing bracket" }
 )
 
 -- test(asdaf)
