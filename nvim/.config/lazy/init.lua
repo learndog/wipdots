@@ -24,6 +24,7 @@
 -- Split a tob to right window
 --      and move a tab up down right left (create or remove window as appropriate)
 -- List of plugins
+-- Add which-key groups to custom keymaps
 
 -- [core]
 --     editor = nvim
