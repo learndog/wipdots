@@ -105,6 +105,9 @@ vim.keymap.set("i", "jj", "<ESC>", { noremap = true, silent = true, desc = "esc 
 -- KEYMAPS WITH SUPPORTING FUNCTION DEFINITIONS
 -- ===============================================
 --
+-- -----------------------------------------------
+-- MOVE AROUND OPEN CLOSE CHARACTERS
+-- -----------------------------------------------
 vim.cmd([[
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " NOTE: jh and jl will end up to the right of the previous or following quote or bracket
@@ -115,7 +118,14 @@ vim.cmd([[
 " Function to skip backward in normal mode to just after the first opening character to the left
 function! s:SkipBackwardToOpening()
   " Get the current line
-  let l:line = getline('.')
+  let l:line = getline('.') getline('.')
+  " Get the current cursor column (1-based index)
+  let l:col = col('.')
+  " Special case: check for double quotes or single quotes just before the cursor
+  if l:col > 2
+    let l:char_before = l:line[l:col - 2] " Character before the current cursor position
+    let l:char_before_prev = l:line[l:col - 3] " Character two positions before the cursor
+    if l:char_before == l:char_before_prev && l:char_before =~# '["'']'
   " Get the current cursor column (1-based index)
   let l:col = col('.')
   " Special case: check for double quotes or single quotes just before the cursor
@@ -166,6 +176,56 @@ nnoremap <silent> jh :call <SID>SkipBackwardToOpening()<CR>
 inoremap <silent> jl <C-o>:call <SID>SkipForwardPastClosing()<CR>
 inoremap <silent> jh <C-o>:call <SID>SkipBackwardToOpening()<CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+]])
+
+-- -----------------------------------------------
+-- TOGGLE ZERO - CYCLE AROUND BEGIN AND END OF LINE
+-- -----------------------------------------------
+vim.cmd([[
+function! ToggleZero(mode)
+   " Get the current cursor position
+   let current_col = col('.')
+   " Search for the first/last non-whitespace character on the current line
+   let first_non_ws_col = match(getline('.'), '\S') + 1
+   let last_non_ws_col = match(getline('.'), '\S\zs\s*$')
+   " Get last col position on the current line
+   let last_col_pos = col('$') -1
+   " Move based on cursor location
+   echo "current col: " . current_col . " last pos: " . last_col_pos
+   if current_col == last_col_pos
+      normal! 0
+   elseif current_col == 1 && current_col != first_non_ws_col
+      normal! ^
+   elseif current_col == first_non_ws_col
+      normal! g_
+   elseif current_col == last_non_ws_col || current_col == last_non_ws_col+1
+      " The +1 is to cover the movement for insert mode cycles
+      normal! $
+   else
+      normal! 0
+   endif
+
+   if a:mode == 'i'
+      stopinsert
+      if col('.') == 1
+         " First column
+         startinsert
+      elseif col('.') >= col('$')-1
+         " Near or at last column, use 'A' to append correctly
+         call feedkeys('A', 'n')
+      elseif col('.') == match(getline('.'), '\S\zs\s*$')
+         " Last non-whitespace column
+         call feedkeys('a', 'n')
+      else
+         " Other positions
+         startinsert
+      endif
+   endif
+endfunction
+
+nnoremap 0 :call ToggleZero('n')<CR>
+nnoremap ;; :call ToggleZero('n')<CR>
+inoremap ;; <C-o>:call ToggleZero('i')<CR>
 ]])
 
 --
