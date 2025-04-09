@@ -104,52 +104,72 @@ vim.keymap.set("i", "jj", "<ESC>", { noremap = true, silent = true, desc = "esc 
 -- ===============================================
 -- KEYMAPS WITH SUPPORTING FUNCTION DEFINITIONS
 -- ===============================================
--- Define a function to jump just after the previous opening bracket
-local function jump_to_prev_opening()
-  -- Define a Vim pattern matching any of the opening brackets: ( [ {
-  -- The pattern uses a character class; note that ( and [ are escaped.
-  local pattern = [[[\(\[\{]]
-  -- 'b' flag: search backwards; 'W' flag: do not wrap around the file.
-  local pos = vim.fn.searchpos(pattern, "bW")
-  if pos[1] == 0 then
-    print("No opening bracket found")
-    return
-  end
-  -- Move one column to the right of the found character.
-  pos[2] = pos[2] + 1
-  vim.api.nvim_win_set_cursor(0, pos)
-end
+--
+vim.cmd([[
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" NOTE: jh and jl will end up to the right of the previous or following quote or bracket
+"       Vim will look for an opening bracket or quote, or a closing bracket or quote
+"       One odd behaviour will be cursor after closing quote because open and close is the same
+"       So if asdf"fasdfasdf"|asdfasdfa, then backward will not move. Forward will look for next one.
+"       Not sure yet if backward should look for another open quote also. Might cause unwanted moves.
+" Function to skip backward in normal mode to just after the first opening character to the left
+function! s:SkipBackwardToOpening()
+  " Get the current line
+  let l:line = getline('.')
+  " Get the current cursor column (1-based index)
+  let l:col = col('.')
+  " Special case: check for double quotes or single quotes just before the cursor
+  if l:col > 2
+    let l:char_before = l:line[l:col - 2] " Character before the current cursor position
+    let l:char_before_prev = l:line[l:col - 3] " Character two positions before the cursor
+    if l:char_before == l:char_before_prev && l:char_before =~# '["'']'
+      " If two identical quotes are found, move the cursor inside the quotes
+      call cursor(line('.'), l:col - 1)
+      return
+    endif
+  endif
+  " Iterate backward from current column to find the first opening character
+  while l:col > 1
+    let l:col -= 1
+    let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
+    " Check if the character is one of the specified opening characters
+    if l:char =~# '[("''\["''{]'
+      " Move cursor to just after the found opening character
+      call cursor(line('.'), l:col + 1)
+      return
+    endif
+  endwhile
+endfunction
+" Function to skip forward to just after the first closing character to the right
+function! s:SkipForwardPastClosing()
+  " Get the current line
+  let l:line = getline('.')
+  " Get the current cursor column (1-based index)
+  let l:col = col('.')
+  " Get the length of the line
+  let l:line_length = len(l:line)
+  " Iterate forward from current column to find the first closing character
+  while l:col <= l:line_length
+    let l:char = l:line[l:col - 1] " Note: Vim index is 0-based, col() is 1-based
+    " Check if the character is one of the specified closing characters
+    if l:char =~# '[)"''\]"''}]'
+      " Move cursor to just after the found closing character
+      call cursor(line('.'), l:col + 1)
+      return
+    endif
+    " Move to the next column
+    let l:col += 1
+  endwhile
+endfunction
+nnoremap <silent> jl :call <SID>SkipForwardPastClosing()<CR>
+nnoremap <silent> jh :call <SID>SkipBackwardToOpening()<CR>
+inoremap <silent> jl <C-o>:call <SID>SkipForwardPastClosing()<CR>
+inoremap <silent> jh <C-o>:call <SID>SkipBackwardToOpening()<CR>
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+]])
 
--- Define a function to jump just after the next closing bracket
-local function jump_to_next_closing()
-  -- Define a Vim pattern matching any of the closing brackets: ) ] }
-  local pattern = [[[\)\]\}]]
-  -- 'W' flag: search forward without wrapping.
-  local pos = vim.fn.searchpos(pattern, "W")
-  if pos[1] == 0 then
-    print("No closing bracket found")
-    return
-  end
-  -- Move one column to the right of the found closing bracket.
-  pos[2] = pos[2] + 1
-  vim.api.nvim_win_set_cursor(0, pos)
-end
-
--- Map the functions to "jh" and "jl" in both normal and insert modes.
--- The 'desc' field is used by folke which-key to display a description.
-vim.keymap.set(
-  { "n", "i" },
-  "jh",
-  jump_to_prev_opening,
-  { noremap = true, silent = true, desc = "Jump after previous opening bracket" }
-)
-vim.keymap.set(
-  { "n", "i" },
-  "jl",
-  jump_to_next_closing,
-  { noremap = true, silent = true, desc = "Jump after next closing bracket" }
-)
-
+--
+--
 -- test(asdaf)
 
 -- ==========================================================================================
