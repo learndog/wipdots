@@ -4,13 +4,25 @@
 -- Suggested gitconfig settings (plus email, name if contributing)
 
 -- TODO
--- Keymaps for jl jh
--- Keymap for reload config (or maybe it autoreloads)
+-- Keymap for reload config
 -- Keymap to start the dashboard from nvim session
--- colorscheme with better contrast on VertexAI jupyterlab
+-- colorscheme with better contrast on VertexAI jupyterlab (preferrably dark)
 -- Use LazyExtra to add mini.move
--- Improved commenting keymap
--- Keymaps ,, and ,,, as Buffers and Files
+-- Improved folds
+-- Default to show hidden files in Explorer
+-- Keymaps ,, and ,,, and ,,,, as Files, Buffers and Grep Buffers
+-- Submenu for search
+-- Submenu for lsp
+-- Submenu for windows
+-- Add window maximizer
+-- Add copilot
+-- Add toggle gutter stuff (for easy copy paste)
+-- Add find vim swap files
+-- Quick duplicate/bkup shapshot of file
+-- LazyVim setup
+-- Breadcrumbs with toggle or cycle for brevity
+-- Split a tob to right window
+--      and move a tab up down right left (create or remove window as appropriate)
 
 -- [core]
 --     editor = nvim
