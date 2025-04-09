@@ -89,7 +89,7 @@ fc-cache -fv
   In the Terminal section, add or modify the following JSON configuration:
 ```
 {
-  "fontFamily": "'Cascadia Code', monospace",
+  "fontFamily": "'Cascadia Code Nerd Font', 'Cascadia Code', monospace",
   "fontSize": 13
 }
 ```
