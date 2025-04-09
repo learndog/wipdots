@@ -1,0 +1,373 @@
+LAZYVIM INSTALL INSTRUCTIONS
+Last updated 2025-04-03
+
+############################################################
+############ INSTALL NEOVIM    #############################
+############################################################
+
+
+############ NVIM INSTALL - DEBIAN 
+# IMPORTANT NOTE FOR GCP VERTEX AI VMS ON BUSTER...
+# Minimum glibc version to run these releases is 2.31. People requiring releases
+# that work on older glibc versions can find them at
+# https://github.com/neovim/neovim-releases and https://github.com/neovim/neovim-releases/releases
+
+# See https://github.com/nvim-lua/kickstart.nvim?tab=readme-ov-file#Install-Recipes
+sudo apt update
+sudo apt install make gcc ripgrep unzip git xclip curl fzf lazygit fd-find # Binary is fdfind
+cd ~/temp_install
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+#OR curl -LO https://github.com/neovim/neovim-releases/releases/download/v0.11.0/nvim-linux-x86_64.tar.gz # Built with glibc 2.17 
+sudo rm -rf /opt/nvim-linux-x86_64
+sudo mkdir -p /opt/nvim-linux-x86_64
+sudo chmod a+rX /opt/nvim-linux-x86_64
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/
+
+############ NVIM INSTALL - UBUNTU
+# See https://github.com/nvim-lua/kickstart.nvim?tab=readme-ov-file#Install-Recipes
+sudo add-apt-repository ppa:neovim-ppa/unstable -y
+sudo apt update
+sudo apt install make gcc ripgrep unzip git xclip neovim
+sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/
+
+############################################################
+############ UNINSTALL LAZYVIM - DEBIAN  ###################
+############################################################
+
+	# Optionally backup first
+	mv ~/.config/lazy{,.bak}
+	mv ~/.local/share/lazy{,.bak}
+	mv ~/.local/state/lazy{,.bak}
+	mv ~/.cache/lazy{,.bak}
+
+# Delete everything in the nvim install and cache
+rm -rf ~/.config/lazy
+rm -rf ~/.local/share/lazy
+rm -rf ~/.local/state/lazy
+rm -rf ~/.cache/lazy
+
+############################################################
+############ INSTALL LAZYVIM   #############################
+############################################################
+# See https://www.lazyvim.org/
+git clone https://github.com/LazyVim/starter ~/.config/lazy
+# rm -rf ~/.config/nvim/.git   # So you can add it to your own repo. Or skip to update with git pull
+
+# In .profile... Set nvim to use lazy config
+export XDG_CONFIG_HOME="$HOME/.config"
+export NVIM_APPNAME="lazy"
+
+# Check it from nvim cmd line
+echo $XDG_CONFIG_HOME
+echo stdpath('config')
+# Check it from init.lua file
+print("Loading init.lua from " .. vim.fn.stdpath('config'))
+
+############################################################
+############ INSTALL NERDFONTS #############################
+############################################################
+
+------------------------------------------------------------------------------------------
+* Nerd Font Install - Windows
+------------------------------------------------------------------------------------------
+* Download CaskaydiaCove Nerd Font
+  from https://www.nerdfonts.com/font-downloads
+  into C:\Users\rr123\Fonts\CaskaydiaCoveNerdFonts\
+* Select all tts files (not readme or license) and right mouse click to install
+
+------------------------------------------------------------------------------------------
+* Nerd Font Install - JupyterLab
+------------------------------------------------------------------------------------------
+* Install the font in debian
+wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/CaskaydiaCove.zip
+cd ~/.local/share/fonts
+unzip CaskaydiaCove.zip
+rm CaskaydiaCove.zip
+fc-cache -fv
+* JupyterLab and go to Settings > Advanced Settings Editor...
+  In the Terminal section, add or modify the following JSON configuration:
+```
+{
+  "fontFamily": "'CaskaydiaCove Nerd Font', monospace",
+  "fontSize": 14
+}
+```
+* Save the changes and restart your JupyterLab session.
+
+############################################################
+############ BASIC CONFIG ##################################
+############################################################
+# With :LazyExtra
+# * Add lang.python (provides LSP:ruff, pyright, LINT:ruff, FORMAT:ruff, DAP:nvim_dap_python)
+# * Add coding.mini-comment  (provides gcc for toggle comment of curr or selected line)
+# * TODO: mini.move
+
+############################################################
+###########  NVIM PYTHON ENV  ##############################
+############################################################
+# See  below for activating it in init.lua for neovim
+deactivate
+python3 -m venv ~/.venvs/nvim
+pip install neovim
+
+############################################################
+#### ADD CUSTOMIZATION TO LAZYVIM init.lua
+############################################################
+
+Notes: 
+* Assumes location of .venvs and nvim env
+* Example config is available at /home/jupyter/.config/lazy/lua/plugins/example.lua
+* Choose colorscheme by creating a /home/jupyter/.config/lazy/lua/plugins/core.lua file that includes in return...
+		return {
+
+		  -- Configure LazyVim to load gruvbox
+		  {
+			"LazyVim/LazyVim",
+			opts = {
+			  colorscheme = "tokyonight-moon",
+			},
+		  },
+
+
+
+==========================================================================================  
+* PREP THE HELPER FILES
+==========================================================================================  
+* git clone wipdots into ~/
+* Maintain vimscript and lua` helper config files in $HOME/wipdots/.vim_helpers/
+* Create link .vim_helpers -> /home/bob/wipdots/.vim_helpers/
+  ln -sf $HOME/wipdots/.vim_helpers ~/.vim_helpers
+  
+==========================================================================================  
+* ADD to ~/.config/lazy/init.lua (needed each time we setup lazyvim)
+==========================================================================================  
+```
+
+-- Use nvim env for python (assuming it's availble as above)
+vim.g.python3_host_prog = vim.fn.expand('~/.venvs/nvim/bin/python')
+
+-- Extend runtime path to include the helper directory
+-- vim.opt.runtimepath:append(vim.fn.expand("$HOME/.vim_helpers"))
+
+--------------------------------------------------------------------------
+--- VIMSCRIPT CONFIG HELPER FILES
+--------------------------------------------------------------------------
+-- Source VimScript helper files
+-- vim.cmd("source " .. vim.fn.expand("$HOME/.vim_helpers/my_helper.vim"))
+
+--------------------------------------------------------------------------
+--- LUA CONFIG HELPER FILES
+--------------------------------------------------------------------------
+-- Load additional configurations from lazy_helper.lua
+-- require("lazy_helper").setup() -- OR... local helper = require("lazy_helper"); helper.setup()
+
+--------------------------------------------------------------------------
+--- HANDOFF TO LAZY
+--------------------------------------------------------------------------
+require("config.lazy")
+
+--------------------------------------------------------------------------
+--- COLORSCHEMES
+--------------------------------------------------------------------------
+-- Manually select from <leader>uC to see the code
+-- Recommended dark scheme... tokyonight-moon OR catppuccin-mocha
+-- Use :colorscheme to check current colorscheme from nvim
+
+-- vim.cmd("colorscheme lunaperche")
+--vim.g.catppuccin_flavour = "mocha"
+--vim.cmd("colorscheme catppuccin")
+vim.opt.background = "dark"
+vim.g.tokyonight_style = "moon"
+-- vim.g.tokyonight_style = "night"
+vim.cmd("colorscheme tokyonight")
+
+--------------------------------------------------------------------------
+--- KEYMAPS
+--------------------------------------------------------------------------
+vim.keymap.set("i", "jj", "<ESC>", { noremap = true, silent = true, desc = "esc from insert mode" })
+
+--------------------------------------------------------------------------
+--- OPTIONS
+--------------------------------------------------------------------------
+
+-- Turn off smooth scrolling
+vim.g.snacks_animate = false
+
+
+```
+
+==========================================================================================  
+* EXAMPLE vimscript helper file
+==========================================================================================  
+```
+" File: ~/.vim_helpers/my_helper.vim
+" Has basic keymaps with descriptions for both Vimscript and Lua
+" but lua is required to set desc for folke which-key
+
+" Normal mode mappings
+nnoremap <leader>a :echo 'Key A in VimScript'<CR> " desc: Leader Key A
+nnoremap <localleader>b :echo 'Key B in VimScript'<CR> " desc: Local Leader Key B
+
+" Visual mode mappings
+vnoremap <leader>c :echo 'Key C in VimScript'<CR> " desc: Leader Key C
+
+" Use Lua if additional options like keymap 'desc' are needed
+
+" VERSION 1 - STANDARD KEYMAPPING
+" Define keymap using Lua's vim.keymap.set like this
+" vim.keymap.set("MODE", "KEYS", "CMD", { noremap = true, silent = true, desc = "WHICHKEY DESCRIPTION" })
+lua << EOF
+vim.keymap.set("n", "<leader>a", ":echo 'Key A in VimScript'<CR>", { noremap = true, silent = true, desc = "Leader Key A" })
+EOF
+
+" VERSION 2 - ALTERNATE KEYMAPPING
+" Define keymaps another way
+lua << EOF
+local keymaps = {
+    { mode = "n", keys = "<leader>d", command = ":echo 'Key D from Lua'<CR>", opts = { desc = "Leader Key D in VimScript" } },
+    { mode = "v", keys = "<leader>e", command = ":echo 'Key E from Lua'<CR>", opts = { desc = "Leader Key E in VimScript" } },
+}
+for _, map in ipairs(keymaps) do
+    vim.keymap.set(map.mode, map.keys, map.command, map.opts)
+end
+
+
+EOF
+```
+
+
+
+==========================================================================================  
+* EXAMPLE1 lua helper file - lazyvim keymaps bootstrap
+==========================================================================================  
+```
+-- File: $HOME/.vim_helpers/lazy_keymaps_bootstrap.lua
+-- allows offloading bulk config into a separate bootstrap lua file
+local M = {}
+
+function M.setup()
+    local lazy_config_helpers = require("lazy_config_helpers")
+    lazy_config_helpers.register_keymaps({
+        { mode = "n", keys = "<leader>a", command = ":echo 'Lazy Keymaps A!'<CR>", opts = { description = "Echo Lazy A" } },
+        { mode = "v", keys = "<leader>b", command = ":echo 'Lazy Keymaps B!'<CR>", opts = { description = "Echo Lazy B" } },
+        { mode = "i", keys = "<C-c>", command = "<ESC>:echo 'Insert Keymap!'<CR>", opts = { description = "Insert Keymap Example" } },
+    })
+end
+
+return M
+```
+
+
+==========================================================================================  
+* EXAMPLE2 lua helper file -  lua based configuration
+==========================================================================================  
+```
+-- File: $HOME/.vim_helpers/lazy_helpers.lua
+-- sample lua based configuration helper
+-- note that we can split the key mappings between init.lua and here and other helpers
+local M = {}
+
+function M.setup()
+    -- Configure key mappings
+    local keymaps = {
+        { mode = "n", keys = "<leader>a", command = ":echo 'Helper Keymaps A!'<CR>", opts = { desc = "Echo Helper A", noremap = true, silent = true } },
+        { mode = "v", keys = "<leader>b", command = ":echo 'Helper Keymaps B!'<CR>", opts = { desc = "Echo Helper B", noremap = true, silent = true } },
+    }
+
+    for _, map in ipairs(keymaps) do
+        vim.keymap.set(map.mode, map.keys, map.command, map.opts)
+    end
+
+    -- Plugin configuration
+    vim.cmd([[packadd some_plugin]]) -- Example plugin loading
+
+    -- Set global preferences
+    vim.opt.shiftwidth = 4  -- Indentation width
+    vim.opt.expandtab = true  -- Use spaces instead of tabs
+    vim.opt.tabstop = 4 -- Tab width
+end
+
+return M
+```
+
+
+
+############################################################
+##### TODO    ##############################################
+############################################################
+* jj, jh, jl for insert mode esc to normal, jump to first letter after left grouper, jump outside next char closer (lookup to match)
+* Remap <leader><leader> to <leader><leader><leader><leader> for cwd files to something else easy so I can use <leader><leader> for all my maps
+* Map <leader><leader><leader> to "<leader>," for buffers - because <leader><leader> is no longer available
+* Add 0$ cycle
+* Folds
+* Indent and move up/down
+* Show this install file by a command
+* Show usage tips and keymap info by a command
+* Show and search keymaps
+* Save, restore and delete sessions
+* Windows - eg faster or repeatable window sizing & maximizer
+* <leader><leader> Convenience and personal stability mappings
+  Same consistent personal interface under <leader><leader> 
+  but leave other stuff the same
+  Will need to...
+    * Map <leader><leader><leader> to "<leader>," for buffers - because <leader><leader> is no longer available
+    * Remap <leader><leader> to <leader><leader>somethingElse for easy access to cwd files fzf (that was the lazyvim default mapping)
+    * Map <leader><leader> to all my maps. Set a variable if possible instead of <leader><leader> in case I want to trigger differently
+    * Map <leader><leader> for symbols/references
+    * Call require("helpers").load_helpers() in your LazyVim file with 
+	local M = {}
+	function M.load_helpers()
+	    vim.cmd("source $HOME/wipdots/.vim_helpers/folding.vim")
+	    vim.cmd("source $HOME/wipdots/.vim_helpers/mappings.vim")
+	end
+	return M
+    * Lazy load my helpers like this...
+	vim.keymap.set("n", "<leader>fold", function()
+	    vim.cmd("source $HOME/wipdots/.vim_helpers/folding.vim")
+	end, { desc = "Load Folding Configurations" })
+      or simple load them like this...
+	vim.cmd([[
+	source $HOME/wipdots/.vim_helpers/folding.vim
+	source $HOME/wipdots/.vim_helpers/other_helpers.vim
+	]])
+      which will dynamically source files only when a command or keymap is triggered
+    * Consider migrating critical performance items to lua, eg
+	vim.opt.foldmethod = "indent"
+	vim.opt.foldlevel = 2
+
+
+ 
+
+############# DEFAULT KEYMAPS
+https://www.lazyvim.org/keymaps
+
+
+
+############## SETUP NVIM
+# WARNING! This needs work - not usable as-is.
+
+# Set nvim as default editor (or use vim and alias to nvim)
+git config --global core.editor "nvim"
+alias nvimdiff='nvim -d'
+# Set nvimdiff, ie nvim -d, as the diff and merge tool
+git config --global difftool.nvimdiff.cmd "nvim -d \"$LOCAL\" \"$REMOTE\""
+git config --global mergetool.nvimdiff.cmd "nvim -d \"$LOCAL\" \"$REMOTE\" \"$BASE\" \"$MERGED\""
+git config --global diff.tool nvimdiff # Set as default tool
+git config --global difftool.prompt false  # Git will launch without prompting
+git config --global merge.tool nvimdiff # Set as default tool
+git difftool <commit1> <commit2> # Test it
+git mergetool # Test it
+
+# Open files for comparison
+git difftool # Compare LOCAL and REMOTE
+nvim -d file1 file2
+nvimdiff file1 file2 # with alias
+
+# View comparisons (e.g., commits, branches, files)
+git diff <file1> <file2>  # Compare two files
+git diff <commit-hash> <file> # Compare working dir to a specific commit
+git diff <commit1> <commit2> <file> # Compare commits for a file (or can compare branches)
+git diff <commit-hash> <file> # Compare to a commit for a file
+
+
