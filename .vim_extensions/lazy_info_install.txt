@@ -94,6 +94,7 @@ fc-cache -fv
 }
 ```
 * Save the changes and restart your JupyterLab session.
+Note: To determine the font names, try using fc-list | grep Cove
 
 ############################################################
 ############ BASIC CONFIG ##################################

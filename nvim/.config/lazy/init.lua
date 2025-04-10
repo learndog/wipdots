@@ -88,18 +88,25 @@ vim.g.snacks_animate = false
 -- -- ===============================================
 
 -- -----------------------------------------------
--- -- Configure snacks - but no impact maybe because lazy loaded
+-- -- Configure snacks - no impact maybe because lazy loaded
 -- -----------------------------------------------
 
-require("snacks").setup({
-  explorer = {
-    filtered_items = {
-      hide_dotfiles = false,
-      hide_gitignored = false,
-    },
-    -- Include other explorer option overrides here.
-  },
-})
+-- vim.api.nvim_create_autocmd("User", {
+--   pattern = "SnacksExplorer",
+--   callback = function()
+--     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-H>", true, true, true), "n", true)
+--   end,
+-- })
+
+-- require("snacks").setup({
+--   explorer = {
+--     filtered_items = {
+--       hide_dotfiles = false,
+--       hide_gitignored = false,
+--     },
+--     -- Include other explorer option overrides here.
+--   },
+-- })
 
 -- ===============================================
 -- KEYMAPS
