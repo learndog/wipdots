@@ -60,9 +60,9 @@ vim.g.python3_host_prog = os.getenv("HOME") .. "/.venvs/nvim/bin/python"
 -- Lua helper files
 -- require("lazy_helper").setup() -- OR... local helper = require("lazy_helper"); helper.setup()
 
--- -----------------------------------------------
+-- ===============================================
 -- BOOTSTRAP LAZYVIM - bootstrap lazy.nvim, LazyVim and your plugins
--- -----------------------------------------------
+-- ===============================================
 require("config.lazy")
 
 -- -----------------------------------------------
@@ -82,6 +82,24 @@ vim.cmd("colorscheme tokyonight")
 
 -- Disable smooth scrolling
 vim.g.snacks_animate = false
+
+-- -- ===============================================
+-- -- CONFIGURE PLUGINS - BROKEN
+-- -- ===============================================
+
+-- -----------------------------------------------
+-- -- Configure snacks - but no impact maybe because lazy loaded
+-- -----------------------------------------------
+
+require("snacks").setup({
+  explorer = {
+    filtered_items = {
+      hide_dotfiles = false,
+      hide_gitignored = false,
+    },
+    -- Include other explorer option overrides here.
+  },
+})
 
 -- ===============================================
 -- KEYMAPS
