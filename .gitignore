@@ -1,3 +1,15 @@
+#############################################################
+# CUSTOM GITIGNORE
+#############################################################
+
+# Local lazy environment specific json install info
+nvim_config/.config/lazyvim/lazy-lock.json
+nvim_config/.config/lazyvim/lazyvim.json
+
+#############################################################
+# LAZYVIM SUPPLIED GITIGNORE
+#############################################################
+
 # Compiled Lua sources
 luac.out
 
