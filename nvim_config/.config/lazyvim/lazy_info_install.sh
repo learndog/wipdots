@@ -180,8 +180,8 @@ TBD
 ############################################################
 ############ LAZYVIM MAINTENANCE   #########################
 ############################################################
-# From lazy extras do (S) to clean, install, upgrade extras
-# From lazy do (S) to clean, install, upgrade plugins
+# From :Lazy do (S) to clean, install, upgrade LazyVim and its plugins
+# From :LazyExtras do (S) to clean, install, upgrade extras
 # :LazyHealth
 # :CheckHealth
 
