@@ -66,6 +66,12 @@ vim.g.python3_host_prog = os.getenv("HOME") .. "/.venvs/nvim/bin/python"
 require("config.lazy")
 
 -- -----------------------------------------------
+-- SET GUI FONT for nvim icons
+-- -----------------------------------------------
+-- Maybe not needed. Maybe doesnt even work.
+vim.opt.guifont = "CaskaydiaCove Nerd Font Mono:h12"
+
+-- -----------------------------------------------
 -- SET COLORSCHEME
 -- -----------------------------------------------
 -- vim.cmd("colorscheme lunaperche")
@@ -136,11 +142,35 @@ vim.g.maplocalleader = "\\" -- single escaped backslash
 --   },
 -- })
 
-vim.keymap.set("n", "<localleader>e", "<ESC>", { noremap = true, silent = true, desc = "esc from insert mode" })
-
 vim.keymap.set("i", "jj", "<ESC>", { noremap = true, silent = true, desc = "esc from insert mode" })
 
--- ===============================================
+-- Older API works also
+-- vim.api.nvim_set_keymap(
+--   "n",
+--   "<localleader>cc",
+--   "<cmd>lua Snacks.toggle.line_number():toggle()<CR>",
+--   { noremap = true, silent = true }
+-- )
+
+vim.keymap.set("n", "<localleader>ct", function()
+  Snacks.toggle.line_number():set(false)
+  Snacks.toggle.indent():set(false)
+  Snacks.toggle.inlay_hints():set(false)
+  Snacks.toggle.diagnostics():set(false)
+  vim.wo.signcolumn = "no"
+  vim.opt.statuscolumn = ""
+end, { silent = true, desc = "copyterm true" })
+vim.keymap.set("n", "<localleader>cf", function()
+  Snacks.toggle.line_number():set(true)
+  Snacks.toggle.indent():set(true)
+  Snacks.toggle.inlay_hints():set(true)
+  Snacks.toggle.diagnostics():set(true)
+  vim.wo.signcolumn = "yes"
+  vim.opt.statuscolumn = "%!v:lua.require'snacks.statuscolumn'.get()"
+end, { silent = true, desc = "copyterm false" })
+-- Protect against localleader cc - it seems to remove a line
+vim.keymap.set("n", "<localleader>cc", "<ESC>", { noremap = true, silent = true, desc = "esc from insert mode" })
+
 -- KEYMAPS WITH SUPPORTING FUNCTION DEFINITIONS
 -- ===============================================
 --
