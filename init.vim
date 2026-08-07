@@ -2,6 +2,19 @@
 " Source this file as ~/.vimrc or ~/.config/nvim/init.vim.
 
 " --------------------------------------------------------
+" Goals
+"
+" - Keep this as one readable Vimscript file.
+" - Prefer built-in Vim behavior over plugins when the built-in behavior is
+"   good enough.
+" - Keep dependencies few, popular, focused, and optional where practical.
+" - Keep startup low-risk: opening Vim should not download or update software.
+" - Preserve wide Vim/Neovim compatibility and graceful degradation when tools
+"   are missing.
+" - Keep maintenance simple. Add complexity only when the runtime benefit is
+"   clear, bounded, and easy to reason about.
+"
+" --------------------------------------------------------
 " Future AI assistant support strategy
 "
 " Intent:
@@ -16,42 +29,45 @@
 "   and local OpenAI-compatible models.
 "
 " GitHub Copilot plan:
-" - First implementation should use github/copilot.vim behind a flag such as
-"   g:omarchy_use_copilot. It is the official Vim/Neovim inline-suggestion
-"   integration and works with this Vimscript config style.
+" - Use github/copilot.vim only for optional inline suggestions, behind
+"   g:omarchy_install_copilot. It is the official Vim/Neovim inline-suggestion
+"   integration and works with this Vimscript config style, but it requires
+"   Vim 9.0.0185+ or Neovim 0.6+ and Node.js.
 " - Set g:copilot_no_tab_map = v:true by default. Map Copilot accept to a
-"   dedicated key such as <C-J>, and add an explicit suggest key under the
-"   <Leader>a namespace. Do not replace this config's <Tab> completion unless
-"   a separate opt-in flag explicitly asks for that behavior.
-" - Expose filetype controls through a user override such as
-"   g:omarchy_copilot_filetypes so sensitive, prose, generated, or low-value
-"   filetypes can be disabled without editing this file.
+"   dedicated key such as <C-J>. Do not replace this config's <Tab> completion.
+" - Start automatic Copilot inline suggestions disabled unless
+"   g:omarchy_copilot_suggestions_start_enabled is set. That flag controls
+"   only automatic inline suggestions, not installation, authentication,
+"   explicit suggestion requests, or Copilot CLI sessions.
+" - Expose filetype controls through Copilot's native g:copilot_filetypes so
+"   sensitive, prose, generated, or low-value filetypes can be disabled without
+"   another abstraction layer.
 " - Avoid risky defaults such as disabling SSL verification or always pulling
 "   the latest Copilot language server at startup.
 "
 " Chat and agent plan:
-" - Treat chat as a separate capability from inline completion. If added, use a
-"   separate flag such as g:omarchy_use_copilot_chat and guard it with has('nvim')
-"   because current rich chat plugins are Neovim-oriented.
-" - Prefer a separate <Leader>a key namespace for AI commands:
-"     <Leader>as  suggest
-"     <Leader>ac  chat
-"     <Leader>aa  ask about selection/current buffer
-"     <Leader>an  new agent session
-"     <Leader>ar  restore agent session
-" - For future agentic sessions, consider a Neovim-only ACP client behind its
-"   own flag so Codex, Cline, OpenCode, Copilot, and local-model agents can be
-"   added without entangling them with completion or ALE.
+" - Treat chat and agentic work as separate from inline completion. Prefer the
+"   official copilot CLI in a terminal over a Neovim-only chat plugin.
+" - Keep the CLI terminal mapping behind g:omarchy_enable_copilot_cli_mapping,
+"   and never launch it with blanket automatic permissions.
+" - Do not add editor-integrated agent tooling until the CLI path proves
+"   insufficient and the extra permissions/configuration surface is justified.
 " --------------------------------------------------------
 
 " 1. Flags ---------------------------------------------------------------------
 let s:config_file = resolve(expand('<sfile>:p'))
+let s:plug_home = has('nvim') ? stdpath('data') . '/site' : expand('~/.vim')
 let g:omarchy_use_fugitive = get(g:, 'omarchy_use_fugitive', 0)
 let g:omarchy_use_gitgutter = get(g:, 'omarchy_use_gitgutter', 0)
 let g:omarchy_fzf_min_version = get(g:, 'omarchy_fzf_min_version', '0.54.0')
+let g:omarchy_use_fzf = get(g:, 'omarchy_use_fzf', -1)
 let g:omarchy_python_format_imports = get(g:, 'omarchy_python_format_imports', 1)
 let g:omarchy_python_keyword_completion = get(g:, 'omarchy_python_keyword_completion', 1)
 let g:omarchy_python_keyword_completion_min_chars = get(g:, 'omarchy_python_keyword_completion_min_chars', 3)
+let g:omarchy_python_keyword_completion_max_lines = get(g:, 'omarchy_python_keyword_completion_max_lines', 5000)
+let g:omarchy_install_copilot = get(g:, 'omarchy_install_copilot', 0)
+let g:omarchy_copilot_suggestions_start_enabled = get(g:, 'omarchy_copilot_suggestions_start_enabled', 0)
+let g:omarchy_enable_copilot_cli_mapping = get(g:, 'omarchy_enable_copilot_cli_mapping', 0)
 let s:python_dictionary_file = fnamemodify(s:config_file, ':h') . '/python-complete.txt'
 let s:python_dictionary_fallback_words = [
       \ 'False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await',
@@ -60,6 +76,9 @@ let s:python_dictionary_fallback_words = [
       \ 'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'try',
       \ 'while', 'with', 'yield'
       \ ]
+let s:python_dictionary_words = []
+let s:python_dictionary_loaded = 0
+let s:debug_log = []
 
 " ALE completion must be enabled before ALE loads.
 let g:ale_completion_enabled = get(g:, 'ale_completion_enabled', 1)
@@ -67,6 +86,19 @@ let g:ale_completion_delay = get(g:, 'ale_completion_delay', 100)
 
 " Disable gitgutter's default maps before the plugin loads.
 let g:gitgutter_map_keys = 0
+
+if g:omarchy_install_copilot
+  let g:copilot_no_tab_map = get(g:, 'copilot_no_tab_map', v:true)
+  let g:copilot_enabled = get(g:, 'copilot_enabled', g:omarchy_copilot_suggestions_start_enabled ? 1 : 0)
+  let g:copilot_version = get(g:, 'copilot_version', v:false)
+  let g:copilot_filetypes = get(g:, 'copilot_filetypes', {
+        \ 'gitcommit': v:false,
+        \ 'markdown': v:false,
+        \ 'text': v:false,
+        \ 'help': v:false,
+        \ })
+endif
+
 function! s:VersionAtLeast(found, required) abort
   if empty(a:found)
     return 0
@@ -85,31 +117,185 @@ function! s:VersionAtLeast(found, required) abort
   return 1
 endfunction
 
-function! s:FzfVersion() abort
-  if !executable('fzf')
+function! s:NormalizePath(path) abort
+  return tolower(substitute(a:path, '\\', '/', 'g'))
+endfunction
+
+function! s:IsPluginManagedFzf(path) abort
+  let l:normalized = s:NormalizePath(a:path)
+  let l:plugged_fzf = s:NormalizePath(s:plug_home . '/plugged/fzf/bin/')
+  return stridx(l:normalized, l:plugged_fzf) == 0 || l:normalized =~# '/plugged/fzf/bin/'
+endfunction
+
+function! s:FzfPathCandidates() abort
+  let l:candidates = []
+
+  if exists('*exepath')
+    let l:path = exepath('fzf')
+    if !empty(l:path)
+      call add(l:candidates, l:path)
+    endif
+  endif
+
+  if executable('sh')
+    let l:paths = systemlist('sh -c "command -v fzf 2>/dev/null"')
+    if !v:shell_error
+      call extend(l:candidates, filter(l:paths, '!empty(v:val)'))
+    endif
+  endif
+
+  return l:candidates
+endfunction
+
+function! s:ExternalFzfPath() abort
+  for l:path in s:FzfPathCandidates()
+    if !s:IsPluginManagedFzf(l:path)
+      return l:path
+    endif
+  endfor
+  return ''
+endfunction
+
+function! s:SystemFzfVersion() abort
+  let l:path = s:ExternalFzfPath()
+  if empty(l:path)
     return ''
   endif
-  let l:version = systemlist('fzf --version')
+  let l:version = systemlist(shellescape(l:path) . ' --version')
   if v:shell_error || empty(l:version)
     return ''
   endif
   return matchstr(l:version[0], '\d\+\.\d\+\.\d\+')
 endfunction
 
+function! s:ResolveFzfFlag() abort
+  let l:version = s:SystemFzfVersion()
+  let l:available = s:VersionAtLeast(l:version, g:omarchy_fzf_min_version)
+
+  if g:omarchy_use_fzf == -1
+    let g:omarchy_use_fzf = l:available
+  elseif g:omarchy_use_fzf && !l:available
+    let g:omarchy_use_fzf = 0
+    echohl WarningMsg
+    if empty(l:version)
+      echom 'g:omarchy_use_fzf was set to 1, but external fzf ' . g:omarchy_fzf_min_version . '+ was not found on PATH.'
+    else
+      echom 'g:omarchy_use_fzf was set to 1, but external fzf is too old: ' . l:version . ' found; ' . g:omarchy_fzf_min_version . '+ required.'
+    endif
+    echom 'FZF integration has been disabled for this session; built-in fallback views will be used.'
+    echom 'Install fzf ' . g:omarchy_fzf_min_version . '+ on PATH and rerun :PlugInstall to enable fzf.vim.'
+    echohl None
+  endif
+endfunction
+
+function! s:Debug(message) abort
+  call add(s:debug_log, strftime('%H:%M:%S') . ' ' . a:message)
+  if len(s:debug_log) > 200
+    call remove(s:debug_log, 0, len(s:debug_log) - 201)
+  endif
+endfunction
+
+function! s:OpenScratch(title, lines) abort
+  botright new
+  execute 'file ' . fnameescape(a:title)
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
+  setlocal modifiable
+  call setline(1, empty(a:lines) ? [''] : a:lines)
+  setlocal nomodifiable nomodified
+  normal! gg
+  nnoremap <buffer><silent> q :close<CR>
+endfunction
+
+function! s:OpenPickerScratch(title, lines, sink, ...) abort
+  call s:OpenScratch(a:title, a:lines)
+  let b:omarchy_picker_sink = a:sink
+  let b:omarchy_picker_root = get(a:, 1, '')
+  nnoremap <buffer><silent> <CR> :call call(b:omarchy_picker_sink, [getline('.')])<CR>
+endfunction
+
+function! s:WarnFzfFallback(feature) abort
+  echohl WarningMsg
+  echom a:feature . ': fzf is not enabled; using an unfiltered scratch-buffer fallback.'
+  echom 'Install external fzf ' . g:omarchy_fzf_min_version . '+ on PATH and rerun :PlugInstall for filtering.'
+  echohl None
+endfunction
+
+function! s:FzfExecutableAvailable() abort
+  return s:VersionAtLeast(s:SystemFzfVersion(), g:omarchy_fzf_min_version)
+endfunction
+
+function! s:HasFzf() abort
+  let l:result = g:omarchy_use_fzf && s:FzfExecutableAvailable()
+        \ && (exists('*fzf#run') || exists(':FZF') == 2)
+  call s:Debug('HasFzf=' . string(l:result)
+        \ . ' use=' . string(g:omarchy_use_fzf)
+        \ . ' executable=' . string(s:FzfExecutableAvailable())
+        \ . ' fzf#run=' . string(exists('*fzf#run'))
+        \ . ' :FZF=' . string(exists(':FZF') == 2))
+  return l:result
+endfunction
+
+function! OmarchyFzfStatus() abort
+  echo 'g:omarchy_use_fzf=' . string(g:omarchy_use_fzf)
+  echo 'fzf candidates=' . string(s:FzfPathCandidates())
+  echo 'fzf path=' . (empty(s:ExternalFzfPath()) ? 'none' : s:ExternalFzfPath())
+  echo 'fzf version=' . (empty(s:SystemFzfVersion()) ? 'none' : s:SystemFzfVersion())
+  echo 'fzf usable=' . string(s:HasFzf())
+endfunction
+command! OmarchyFzfStatus call OmarchyFzfStatus()
+
+function! OmarchyDebug() abort
+  let l:lines = [
+        \ 'Omarchy debug',
+        \ '',
+        \ 'config_file=' . s:config_file,
+        \ 'config_readable=' . string(filereadable(s:config_file)),
+        \ 'cwd=' . getcwd(),
+        \ 'shell=' . &shell,
+        \ 'shellcmdflag=' . &shellcmdflag,
+        \ 'shellslash=' . string(&shellslash),
+        \ 'g:omarchy_use_fzf=' . string(g:omarchy_use_fzf),
+        \ 'fzf candidates=' . string(s:FzfPathCandidates()),
+        \ 'fzf path=' . (empty(s:ExternalFzfPath()) ? 'none' : s:ExternalFzfPath()),
+        \ 'fzf version=' . (empty(s:SystemFzfVersion()) ? 'none' : s:SystemFzfVersion()),
+        \ 'fzf executable available=' . string(s:FzfExecutableAvailable()),
+        \ 'fzf#run exists=' . string(exists('*fzf#run')),
+        \ ':FZF command exists=' . string(exists(':FZF') == 2),
+        \ 's:HasFzf=' . string(s:HasFzf()),
+        \ '',
+        \ 'Recent log:',
+        \ ]
+  call extend(l:lines, empty(s:debug_log) ? ['(empty)'] : copy(s:debug_log))
+  call s:OpenScratch('[Omarchy debug]', l:lines)
+endfunction
+command! OmarchyDebug call OmarchyDebug()
+
 " 2. vim-plug ------------------------------------------------------------------
-let s:plug_home = has('nvim') ? stdpath('data') . '/site' : expand('~/.vim')
 let s:plug_file = s:plug_home . '/autoload/plug.vim'
 let s:plug_url = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
-function! s:BootstrapPlug() abort
+function! s:LoadPlug(...) abort
   if filereadable(s:plug_file)
     execute 'source ' . fnameescape(s:plug_file)
     return exists('*plug#begin')
   endif
 
+  if !get(a:, 1, 0)
+    echohl WarningMsg
+    echom 'vim-plug is missing. Run :OmarchyPlugBootstrap to download it, then run :PlugInstall.'
+    echohl None
+  endif
+  return 0
+endfunction
+
+function! s:BootstrapPlug() abort
+  if s:LoadPlug(1)
+    return 1
+  endif
+
   if !executable('curl')
     echohl ErrorMsg
-    echom 'vim-plug is missing and curl is not installed. Install curl, restart, then run :PlugInstall.'
+    echom 'vim-plug is missing and curl is not installed. Install curl, then run :OmarchyPlugBootstrap.'
     echohl None
     return 0
   endif
@@ -129,41 +315,41 @@ function! s:BootstrapPlug() abort
   endif
 
   execute 'source ' . fnameescape(s:plug_file)
-  return exists('*plug#begin')
+  if exists('*plug#begin')
+    silent! delcommand PlugInstall
+    echom 'vim-plug installed. Reloading config so :PlugInstall is available.'
+    execute 'source ' . fnameescape(s:config_file)
+    return 1
+  endif
+
+  echohl ErrorMsg
+  echom 'vim-plug was downloaded, but plug#begin was not created. Check :messages.'
+  echohl None
+  return 0
 endfunction
 
 function! s:PlugInstallFallback() abort
-  silent! delcommand PlugInstall
-  if !s:BootstrapPlug()
-    echohl ErrorMsg
-    echom 'vim-plug is still unavailable. See :messages and omarchy/vim/README.md.'
-    echohl None
-    return
-  endif
-  execute 'source ' . fnameescape(s:config_file)
-  if exists(':PlugInstall') == 2
-    PlugInstall
-  else
-    echohl ErrorMsg
-    echom 'vim-plug loaded, but :PlugInstall was not created. Check :messages.'
-    echohl None
-  endif
+  echohl WarningMsg
+  echom 'vim-plug is missing. Run :OmarchyPlugBootstrap first, then run :PlugInstall.'
+  echohl None
 endfunction
 
 command! OmarchyPlugBootstrap call <SID>BootstrapPlug()
-call s:BootstrapPlug()
+call s:LoadPlug()
+call s:ResolveFzfFlag()
 if exists(':PlugInstall') != 2 && !exists('*plug#begin')
   command! PlugInstall call <SID>PlugInstallFallback()
 endif
 if exists('*plug#begin')
   call plug#begin(s:plug_home . '/plugged')
   Plug 'dense-analysis/ale'
-  if s:VersionAtLeast(s:FzfVersion(), g:omarchy_fzf_min_version)
+  if g:omarchy_use_fzf
     Plug 'junegunn/fzf'
-  else
-    Plug 'junegunn/fzf', { 'do': './install --bin' }
+    Plug 'junegunn/fzf.vim'
   endif
-  Plug 'junegunn/fzf.vim'
+  if g:omarchy_install_copilot
+    Plug 'github/copilot.vim'
+  endif
   if g:omarchy_use_gitgutter
     Plug 'airblade/vim-gitgutter'
   endif
@@ -179,7 +365,6 @@ filetype plugin indent on
 syntax enable
 
 set encoding=utf-8
-set fileencoding=utf-8
 set number
 set relativenumber
 set ruler
@@ -203,7 +388,7 @@ set expandtab
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
-set smartindent
+set autoindent
 set linebreak
 set textwidth=0
 set colorcolumn=
@@ -237,6 +422,11 @@ endfunction
 
 function! s:RunCommand(command) abort
   let l:name = matchstr(a:command, '^\S\+')
+  if index(['Buffers', 'BLines', 'Files', 'GFiles', 'Maps', 'Rg'], l:name) >= 0
+        \ && !s:HasFzf()
+    echo 'fzf is not enabled. Install external fzf ' . g:omarchy_fzf_min_version . '+ on PATH and rerun :PlugInstall.'
+    return
+  endif
   if s:CommandExists(l:name)
     execute a:command
   else
@@ -248,18 +438,57 @@ function! s:InGitRepo() abort
   return executable('git') && system('git rev-parse --is-inside-work-tree 2>/dev/null') =~# 'true'
 endfunction
 
-function! s:HasFzf() abort
-  return exists('*fzf#run') || s:CommandExists('FZF')
+function! s:GitRootForDir(dir) abort
+  if !executable('git')
+    return ''
+  endif
+  let l:root = systemlist('git -C ' . shellescape(a:dir) . ' rev-parse --show-toplevel 2>/dev/null')
+  return v:shell_error || empty(l:root) ? '' : l:root[0]
+endfunction
+
+function! s:OpenFileSink(line) abort
+  let l:file = matchstr(a:line, '^\s*\zs.\{-}\ze\s*$')
+  if empty(l:file)
+    return
+  endif
+  if exists('b:omarchy_picker_root') && !empty(b:omarchy_picker_root)
+        \ && fnamemodify(l:file, ':p') !=# l:file
+    let l:file = b:omarchy_picker_root . '/' . l:file
+  endif
+  execute 'edit ' . fnameescape(l:file)
+endfunction
+
+function! s:OpenBufferLineSink(line) abort
+  let l:lnum = str2nr(matchstr(a:line, '^\s*\zs\d\+'))
+  if l:lnum <= 0
+    return
+  endif
+  execute l:lnum
+  normal! zvzz
+endfunction
+
+function! s:OpenGrepSink(line) abort
+  let l:parts = matchlist(a:line, '^\(.\{-}\):\(\d\+\):')
+  if empty(l:parts)
+    return
+  endif
+  execute 'edit ' . fnameescape(l:parts[1])
+  execute str2nr(l:parts[2])
+  normal! zvzz
 endfunction
 
 function! s:FzfRun(spec) abort
   if !s:HasFzf()
+    call s:Debug('FzfRun skipped')
     return 0
   endif
   try
+    call s:Debug('FzfRun entering fzf#run')
     call fzf#run(fzf#wrap(a:spec))
+    call s:Debug('FzfRun returned success')
     return 1
   catch
+    call s:Debug('FzfRun caught error: ' . v:exception)
     return 0
   endtry
 endfunction
@@ -283,35 +512,115 @@ else
 endif
 
 function! s:ProjectFiles() abort
-  if s:CommandExists('GFiles') && s:InGitRepo()
+  if s:HasFzf() && s:CommandExists('GFiles') && s:InGitRepo()
     GFiles
-  elseif s:CommandExists('Files')
+  elseif s:HasFzf() && s:CommandExists('Files')
     Files
   else
-    echo 'fzf.vim is not installed. Run :PlugInstall.'
+    call s:FallbackProjectFiles()
   endif
 endfunction
 
 function! s:GitFiles() abort
-  if s:InGitRepo()
-    call s:RunCommand('GFiles')
+  if s:HasFzf() && s:InGitRepo()
+    GFiles
   else
-    call s:ProjectFiles()
+    call s:FallbackGitFiles()
   endif
 endfunction
 
 function! s:Ripgrep() abort
-  if s:CommandExists('Rg') && executable('rg')
+  if s:CommandExists('Rg') && executable('rg') && s:HasFzf()
     Rg
-  elseif executable('grep')
-    let l:pattern = input('grep pattern: ')
-    if !empty(l:pattern)
-      execute 'grep! -RIn ' . shellescape(l:pattern) . ' .'
-      copen
-    endif
   else
-    echo 'Install ripgrep for :Rg, or grep for fallback search.'
+    call s:FallbackTextSearch()
   endif
+endfunction
+
+function! s:FallbackFindFiles() abort
+  if executable('find')
+    let l:files = systemlist('find . -type f -not -path "*/.git/*"')
+    return v:shell_error ? [] : map(l:files, 'substitute(v:val, ''^\./'', '''', '''')')
+  endif
+
+  return filter(glob('**/*', 0, 1), 'filereadable(v:val) && v:val !~# ''\v(^|[\/\\])\.git([\/\\]|$)''')
+endfunction
+
+function! s:FallbackProjectFiles() abort
+  call s:WarnFzfFallback('Project files')
+  let l:root = s:GitRootForDir(getcwd())
+  if !empty(l:root)
+    let l:files = systemlist('git -C ' . shellescape(l:root) . ' ls-files')
+    if !v:shell_error && !empty(l:files)
+      call s:OpenPickerScratch('[project files]', l:files, function('<SID>OpenFileSink'), l:root)
+      return
+    endif
+  endif
+
+  let l:files = s:FallbackFindFiles()
+  if empty(l:files)
+    echo 'No files found.'
+    return
+  endif
+  call s:OpenPickerScratch('[project files]', l:files, function('<SID>OpenFileSink'))
+endfunction
+
+function! s:FallbackGitFiles() abort
+  let l:root = s:GitRootForDir(getcwd())
+  if empty(l:root)
+    call s:FallbackProjectFiles()
+    return
+  endif
+  call s:WarnFzfFallback('Git files')
+
+  let l:files = systemlist('git -C ' . shellescape(l:root) . ' ls-files')
+  if v:shell_error || empty(l:files)
+    echo 'No git-tracked files found.'
+    return
+  endif
+  call s:OpenPickerScratch('[git files]', l:files, function('<SID>OpenFileSink'), l:root)
+endfunction
+
+function! s:BufferLines() abort
+  if !s:HasFzf()
+    call s:WarnFzfFallback('Buffer lines')
+  endif
+  let l:items = []
+  for l:lnum in range(1, line('$'))
+    let l:text = getline(l:lnum)
+    if !empty(l:text)
+      call add(l:items, printf('%5d  %s', l:lnum, l:text))
+    endif
+  endfor
+  if empty(l:items)
+    echo 'No non-empty lines in current buffer.'
+    return
+  endif
+  call s:OpenPickerScratch('[buffer lines]', l:items, function('<SID>OpenBufferLineSink'))
+endfunction
+
+function! s:FallbackTextSearch() abort
+  call s:WarnFzfFallback('Text search')
+  let l:scope = getcwd()
+  let l:pattern = input('search pattern under ' . l:scope . ': ')
+  if empty(l:pattern)
+    return
+  endif
+
+  if executable('rg')
+    let l:results = systemlist('rg --vimgrep -- ' . shellescape(l:pattern))
+  elseif executable('grep')
+    let l:results = systemlist('grep -RIn --exclude-dir=.git -- ' . shellescape(l:pattern) . ' .')
+  else
+    echo 'Install ripgrep or grep for fallback search.'
+    return
+  endif
+
+  if v:shell_error && empty(l:results)
+    echo 'No matches.'
+    return
+  endif
+  call s:OpenPickerScratch('[text search]', l:results, function('<SID>OpenGrepSink'))
 endfunction
 
 " MAP: <Leader>ff | Find project files
@@ -321,7 +630,7 @@ nnoremap <silent> <Leader>fg :call <SID>GitFiles()<CR>
 " MAP: <Leader>fr | Search text with ripgrep
 nnoremap <silent> <Leader>fr :call <SID>Ripgrep()<CR>
 " MAP: <Leader>fl | Search current buffer lines
-nnoremap <silent> <Leader>fl :call <SID>RunCommand('BLines')<CR>
+nnoremap <silent> <Leader>fl :call <SID>BufferLines()<CR>
 " MAP: <Leader>fm | Search normal-mode maps
 nnoremap <silent> <Leader>fm :call <SID>RunCommand('Maps')<CR>
 
@@ -375,14 +684,14 @@ function! s:PythonBufferCompletionMatches(base, matches, seen) abort
 endfunction
 
 function! s:PythonDictionaryCompletionMatches(base, matches, seen) abort
-  if !filereadable(s:python_dictionary_file)
-    for l:word in s:python_dictionary_fallback_words
-      call s:AddPythonCompletionMatch(a:matches, a:seen, l:word, '[python]', 'k', a:base)
-    endfor
-    return
+  if !s:python_dictionary_loaded
+    let s:python_dictionary_words = filereadable(s:python_dictionary_file)
+          \ ? readfile(s:python_dictionary_file)
+          \ : copy(s:python_dictionary_fallback_words)
+    let s:python_dictionary_loaded = 1
   endif
 
-  for l:word in readfile(s:python_dictionary_file)
+  for l:word in s:python_dictionary_words
     call s:AddPythonCompletionMatch(a:matches, a:seen, l:word, '[python]', 'k', a:base)
   endfor
 endfunction
@@ -426,8 +735,28 @@ function! s:TriggerPythonKeywordCompletion(min_chars) abort
   return 1
 endfunction
 
+function! s:CopilotAutoSuggestionsEnabled() abort
+  if !g:omarchy_install_copilot || !get(g:, 'copilot_enabled', 0)
+    return 0
+  endif
+  if exists('b:copilot_enabled')
+    return b:copilot_enabled
+  endif
+
+  let l:filetypes = get(g:, 'copilot_filetypes', {})
+  if has_key(l:filetypes, '*') && !get(l:filetypes, '*')
+    return get(l:filetypes, &filetype, 0)
+  endif
+  return get(l:filetypes, &filetype, 1)
+endfunction
+
 function! s:MaybeAutoPythonKeywordComplete() abort
-  if mode() ==# 'i' && !pumvisible()
+  if g:omarchy_python_keyword_completion_max_lines > 0
+        \ && line('$') > g:omarchy_python_keyword_completion_max_lines
+    return
+  endif
+
+  if mode() ==# 'i' && !pumvisible() && !s:CopilotAutoSuggestionsEnabled()
     call s:TriggerPythonKeywordCompletion(g:omarchy_python_keyword_completion_min_chars)
   endif
 endfunction
@@ -459,6 +788,91 @@ function! s:ManualComplete() abort
   return ''
 endfunction
 
+function! s:CopilotAvailable() abort
+  return g:omarchy_install_copilot && s:CommandExists('Copilot')
+endfunction
+
+function! s:SetCopilotEnabled(enabled) abort
+  if !g:omarchy_install_copilot
+    echo 'Copilot is not installed by this config. Set g:omarchy_install_copilot = 1 before sourcing init.vim.'
+    return
+  endif
+
+  let g:copilot_enabled = a:enabled ? 1 : 0
+  if s:CopilotAvailable()
+    execute 'Copilot ' . (a:enabled ? 'enable' : 'disable')
+    echo 'Copilot inline suggestions ' . (a:enabled ? 'enabled.' : 'disabled.')
+  else
+    echo 'copilot.vim is not installed yet. Run :PlugInstall after enabling g:omarchy_install_copilot.'
+  endif
+endfunction
+
+function! s:ToggleCopilot() abort
+  call s:SetCopilotEnabled(!get(g:, 'copilot_enabled', 0))
+endfunction
+
+function! s:CopilotStatus() abort
+  if s:CopilotAvailable()
+    Copilot status
+  elseif g:omarchy_install_copilot
+    echo 'copilot.vim is not installed yet. Run :PlugInstall.'
+  else
+    echo 'Copilot is not installed by this config. Set g:omarchy_install_copilot = 1 before sourcing init.vim.'
+  endif
+endfunction
+
+function! s:CopilotAccept() abort
+  return exists('*copilot#Accept') ? copilot#Accept('') : ''
+endfunction
+
+function! s:CopilotSuggest() abort
+  if !g:omarchy_install_copilot
+    echo 'Copilot is not installed by this config. Set g:omarchy_install_copilot = 1 before sourcing init.vim.'
+    return
+  endif
+
+  if !s:CopilotAvailable()
+    echo 'copilot.vim is not installed yet. Run :PlugInstall.'
+    return
+  endif
+
+  call feedkeys((mode() ==# 'i' ? '' : 'i') . "\<Plug>(copilot-suggest)", 'm')
+endfunction
+
+function! s:CopilotCliRoot() abort
+  let l:bufdir = expand('%:p:h')
+  if !empty(l:bufdir) && isdirectory(l:bufdir)
+    let l:root = s:GitRootForDir(l:bufdir)
+    return empty(l:root) ? l:bufdir : l:root
+  endif
+
+  let l:root = s:GitRootForDir(getcwd())
+  return empty(l:root) ? getcwd() : l:root
+endfunction
+
+function! s:OpenCopilotCli() abort
+  if !executable('copilot')
+    echo 'GitHub Copilot CLI is not installed. Install the copilot command, then run :OmarchyCopilotChat or run copilot from a terminal.'
+    return
+  endif
+
+  if exists(':terminal') != 2
+    echo 'This Vim build does not support :terminal. Run copilot from a terminal in the project directory.'
+    return
+  endif
+
+  let l:root = s:CopilotCliRoot()
+  botright split
+  execute 'lcd ' . fnameescape(l:root)
+  try
+    terminal copilot
+  catch
+    echohl ErrorMsg
+    echom 'Could not start GitHub Copilot CLI: ' . v:exception
+    echohl None
+  endtry
+endfunction
+
 function! s:TabComplete() abort
   if pumvisible()
     return "\<C-n>"
@@ -480,14 +894,32 @@ nnoremap <silent> <Leader>lh :call <SID>RunCommand('ALEHover')<CR>
 nnoremap <silent> <Leader>ln :call <SID>RunCommand('ALERename')<CR>
 " MAP: <Leader>la | ALE code action
 nnoremap <silent> <Leader>la :call <SID>RunCommand('ALECodeAction')<CR>
-" MAP: <Leader>aj | Next ALE diagnostic
-nnoremap <silent> <Leader>aj :call <SID>RunCommand('ALENextWrap')<CR>
-" MAP: <Leader>ak | Previous ALE diagnostic
-nnoremap <silent> <Leader>ak :call <SID>RunCommand('ALEPreviousWrap')<CR>
-" MAP: <Leader>af | Run ALE fixers
-nnoremap <silent> <Leader>af :call <SID>RunCommand('ALEFix')<CR>
-" MAP: <Leader>ai | Show ALE info
-nnoremap <silent> <Leader>ai :call <SID>RunCommand('ALEInfo')<CR>
+" MAP: <Leader>lj | Next ALE diagnostic
+nnoremap <silent> <Leader>lj :call <SID>RunCommand('ALENextWrap')<CR>
+" MAP: <Leader>lk | Previous ALE diagnostic
+nnoremap <silent> <Leader>lk :call <SID>RunCommand('ALEPreviousWrap')<CR>
+" MAP: <Leader>lf | Run ALE fixers
+nnoremap <silent> <Leader>lf :call <SID>RunCommand('ALEFix')<CR>
+" MAP: <Leader>li | Show ALE info
+nnoremap <silent> <Leader>li :call <SID>RunCommand('ALEInfo')<CR>
+command! OmarchyCopilotOn call <SID>SetCopilotEnabled(1)
+command! OmarchyCopilotOff call <SID>SetCopilotEnabled(0)
+command! OmarchyCopilotToggle call <SID>ToggleCopilot()
+command! OmarchyCopilotStatus call <SID>CopilotStatus()
+command! OmarchyCopilotSuggest call <SID>CopilotSuggest()
+command! OmarchyCopilotChat call <SID>OpenCopilotCli()
+if g:omarchy_install_copilot
+  " MAP: <Leader>at | Toggle Copilot inline suggestions
+  nnoremap <silent> <Leader>at :OmarchyCopilotToggle<CR>
+  " MAP: <Leader>as | Request a Copilot inline suggestion
+  nnoremap <silent> <Leader>as :OmarchyCopilotSuggest<CR>
+  " MAP: <C-J> | Accept Copilot inline suggestion
+  inoremap <silent><script><expr> <C-J> <SID>CopilotAccept()
+endif
+if g:omarchy_enable_copilot_cli_mapping
+  " MAP: <Leader>ac | Open GitHub Copilot CLI in a terminal split
+  nnoremap <silent> <Leader>ac :OmarchyCopilotChat<CR>
+endif
 " MAP: <Tab> | Complete after a word, otherwise insert a tab
 inoremap <silent><expr> <Tab> <SID>TabComplete()
 " MAP: <S-Tab> | Previous completion menu item
@@ -572,17 +1004,46 @@ function! OmarchyAleCounts() abort
   return ''
 endfunction
 
+function! s:StatusEscape(text) abort
+  return substitute(a:text, '%', '%%', 'g')
+endfunction
+
+let s:git_root_cache = {}
 let s:git_branch_cache = {}
-function! OmarchyGitBranch() abort
-  if !executable('git') || empty(expand('%:p'))
+function! s:GitRootForBuffer(bufnr, file) abort
+  if !executable('git') || empty(a:file)
     return ''
   endif
-  let l:dir = expand('%:p:h')
+
+  let l:cached = get(s:git_root_cache, a:bufnr, {})
+  if get(l:cached, 'file', '') ==# a:file
+    return get(l:cached, 'root', '')
+  endif
+
+  let l:dir = fnamemodify(a:file, ':p:h')
   let l:root = systemlist('git -C ' . shellescape(l:dir) . ' rev-parse --show-toplevel 2>/dev/null')
   if v:shell_error || empty(l:root)
+    let s:git_root_cache[a:bufnr] = {'file': a:file, 'root': ''}
     return ''
   endif
-  let l:key = l:root[0]
+  let s:git_root_cache[a:bufnr] = {'file': a:file, 'root': l:root[0]}
+  return l:root[0]
+endfunction
+
+function! OmarchyRefreshGitStatus() abort
+  if has_key(s:git_root_cache, bufnr(''))
+    call remove(s:git_root_cache, bufnr(''))
+  endif
+  let s:git_branch_cache = {}
+endfunction
+
+function! OmarchyGitBranch() abort
+  let l:root = s:GitRootForBuffer(bufnr(''), expand('%:p'))
+  if empty(l:root)
+    return ''
+  endif
+
+  let l:key = l:root
   if has_key(s:git_branch_cache, l:key)
     return s:git_branch_cache[l:key]
   endif
@@ -590,9 +1051,20 @@ function! OmarchyGitBranch() abort
   if v:shell_error || empty(l:branch) || empty(l:branch[0])
     let l:branch = systemlist('git -C ' . shellescape(l:key) . ' rev-parse --abbrev-ref HEAD 2>/dev/null')
   endif
-  let s:git_branch_cache[l:key] = v:shell_error || empty(l:branch) ? '' : '[' . l:branch[0] . ']'
+  let s:git_branch_cache[l:key] = v:shell_error || empty(l:branch) ? '' : '[' . s:StatusEscape(l:branch[0]) . ']'
   return s:git_branch_cache[l:key]
 endfunction
+
+augroup omarchy_git_status
+  autocmd!
+  autocmd BufEnter,BufWritePost * call OmarchyRefreshGitStatus()
+  if exists('##FocusGained')
+    autocmd FocusGained * call OmarchyRefreshGitStatus()
+  endif
+  if exists('##ShellCmdPost')
+    autocmd ShellCmdPost * call OmarchyRefreshGitStatus()
+  endif
+augroup END
 
 function! OmarchyStatusline() abort
   let l:left = ' ' . OmarchyMode() . ' %f%m%r '
@@ -604,8 +1076,8 @@ function! OmarchyStatusline() abort
   if !empty(l:ale)
     let l:left .= l:ale . ' '
   endif
-  let l:ft = empty(&filetype) ? 'none' : &filetype
-  let l:enc = empty(&fileencoding) ? &encoding : &fileencoding
+  let l:ft = s:StatusEscape(empty(&filetype) ? 'none' : &filetype)
+  let l:enc = s:StatusEscape(empty(&fileencoding) ? &encoding : &fileencoding)
   let l:right = printf(' %s %s/%s ts:%d %%l:%%c %%p%%%% %s ', l:ft, l:enc, &fileformat, &tabstop, strftime('%H:%M'))
   return l:left . '%=' . l:right
 endfunction
@@ -627,25 +1099,47 @@ function! s:KeymapSink(line) abort
 endfunction
 
 function! s:Keymaps() abort
+  call s:Debug('Keymaps start')
   let l:maps = []
-  for l:line in readfile(s:config_file)
-    if l:line =~# '^" MAP: '
-      call add(l:maps, substitute(l:line, '^" ', '', ''))
-    endif
-  endfor
+  if filereadable(s:config_file)
+    for l:line in readfile(s:config_file)
+      if l:line =~# '^" MAP: '
+        call add(l:maps, substitute(l:line, '^" ', '', ''))
+      endif
+    endfor
+  endif
+  call s:Debug('Keymaps collected=' . len(l:maps) . ' config_readable=' . string(filereadable(s:config_file)))
 
-  if s:FzfRun({
-        \ 'source': l:maps,
-        \ 'sink': function('<SID>KeymapSink'),
-        \ 'options': '--prompt="Keymaps> " --no-multi'
-        \ })
-    return
+  if !empty(l:maps) && s:HasFzf()
+    call s:Debug('Keymaps attempting FZF')
+    if s:FzfRun({
+          \ 'source': l:maps,
+          \ 'sink': function('<SID>KeymapSink'),
+          \ 'options': '--prompt="Keymaps> " --no-multi'
+          \ })
+      return
+    endif
+    call s:Debug('Keymaps FZF unavailable or failed; using fallback')
+  else
+    call s:Debug('Keymaps using fallback without FZF')
   endif
 
-  botright new
-  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
-  call setline(1, l:maps)
-  nnoremap <buffer> <CR> :call <SID>KeymapSink(getline('.'))<CR>
+  if empty(l:maps)
+    let l:maps = [
+          \ 'No keymap comments were found.',
+          \ '',
+          \ 'Config file: ' . s:config_file,
+          \ 'Config readable: ' . string(filereadable(s:config_file)),
+          \ 'g:omarchy_use_fzf: ' . string(g:omarchy_use_fzf),
+          \ 'External fzf path: ' . (empty(s:ExternalFzfPath()) ? 'none' : s:ExternalFzfPath()),
+          \ 'External fzf version: ' . (empty(s:SystemFzfVersion()) ? 'none' : s:SystemFzfVersion()),
+          \ '',
+          \ 'Run :OmarchyFzfStatus for FZF diagnostics.',
+          \ ]
+  endif
+  call s:OpenScratch('[Omarchy keymaps]', l:maps)
+  nnoremap <buffer><silent> <CR> :call <SID>KeymapSink(getline('.'))<CR>
+  call s:Debug('Keymaps fallback opened')
 endfunction
 
 command! Keymaps call <SID>Keymaps()
@@ -756,7 +1250,6 @@ function! s:CloseDiffSession(origin_buf) abort
   if l:origin_win > 0
     execute l:origin_win . 'wincmd w'
     diffoff
-    silent! nunmap <buffer> q
     silent! nunmap <buffer> <Leader>dq
   endif
 
@@ -768,7 +1261,6 @@ function! s:CloseDiffSession(origin_buf) abort
     elseif bufexists(a:origin_buf)
       execute 'buffer ' . a:origin_buf
       diffoff
-      silent! nunmap <buffer> q
       silent! nunmap <buffer> <Leader>dq
     else
       enew
@@ -820,8 +1312,6 @@ function! s:StartDiffScratch(name, lines) abort
   diffthis
 
   wincmd p
-  let b:omarchy_diff_origin = 1
-  nnoremap <buffer><silent> q :DiffClose<CR>
   nnoremap <buffer><silent> <Leader>dq :DiffClose<CR>
   diffthis
 
