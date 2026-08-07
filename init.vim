@@ -9,6 +9,7 @@ let g:omarchy_fzf_min_version = get(g:, 'omarchy_fzf_min_version', '0.54.0')
 let g:omarchy_python_format_imports = get(g:, 'omarchy_python_format_imports', 1)
 let g:omarchy_python_keyword_completion = get(g:, 'omarchy_python_keyword_completion', 1)
 let g:omarchy_python_keyword_completion_min_chars = get(g:, 'omarchy_python_keyword_completion_min_chars', 3)
+let s:python_dictionary_file = fnamemodify(s:config_file, ':h') . '/python-complete.txt'
 
 " ALE completion must be enabled before ALE loads.
 let g:ale_completion_enabled = get(g:, 'ale_completion_enabled', 1)
@@ -289,63 +290,36 @@ function! s:SetAleOmnifunc() abort
   setlocal omnifunc=ale#completion#OmniFunc
 endfunction
 
-let s:python_completion_words = [
-      \ 'False', 'None', 'True', '__import__', 'abs', 'aiter', 'all', 'anext',
-      \ 'and', 'any', 'as', 'ascii', 'assert', 'async', 'await', 'bin', 'bool',
-      \ 'break', 'breakpoint', 'bytearray', 'bytes', 'callable', 'chr', 'class',
-      \ 'classmethod', 'compile', 'complex', 'continue', 'def', 'del', 'delattr',
-      \ 'dict', 'dir', 'divmod', 'elif', 'else', 'enumerate', 'eval', 'except',
-      \ 'exec', 'filter', 'finally', 'float', 'for', 'format', 'from', 'frozenset',
-      \ 'getattr', 'global', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id',
-      \ 'if', 'import', 'in', 'input', 'int', 'is', 'isinstance', 'issubclass',
-      \ 'iter', 'lambda', 'len', 'list', 'locals', 'map', 'max', 'memoryview',
-      \ 'min', 'next', 'nonlocal', 'not', 'object', 'oct', 'open', 'or', 'ord',
-      \ 'pass', 'pow', 'print', 'property', 'raise', 'range', 'repr', 'return',
-      \ 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod',
-      \ 'str', 'sum', 'super', 'try', 'tuple', 'type', 'vars', 'while', 'with',
-      \ 'yield', 'zip'
-      \ ]
-
 function! s:CurrentKeywordPrefix() abort
   let l:head = strpart(getline('.'), 0, col('.') - 1)
   let l:prefix = matchstr(l:head, '\k\+$')
   return [l:prefix, col('.') - strlen(l:prefix)]
 endfunction
 
-function! s:AddCompletionMatch(matches, seen, word, menu, kind) abort
-  if has_key(a:seen, a:word)
+function! s:ListHasCommaItem(value, item) abort
+  return (',' . a:value . ',') =~# ',' . escape(a:item, '\.^$*~[]') . ','
+endfunction
+
+function! s:SetupPythonKeywordCompletion() abort
+  if !g:omarchy_python_keyword_completion
     return
   endif
-  let a:seen[a:word] = 1
-  call add(a:matches, {
-        \ 'word': a:word,
-        \ 'menu': a:menu,
-        \ 'kind': a:kind,
-        \ 'dup': 0,
-        \ })
-endfunction
 
-function! s:PythonBufferMatches(prefix, matches, seen) abort
-  for l:lnum in range(1, line('$'))
-    for l:word in split(getline(l:lnum), '[^A-Za-z0-9_]\+')
-      if l:word =~# '^[A-Za-z_][A-Za-z0-9_]*$'
-            \ && l:word !=# a:prefix
-            \ && stridx(l:word, a:prefix) == 0
-        call s:AddCompletionMatch(a:matches, a:seen, l:word, '[buffer]', 'w')
-      endif
-    endfor
-  endfor
-endfunction
-
-function! s:PythonKeywordMatches(prefix, matches, seen) abort
-  for l:word in s:python_completion_words
-    if stridx(l:word, a:prefix) == 0
-      call s:AddCompletionMatch(a:matches, a:seen, l:word, '[python]', 'k')
+  if filereadable(s:python_dictionary_file)
+    let l:dict = fnameescape(s:python_dictionary_file)
+    if empty(&l:dictionary)
+      let &l:dictionary = l:dict
+    elseif !s:ListHasCommaItem(&l:dictionary, l:dict)
+      let &l:dictionary = l:dict . ',' . &l:dictionary
     endif
-  endfor
+
+    if !s:ListHasCommaItem(&l:complete, 'k')
+      let &l:complete .= ',k'
+    endif
+  endif
 endfunction
 
-function! s:CompletePythonKeywords(min_chars) abort
+function! s:TriggerPythonKeywordCompletion(min_chars) abort
   if !g:omarchy_python_keyword_completion || &filetype !=# 'python' || &paste
     return 0
   endif
@@ -359,26 +333,19 @@ function! s:CompletePythonKeywords(min_chars) abort
     return 0
   endif
 
-  let l:matches = []
-  let l:seen = {}
-  call s:PythonBufferMatches(l:prefix, l:matches, l:seen)
-  call s:PythonKeywordMatches(l:prefix, l:matches, l:seen)
-  if empty(l:matches)
-    return 0
-  endif
-
-  call complete(l:start, l:matches)
+  call feedkeys("\<C-n>", 'n')
   return 1
 endfunction
 
 function! s:MaybeAutoPythonKeywordComplete() abort
-  if mode() ==# 'i'
-    call s:CompletePythonKeywords(g:omarchy_python_keyword_completion_min_chars)
+  if mode() ==# 'i' && !pumvisible()
+    call s:TriggerPythonKeywordCompletion(g:omarchy_python_keyword_completion_min_chars)
   endif
 endfunction
 
 function! s:SetupPythonCompletion() abort
   call s:SetAleOmnifunc()
+  call s:SetupPythonKeywordCompletion()
   augroup omarchy_python_keyword_completion
     autocmd! * <buffer>
     autocmd TextChangedI <buffer> call <SID>MaybeAutoPythonKeywordComplete()
@@ -391,7 +358,7 @@ augroup omarchy_ale_omnifunc
 augroup END
 
 function! s:ManualComplete() abort
-  if s:CompletePythonKeywords(1)
+  if s:TriggerPythonKeywordCompletion(1)
     return ''
   elseif s:CommandExists('ALEComplete')
     execute 'ALEComplete'
