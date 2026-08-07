@@ -6,6 +6,7 @@
   - base config items?
   - jh and jl to move to start and end of line OR before after (or just after) nearest bracket on that side
   - config_endstuff?
+  - 0 cycle navigation in line: start first last end
   - fixvisualpaste? (don't overwrite @r)
   - folding functionality? Integrate with ALE?
   - Literal search option for fuzzy find commands (eg first char literal symbol)? ff vs f for literal?
@@ -19,7 +20,9 @@
 * Cline?
 * Local?
 
+### Later
+* Remove all omarchy references
+
 ### Maybe
 * Other functionality from previous config attempts
   - Mine zarchive\vimrc_ale\.vimrc_ale for features
-* 0 cycle navigation in line: start first last end
