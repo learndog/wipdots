@@ -294,7 +294,7 @@ Optional plugins are off by default:
 - `g:omarchy_use_gitgutter = 1` enables `airblade/vim-gitgutter` for added/changed/removed signs.
 - `g:omarchy_use_fugitive = 1` enables `tpope/vim-fugitive` for `:Git`, `:Git blame`, and `:Gdiffsplit`.
 - `g:omarchy_python_format_imports = 0` formats Python with `black` only. The default is `1`, which runs `isort` and then `black`.
-- `g:omarchy_python_keyword_completion = 0` disables the built-in Python keyword/builtin fallback completion.
+- `g:omarchy_python_keyword_completion = 0` disables the built-in Python buffer-symbol and keyword/builtin fallback completion.
 - `g:omarchy_python_keyword_completion_min_chars = 3` controls how many typed keyword characters are needed before the Python fallback menu opens automatically.
 
 Set the flags before `source .../init.vim`. The wrapper examples above are the preferred way for both Vim and Neovim. Do not put the flags after the `source` line; by then the plugin list has already been built.
@@ -326,7 +326,7 @@ Optional plugin checks after enabling flags:
 | `<Leader>ln` | ALE rename |
 | `<Leader>la` | ALE code action |
 | `<Leader>af` | run ALE fixers |
-| Python insert text | show Python keyword/builtin completions after 3 typed characters |
+| Python insert text | show buffer-symbol and keyword/builtin completions after 3 typed characters |
 | Insert `<Tab>` | complete after a word, otherwise insert a tab |
 | Insert `<S-Tab>` | previous completion menu item |
 | Insert `<CR>` | accept visible completion menu item |
@@ -346,11 +346,11 @@ Optional plugin checks after enabling flags:
 Python buffers have two completion paths:
 
 - ALE/LSP completion, when `pylsp` is installed and running.
-- A small built-in Python keyword/builtin fallback, so typing `imp` can show `import` even when the LSP is absent or still starting.
+- A small built-in Python fallback for current-buffer symbols plus keywords/builtins, so typing `hel` can show a local `hello`, and typing `imp` can show `import` even when the LSP is absent or still starting.
 
 In insert mode:
 
-- Type at least three keyword characters in a Python file, such as `imp`, to open the Python fallback menu automatically.
+- Type at least three keyword characters in a Python file, such as `hel` or `imp`, to open the Python fallback menu automatically.
 - Press `<Tab>` after a word to trigger completion manually, or press `<Tab>` while the menu is visible to move to the next item.
 - Press `<S-Tab>` while the menu is visible to move to the previous item.
 - Press `<CR>` while the menu is visible to accept the selected item.
@@ -475,6 +475,7 @@ Key checks on a symbol:
 - `<Leader>lh` hover.
 - `<Leader>ln` rename.
 - `<Leader>la` code action.
+- Typing `hel` in insert mode shows a local `hello` symbol when the buffer contains one.
 - Typing `imp` in insert mode shows the Python fallback completion menu with `import`.
 - Insert mode `<C-x><C-o>` triggers omnifunc completion.
 - Insert mode `<Tab>` after a word and `<M-/>` trigger completion without the two-key control sequence.

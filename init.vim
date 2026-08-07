@@ -312,20 +312,37 @@ function! s:CurrentKeywordPrefix() abort
   return [l:prefix, col('.') - strlen(l:prefix)]
 endfunction
 
-function! s:PythonKeywordMatches(prefix) abort
-  let l:matches = []
-  let l:pattern = '^' . escape(a:prefix, '\.^$*~[]')
+function! s:AddCompletionMatch(matches, seen, word, menu, kind) abort
+  if has_key(a:seen, a:word)
+    return
+  endif
+  let a:seen[a:word] = 1
+  call add(a:matches, {
+        \ 'word': a:word,
+        \ 'menu': a:menu,
+        \ 'kind': a:kind,
+        \ 'dup': 0,
+        \ })
+endfunction
+
+function! s:PythonBufferMatches(prefix, matches, seen) abort
+  for l:lnum in range(1, line('$'))
+    for l:word in split(getline(l:lnum), '[^A-Za-z0-9_]\+')
+      if l:word =~# '^[A-Za-z_][A-Za-z0-9_]*$'
+            \ && l:word !=# a:prefix
+            \ && stridx(l:word, a:prefix) == 0
+        call s:AddCompletionMatch(a:matches, a:seen, l:word, '[buffer]', 'w')
+      endif
+    endfor
+  endfor
+endfunction
+
+function! s:PythonKeywordMatches(prefix, matches, seen) abort
   for l:word in s:python_completion_words
-    if l:word =~# l:pattern
-      call add(l:matches, {
-            \ 'word': l:word,
-            \ 'menu': '[python]',
-            \ 'kind': 'k',
-            \ 'dup': 0,
-            \ })
+    if stridx(l:word, a:prefix) == 0
+      call s:AddCompletionMatch(a:matches, a:seen, l:word, '[python]', 'k')
     endif
   endfor
-  return l:matches
 endfunction
 
 function! s:CompletePythonKeywords(min_chars) abort
@@ -342,7 +359,10 @@ function! s:CompletePythonKeywords(min_chars) abort
     return 0
   endif
 
-  let l:matches = s:PythonKeywordMatches(l:prefix)
+  let l:matches = []
+  let l:seen = {}
+  call s:PythonBufferMatches(l:prefix, l:matches, l:seen)
+  call s:PythonKeywordMatches(l:prefix, l:matches, l:seen)
   if empty(l:matches)
     return 0
   endif
@@ -352,7 +372,7 @@ function! s:CompletePythonKeywords(min_chars) abort
 endfunction
 
 function! s:MaybeAutoPythonKeywordComplete() abort
-  if mode() ==# 'i' && !pumvisible()
+  if mode() ==# 'i'
     call s:CompletePythonKeywords(g:omarchy_python_keyword_completion_min_chars)
   endif
 endfunction
