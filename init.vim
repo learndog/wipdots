@@ -2,7 +2,7 @@
 " Source this file as ~/.vimrc or ~/.config/nvim/init.vim.
 
 " 1. Flags ---------------------------------------------------------------------
-let s:config_file = expand('<sfile>:p')
+let s:config_file = resolve(expand('<sfile>:p'))
 let g:omarchy_use_fugitive = get(g:, 'omarchy_use_fugitive', 0)
 let g:omarchy_use_gitgutter = get(g:, 'omarchy_use_gitgutter', 0)
 let g:omarchy_fzf_min_version = get(g:, 'omarchy_fzf_min_version', '0.54.0')
@@ -10,6 +10,13 @@ let g:omarchy_python_format_imports = get(g:, 'omarchy_python_format_imports', 1
 let g:omarchy_python_keyword_completion = get(g:, 'omarchy_python_keyword_completion', 1)
 let g:omarchy_python_keyword_completion_min_chars = get(g:, 'omarchy_python_keyword_completion_min_chars', 3)
 let s:python_dictionary_file = fnamemodify(s:config_file, ':h') . '/python-complete.txt'
+let s:python_dictionary_fallback_words = [
+      \ 'False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await',
+      \ 'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except',
+      \ 'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is',
+      \ 'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'try',
+      \ 'while', 'with', 'yield'
+      \ ]
 
 " ALE completion must be enabled before ALE loads.
 let g:ale_completion_enabled = get(g:, 'ale_completion_enabled', 1)
@@ -326,6 +333,9 @@ endfunction
 
 function! s:PythonDictionaryCompletionMatches(base, matches, seen) abort
   if !filereadable(s:python_dictionary_file)
+    for l:word in s:python_dictionary_fallback_words
+      call s:AddPythonCompletionMatch(a:matches, a:seen, l:word, '[python]', 'k', a:base)
+    endfor
     return
   endif
 

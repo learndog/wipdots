@@ -346,7 +346,7 @@ Optional plugin checks after enabling flags:
 Python buffers have three completion paths:
 
 - The config's Python `completefunc` scans the current buffer with exact-case matching, so typing `hel` can show a local `hello` without also matching `Hello`.
-- A Python dictionary file at `omarchy/vim/python-complete.txt` feeds keywords/builtins into that same completion function, so typing `imp` can show `import`.
+- A Python dictionary file at `omarchy/vim/python-complete.txt` feeds keywords/builtins into that same completion function, so typing `imp` can show `import`. The config resolves symlinked startup files back to the real repo path and has a small keyword fallback if the dictionary file is unavailable.
 - ALE/LSP completion remains configured through omnifunc and `:ALEComplete` when `pylsp` is installed and running.
 
 In insert mode:
