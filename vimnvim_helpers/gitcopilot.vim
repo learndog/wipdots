@@ -1,1 +1,0 @@
-" Helper for git copilot
