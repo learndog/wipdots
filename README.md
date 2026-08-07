@@ -326,7 +326,7 @@ Optional plugin checks after enabling flags:
 | `<Leader>ln` | ALE rename |
 | `<Leader>la` | ALE code action |
 | `<Leader>af` | run ALE fixers |
-| Python insert text | show native keyword completions after 3 typed characters |
+| Python insert text | show Python completions after 3 typed characters |
 | Insert `<Tab>` | complete after a word, otherwise insert a tab |
 | Insert `<S-Tab>` | previous completion menu item |
 | Insert `<CR>` | accept visible completion menu item |
@@ -345,13 +345,13 @@ Optional plugin checks after enabling flags:
 
 Python buffers have three completion paths:
 
-- Native Vim keyword completion scans the current buffer, so typing `hel` can show a local `hello`.
-- A Python dictionary file at `omarchy/vim/python-complete.txt` feeds keywords/builtins into native Vim keyword completion, so typing `imp` can show `import`.
+- The config's Python `completefunc` scans the current buffer with exact-case matching, so typing `hel` can show a local `hello` without also matching `Hello`.
+- A Python dictionary file at `omarchy/vim/python-complete.txt` feeds keywords/builtins into that same completion function, so typing `imp` can show `import`.
 - ALE/LSP completion remains configured through omnifunc and `:ALEComplete` when `pylsp` is installed and running.
 
 In insert mode:
 
-- Type at least three keyword characters in a Python file, such as `hel` or `imp`, to open the native keyword completion menu automatically.
+- Type at least three keyword characters in a Python file, such as `hel` or `imp`, to open the Python completion menu automatically.
 - Press `<Tab>` after a word to trigger completion manually, or press `<Tab>` while the menu is visible to move to the next item.
 - Press `<S-Tab>` while the menu is visible to move to the previous item.
 - Press `<CR>` while the menu is visible to accept the selected item.

@@ -290,33 +290,64 @@ function! s:SetAleOmnifunc() abort
   setlocal omnifunc=ale#completion#OmniFunc
 endfunction
 
-function! s:CurrentKeywordPrefix() abort
-  let l:head = strpart(getline('.'), 0, col('.') - 1)
-  let l:prefix = matchstr(l:head, '\k\+$')
-  return [l:prefix, col('.') - strlen(l:prefix)]
+function! s:PythonCompleteStart() abort
+  let l:line = getline('.')
+  let l:start = col('.') - 1
+  while l:start > 0 && strpart(l:line, l:start - 1, 1) =~# '[A-Za-z0-9_]'
+    let l:start -= 1
+  endwhile
+  return l:start
 endfunction
 
-function! s:ListHasCommaItem(value, item) abort
-  return (',' . a:value . ',') =~# ',' . escape(a:item, '\.^$*~[]') . ','
-endfunction
-
-function! s:SetupPythonKeywordCompletion() abort
-  if !g:omarchy_python_keyword_completion
+function! s:AddPythonCompletionMatch(matches, seen, word, menu, kind, base) abort
+  if a:word !~# '^[A-Za-z_][A-Za-z0-9_]*$'
+        \ || a:word ==# a:base
+        \ || stridx(a:word, a:base) != 0
+        \ || has_key(a:seen, a:word)
     return
   endif
 
-  if filereadable(s:python_dictionary_file)
-    let l:dict = fnameescape(s:python_dictionary_file)
-    if empty(&l:dictionary)
-      let &l:dictionary = l:dict
-    elseif !s:ListHasCommaItem(&l:dictionary, l:dict)
-      let &l:dictionary = l:dict . ',' . &l:dictionary
-    endif
+  let a:seen[a:word] = 1
+  call add(a:matches, {
+        \ 'word': a:word,
+        \ 'menu': a:menu,
+        \ 'kind': a:kind,
+        \ 'dup': 0,
+        \ })
+endfunction
 
-    if !s:ListHasCommaItem(&l:complete, 'k')
-      let &l:complete .= ',k'
-    endif
+function! s:PythonBufferCompletionMatches(base, matches, seen) abort
+  for l:line in getline(1, '$')
+    for l:word in split(l:line, '[^A-Za-z0-9_]\+')
+      call s:AddPythonCompletionMatch(a:matches, a:seen, l:word, '[buffer]', 'w', a:base)
+    endfor
+  endfor
+endfunction
+
+function! s:PythonDictionaryCompletionMatches(base, matches, seen) abort
+  if !filereadable(s:python_dictionary_file)
+    return
   endif
+
+  for l:word in readfile(s:python_dictionary_file)
+    call s:AddPythonCompletionMatch(a:matches, a:seen, l:word, '[python]', 'k', a:base)
+  endfor
+endfunction
+
+function! s:PythonCompletionMatches(base) abort
+  let l:matches = []
+  let l:seen = {}
+  call s:PythonBufferCompletionMatches(a:base, l:matches, l:seen)
+  call s:PythonDictionaryCompletionMatches(a:base, l:matches, l:seen)
+  return l:matches
+endfunction
+
+function! OmarchyPythonComplete(findstart, base) abort
+  if a:findstart
+    return s:PythonCompleteStart()
+  endif
+
+  return s:PythonCompletionMatches(a:base)
 endfunction
 
 function! s:TriggerPythonKeywordCompletion(min_chars) abort
@@ -324,7 +355,8 @@ function! s:TriggerPythonKeywordCompletion(min_chars) abort
     return 0
   endif
 
-  let [l:prefix, l:start] = s:CurrentKeywordPrefix()
+  let l:start = s:PythonCompleteStart()
+  let l:prefix = strpart(getline('.'), l:start, col('.') - 1 - l:start)
   if strlen(l:prefix) < a:min_chars
     return 0
   endif
@@ -333,7 +365,11 @@ function! s:TriggerPythonKeywordCompletion(min_chars) abort
     return 0
   endif
 
-  call feedkeys("\<C-n>", 'n')
+  if empty(s:PythonCompletionMatches(l:prefix))
+    return 0
+  endif
+
+  call feedkeys("\<C-x>\<C-u>", 'n')
   return 1
 endfunction
 
@@ -345,7 +381,7 @@ endfunction
 
 function! s:SetupPythonCompletion() abort
   call s:SetAleOmnifunc()
-  call s:SetupPythonKeywordCompletion()
+  setlocal completefunc=OmarchyPythonComplete
   augroup omarchy_python_keyword_completion
     autocmd! * <buffer>
     autocmd TextChangedI <buffer> call <SID>MaybeAutoPythonKeywordComplete()
