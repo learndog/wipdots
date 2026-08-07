@@ -7,6 +7,8 @@ let g:omarchy_use_fugitive = get(g:, 'omarchy_use_fugitive', 0)
 let g:omarchy_use_gitgutter = get(g:, 'omarchy_use_gitgutter', 0)
 let g:omarchy_fzf_min_version = get(g:, 'omarchy_fzf_min_version', '0.54.0')
 let g:omarchy_python_format_imports = get(g:, 'omarchy_python_format_imports', 1)
+let g:omarchy_python_keyword_completion = get(g:, 'omarchy_python_keyword_completion', 1)
+let g:omarchy_python_keyword_completion_min_chars = get(g:, 'omarchy_python_keyword_completion_min_chars', 3)
 
 " ALE completion must be enabled before ALE loads.
 let g:ale_completion_enabled = get(g:, 'ale_completion_enabled', 1)
@@ -284,19 +286,95 @@ let g:ale_echo_msg_format = get(g:, 'ale_echo_msg_format', '[%linter%] %s [%seve
 let g:ale_hover_to_preview = get(g:, 'ale_hover_to_preview', 1)
 
 function! s:SetAleOmnifunc() abort
-  if exists('*ale#completion#OmniFunc')
-    setlocal omnifunc=ale#completion#OmniFunc
+  setlocal omnifunc=ale#completion#OmniFunc
+endfunction
+
+let s:python_completion_words = [
+      \ 'False', 'None', 'True', '__import__', 'abs', 'aiter', 'all', 'anext',
+      \ 'and', 'any', 'as', 'ascii', 'assert', 'async', 'await', 'bin', 'bool',
+      \ 'break', 'breakpoint', 'bytearray', 'bytes', 'callable', 'chr', 'class',
+      \ 'classmethod', 'compile', 'complex', 'continue', 'def', 'del', 'delattr',
+      \ 'dict', 'dir', 'divmod', 'elif', 'else', 'enumerate', 'eval', 'except',
+      \ 'exec', 'filter', 'finally', 'float', 'for', 'format', 'from', 'frozenset',
+      \ 'getattr', 'global', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id',
+      \ 'if', 'import', 'in', 'input', 'int', 'is', 'isinstance', 'issubclass',
+      \ 'iter', 'lambda', 'len', 'list', 'locals', 'map', 'max', 'memoryview',
+      \ 'min', 'next', 'nonlocal', 'not', 'object', 'oct', 'open', 'or', 'ord',
+      \ 'pass', 'pow', 'print', 'property', 'raise', 'range', 'repr', 'return',
+      \ 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod',
+      \ 'str', 'sum', 'super', 'try', 'tuple', 'type', 'vars', 'while', 'with',
+      \ 'yield', 'zip'
+      \ ]
+
+function! s:CurrentKeywordPrefix() abort
+  let l:head = strpart(getline('.'), 0, col('.') - 1)
+  let l:prefix = matchstr(l:head, '\k\+$')
+  return [l:prefix, col('.') - strlen(l:prefix)]
+endfunction
+
+function! s:PythonKeywordMatches(prefix) abort
+  let l:matches = []
+  let l:pattern = '^' . escape(a:prefix, '\.^$*~[]')
+  for l:word in s:python_completion_words
+    if l:word =~# l:pattern
+      call add(l:matches, {
+            \ 'word': l:word,
+            \ 'menu': '[python]',
+            \ 'kind': 'k',
+            \ 'dup': 0,
+            \ })
+    endif
+  endfor
+  return l:matches
+endfunction
+
+function! s:CompletePythonKeywords(min_chars) abort
+  if !g:omarchy_python_keyword_completion || &filetype !=# 'python' || &paste
+    return 0
   endif
+
+  let [l:prefix, l:start] = s:CurrentKeywordPrefix()
+  if strlen(l:prefix) < a:min_chars
+    return 0
+  endif
+
+  if l:start > 1 && strpart(getline('.'), l:start - 2, 1) ==# '.'
+    return 0
+  endif
+
+  let l:matches = s:PythonKeywordMatches(l:prefix)
+  if empty(l:matches)
+    return 0
+  endif
+
+  call complete(l:start, l:matches)
+  return 1
+endfunction
+
+function! s:MaybeAutoPythonKeywordComplete() abort
+  if mode() ==# 'i' && !pumvisible()
+    call s:CompletePythonKeywords(g:omarchy_python_keyword_completion_min_chars)
+  endif
+endfunction
+
+function! s:SetupPythonCompletion() abort
+  call s:SetAleOmnifunc()
+  augroup omarchy_python_keyword_completion
+    autocmd! * <buffer>
+    autocmd TextChangedI <buffer> call <SID>MaybeAutoPythonKeywordComplete()
+  augroup END
 endfunction
 
 augroup omarchy_ale_omnifunc
   autocmd!
-  autocmd FileType python call <SID>SetAleOmnifunc()
+  autocmd FileType python call <SID>SetupPythonCompletion()
 augroup END
 
 function! s:ManualComplete() abort
-  if maparg('<Plug>(ale_complete)', 'i') !=# ''
-    call feedkeys("\<Plug>(ale_complete)", 'm')
+  if s:CompletePythonKeywords(1)
+    return ''
+  elseif s:CommandExists('ALEComplete')
+    execute 'ALEComplete'
   elseif !empty(&omnifunc)
     call feedkeys("\<C-x>\<C-o>", 'n')
   else
@@ -310,7 +388,7 @@ function! s:TabComplete() abort
     return "\<C-n>"
   endif
   let l:col = col('.') - 1
-  if l:col > 0 && getline('.')[l:col - 1] =~# '\k'
+  if l:col > 0 && strpart(getline('.'), l:col - 1, 1) =~# '\k'
     return s:ManualComplete()
   endif
   return "\<Tab>"
@@ -336,6 +414,10 @@ nnoremap <silent> <Leader>af :call <SID>RunCommand('ALEFix')<CR>
 nnoremap <silent> <Leader>ai :call <SID>RunCommand('ALEInfo')<CR>
 " MAP: <Tab> | Complete after a word, otherwise insert a tab
 inoremap <silent><expr> <Tab> <SID>TabComplete()
+" MAP: <S-Tab> | Previous completion menu item
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" MAP: <CR> | Accept completion menu item
+inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
 " MAP: <M-/> | Trigger insert completion
 inoremap <silent><expr> <M-/> <SID>ManualComplete()
 " MAP: <C-Space> | Trigger insert completion

@@ -294,6 +294,8 @@ Optional plugins are off by default:
 - `g:omarchy_use_gitgutter = 1` enables `airblade/vim-gitgutter` for added/changed/removed signs.
 - `g:omarchy_use_fugitive = 1` enables `tpope/vim-fugitive` for `:Git`, `:Git blame`, and `:Gdiffsplit`.
 - `g:omarchy_python_format_imports = 0` formats Python with `black` only. The default is `1`, which runs `isort` and then `black`.
+- `g:omarchy_python_keyword_completion = 0` disables the built-in Python keyword/builtin fallback completion.
+- `g:omarchy_python_keyword_completion_min_chars = 3` controls how many typed keyword characters are needed before the Python fallback menu opens automatically.
 
 Set the flags before `source .../init.vim`. The wrapper examples above are the preferred way for both Vim and Neovim. Do not put the flags after the `source` line; by then the plugin list has already been built.
 
@@ -324,7 +326,10 @@ Optional plugin checks after enabling flags:
 | `<Leader>ln` | ALE rename |
 | `<Leader>la` | ALE code action |
 | `<Leader>af` | run ALE fixers |
+| Python insert text | show Python keyword/builtin completions after 3 typed characters |
 | Insert `<Tab>` | complete after a word, otherwise insert a tab |
+| Insert `<S-Tab>` | previous completion menu item |
+| Insert `<CR>` | accept visible completion menu item |
 | Insert `<M-/>` | trigger completion |
 | `<C-L>` | refresh screen |
 | `<Leader>rr` | refresh screen |
@@ -335,6 +340,21 @@ Optional plugin checks after enabling flags:
 | `<Leader>dq` | close active diff |
 
 `<Leader>` is Space.
+
+## Completion Usage
+
+Python buffers have two completion paths:
+
+- ALE/LSP completion, when `pylsp` is installed and running.
+- A small built-in Python keyword/builtin fallback, so typing `imp` can show `import` even when the LSP is absent or still starting.
+
+In insert mode:
+
+- Type at least three keyword characters in a Python file, such as `imp`, to open the Python fallback menu automatically.
+- Press `<Tab>` after a word to trigger completion manually, or press `<Tab>` while the menu is visible to move to the next item.
+- Press `<S-Tab>` while the menu is visible to move to the previous item.
+- Press `<CR>` while the menu is visible to accept the selected item.
+- Press `<M-/>` to trigger completion manually without using the two-key `<C-x><C-o>` chord.
 
 ## Test Matrix
 
@@ -455,8 +475,10 @@ Key checks on a symbol:
 - `<Leader>lh` hover.
 - `<Leader>ln` rename.
 - `<Leader>la` code action.
+- Typing `imp` in insert mode shows the Python fallback completion menu with `import`.
 - Insert mode `<C-x><C-o>` triggers omnifunc completion.
 - Insert mode `<Tab>` after a word and `<M-/>` trigger completion without the two-key control sequence.
+- Insert mode `<Tab>`, `<S-Tab>`, and `<CR>` navigate or accept the visible completion menu.
 
 ### 5. Python Symbols
 
@@ -556,7 +578,7 @@ Expected: fugitive commands work. Gitgutter signs appear after editing a tracked
 - previews are plain text: install `bat`; on Debian the executable is `batcat`.
 - ALE has no Python LSP: install `python3-pylsp` on Debian or `python-lsp-server` on Arch, then restart Vim.
 - Python tools are installed but ALE cannot see them: check `:ALEInfo` and `command -v pylsp black isort flake8 pylint`.
-- terminal keys fail: use `:verbose map <key>` and check terminal/tmux key handling. Insert `<Tab>` after a word and `<M-/>` are the practical completion triggers; `<C-x><C-o>` remains the built-in omnifunc fallback.
+- terminal keys fail: use `:verbose imap <key>` and check terminal/tmux key handling. Insert `<Tab>` after a word is the most reliable manual completion trigger; `<M-/>` is optional and terminal-dependent. `<C-x><C-o>` remains the built-in omnifunc fallback.
 - optional plugin maps say a command is unavailable: the flag is probably enabled but `:PlugInstall` has not been rerun yet.
 
 ## Upgrade
