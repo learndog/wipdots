@@ -1,6 +1,49 @@
 " Omarchy Vim configuration
 " Source this file as ~/.vimrc or ~/.config/nvim/init.vim.
 
+" --------------------------------------------------------
+" Future AI assistant support strategy
+"
+" Intent:
+" - Keep AI features optional and off by default.
+" - Preserve the existing native/ALE completion path when AI features are off.
+" - Preserve the option to keep existing completion on <Tab> even when an AI
+"   assistant is enabled, because Copilot plans can have limited completion
+"   quotas and because local completion is faster for simple symbols.
+" - Prefer popular, focused, lower-risk plugins over broad integrations that
+"   install extra tooling or take over unrelated editor behavior.
+" - Leave a clean path for future assistants such as Codex, Cline, OpenCode,
+"   and local OpenAI-compatible models.
+"
+" GitHub Copilot plan:
+" - First implementation should use github/copilot.vim behind a flag such as
+"   g:omarchy_use_copilot. It is the official Vim/Neovim inline-suggestion
+"   integration and works with this Vimscript config style.
+" - Set g:copilot_no_tab_map = v:true by default. Map Copilot accept to a
+"   dedicated key such as <C-J>, and add an explicit suggest key under the
+"   <Leader>a namespace. Do not replace this config's <Tab> completion unless
+"   a separate opt-in flag explicitly asks for that behavior.
+" - Expose filetype controls through a user override such as
+"   g:omarchy_copilot_filetypes so sensitive, prose, generated, or low-value
+"   filetypes can be disabled without editing this file.
+" - Avoid risky defaults such as disabling SSL verification or always pulling
+"   the latest Copilot language server at startup.
+"
+" Chat and agent plan:
+" - Treat chat as a separate capability from inline completion. If added, use a
+"   separate flag such as g:omarchy_use_copilot_chat and guard it with has('nvim')
+"   because current rich chat plugins are Neovim-oriented.
+" - Prefer a separate <Leader>a key namespace for AI commands:
+"     <Leader>as  suggest
+"     <Leader>ac  chat
+"     <Leader>aa  ask about selection/current buffer
+"     <Leader>an  new agent session
+"     <Leader>ar  restore agent session
+" - For future agentic sessions, consider a Neovim-only ACP client behind its
+"   own flag so Codex, Cline, OpenCode, Copilot, and local-model agents can be
+"   added without entangling them with completion or ALE.
+" --------------------------------------------------------
+
 " 1. Flags ---------------------------------------------------------------------
 let s:config_file = resolve(expand('<sfile>:p'))
 let g:omarchy_use_fugitive = get(g:, 'omarchy_use_fugitive', 0)
