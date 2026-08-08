@@ -26,6 +26,8 @@
 * Confirm that nothing is being updated (plugins or other installs like language servers or fzf) unless :PlugUpdate is called. (Or, of course, the original :PlugInstall). I want to manually control updates rather than be exposed to every new version at release time. Also it would be nice to implement a :CheckForUpdates command that looks at vim/nvim, plugins and any other dependency to see if updates are available (for manual install; and to also be aware of changes when doing a new install on another computer)
 * Do analysis of keymaps and update as appropriate
 * Remove all omarchy references
+* Add to readme that $DOTFILES should either be set or replaced by the actual dotfile location in the local wrapper copy. (is it used elsewhere?) Also clarify that nothing in the repository should change unless it is meant to be a "global" change. Customization should happen in local copies of the config and wrappers.
+* Support nvim config switching. Is it worth the complexity? It might allow either mult configs or an easy way to try it before committing to anything. But setup would be well-known if user already does this, and confusing to someone who doesn't want complexity. So not clear it should be implemented, unless it can be done simply and cleverly to meet the needs of both.
 * Compare this config with https://github.com/smnatale/nvim_native and see if there are any good ideas that are
   1. Compatible with the current min requirements for vim and nvim, or
   2. Can be useful as nvim-only functionality that only gets invoked when nvim used

@@ -1,4 +1,3 @@
-" DEFAULT WRAPPER (no git, no copilot)
 " Omarchy Vim wrapper: FZF/Python helpers enabled, Copilot and git plugins disabled.
 " Copy this file to ~/.vimrc for Vim or ~/.config/nvim/init.vim for Neovim.
 " Keep this path pointed at the git repo copy of omarchy/vim/init.vim.

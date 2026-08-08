@@ -7,6 +7,8 @@ The config uses Vimscript, vim-plug, ALE, and optional fzf/fzf.vim. It does not 
 ## Files
 
 - `init.vim`: canonical config.
+- `use_this_wrapper_for_nvim_init_vim/*.vim`: wrapper presets for both Vim
+  and Neovim. Copy one to `~/.vimrc` or `~/.config/nvim/init.vim`.
 - `vim_strategy.md`: strategy and risk notes.
 - `README.md`: install and test instructions.
 
@@ -36,45 +38,53 @@ Without Python installed, this config should still load and the editor, statusli
 
 ## Version Tables
 
-Versions below were checked from official package pages on 2026-08-06. Debian 12 is stable, while Arch is rolling; use the check commands below to see what your machine actually has.
+Versions below are package versions checked from official package pages. Debian
+12 is stable, while Arch is rolling; use the check commands below to see what
+your machine actually has. The minimum column is the minimum for this config's
+documented functionality. Where no strict minimum is listed, the config only
+needs the command-line behavior described in the final column.
 
 ### Debian 12 Bookworm
 
-| Package | Version | Role | Required? |
+| Package | Checked package version | Minimum for this config | Required for / gained functionality |
 | --- | --- | --- | --- |
-| `vim` | `2:9.0.1378-2+deb12u2` | primary editor target | yes, unless using Nvim only |
-| `neovim` | `0.7.2-7` | optional Nvim target | optional |
-| `git` | `1:2.39.5-0+deb12u3` | plugin install + git features | yes |
-| `curl` | `7.88.1-10+deb12u15` | vim-plug bootstrap | yes |
-| `python3` | `3.11.2-1 and others` | Python tooling runtime | Python only |
-| `python3-pylsp` | `1.7.1-1` | Python LSP | Python only |
-| `black` | `23.1.0-1` | Python formatter | Python only |
-| `isort` | `5.6.4-1` | Python import sorter | Python only |
-| `flake8` | `5.0.4-4` | Python linter | Python only |
-| `pylint` | `2.16.2-2` | Python linter | Python only |
-| `ripgrep` | `13.0.0-4` | text search | recommended |
-| `bat` | `0.22.1-4` | fzf previews; executable is `batcat` | recommended |
-| `fzf` | `0.38.0-1` | shell fzf only; too old for current `fzf.vim` | do not rely on this for Vim |
+| `vim` | `2:9.0.1378-2+deb12u2` | Vim 8.2+ with `+job`, `+channel`, and `+timers`; Copilot needs Vim 9.0.0185+ | Primary Vim runtime. Required unless you use Neovim only. Enables the whole config, ALE async jobs, terminal/editor workflows, and Copilot inline suggestions when the Copilot flag is enabled. |
+| `neovim` | `0.7.2-7` | Neovim 0.6+ for Copilot | Optional Neovim runtime. Enables using this same Vimscript config as `~/.config/nvim/init.vim`. |
+| `git` | `1:2.39.5-0+deb12u3` | No config-pinned minimum; needs standard `git` CLI behavior | Required for vim-plug plugin clones, git file search, git branch display, diff helpers, gitgutter signs, and fugitive commands. |
+| `curl` | `7.88.1-10+deb12u15` | No config-pinned minimum; must support HTTPS downloads | Required only for `:OmarchyPlugBootstrap` to download vim-plug. |
+| `nodejs` | `18.20.4+dfsg-1~deb12u2` | Node.js 18+ | Required only when using `github/copilot.vim` inline suggestions. |
+| `npm` | `9.2.0~ds1-1` | Bundled/package version is fine with Node.js 18+ | Recommended with Node.js for Copilot tooling compatibility and any Node package-manager workflows. |
+| `python3` | `3.11.2-1 and others` | No config-pinned minimum | Runtime for Python tools. Not needed to start Vim or use native Python keyword completion. |
+| `python3-pylsp` | `1.7.1-1` | No config-pinned minimum | Enables Python LSP features through ALE. |
+| `black` | `23.1.0-1` | No config-pinned minimum | Enables Python formatting through `:ALEFix`. |
+| `isort` | `5.6.4-1` | No config-pinned minimum | Enables Python import sorting before `black` when `g:omarchy_python_format_imports = 1`. |
+| `flake8` | `5.0.4-4` | No config-pinned minimum | Enables Python lint diagnostics through ALE. |
+| `pylint` | `2.16.2-2` | No config-pinned minimum | Enables additional Python lint diagnostics through ALE. |
+| `ripgrep` | `13.0.0-4` | No config-pinned minimum | Enables fast project text search for `:Rg` and `<Leader>fr`. |
+| `bat` | `0.22.1-4` | No config-pinned minimum | Enables highlighted FZF previews; Debian's executable is `batcat`. |
+| `fzf` | `0.38.0-1` | `0.54.0+` for `fzf.vim` | Debian's package is too old for this Vim FZF integration. Install a current external `fzf` for interactive FZF pickers; otherwise fallback pickers are used. |
 
 Current `fzf.vim` requires fzf `0.54.0+`. Debian 12 packages fzf `0.38.0`, so Debian users should install a current `fzf` binary through another trusted channel if they want Vim FZF commands. The config no longer runs the fzf repository's `./install --bin` hook or enables fzf.vim by default without a current external `fzf`.
 
 ### Arch Linux
 
-| Package | Version | Role | Required? |
+| Package | Checked package version | Minimum for this config | Required for / gained functionality |
 | --- | --- | --- | --- |
-| `vim` | `9.2.0849-1` | Vim target | yes, unless using Nvim only |
-| `neovim` | `0.12.4-1` | Nvim target | optional |
-| `git` | `2.55.0-1` | plugin install + git features | yes |
-| `curl` | `8.21.0-1` | vim-plug bootstrap | yes |
-| `python` | `3.14.6-1` | Python tooling runtime | Python only |
-| `python-lsp-server` | `1.15.0-1` | Python LSP | Python only |
-| `python-black` | `26.5.1-1` | Python formatter | Python only |
-| `python-isort` | `9.0.0b1-1` | Python import sorter | Python only |
-| `python-flake8` | `1:7.3.0-2` | Python linter | Python only |
-| `python-pylint` | `4.0.6-1` | Python linter | Python only |
-| `ripgrep` | `15.2.0-1` | text search | recommended |
-| `bat` | `0.26.1-2` | fzf previews; executable is `bat` | recommended |
-| `fzf` | `0.74.2-1` | shell fzf; new enough for current `fzf.vim` | optional |
+| `vim` | `9.2.0849-1` | Vim 8.2+ with `+job`, `+channel`, and `+timers`; Copilot needs Vim 9.0.0185+ | Primary Vim runtime. Required unless you use Neovim only. Enables the whole config, ALE async jobs, terminal/editor workflows, and Copilot inline suggestions when the Copilot flag is enabled. |
+| `neovim` | `0.12.4-1` | Neovim 0.6+ for Copilot | Optional Neovim runtime. Enables using this same Vimscript config as `~/.config/nvim/init.vim`. |
+| `git` | `2.55.0-1` | No config-pinned minimum; needs standard `git` CLI behavior | Required for vim-plug plugin clones, git file search, git branch display, diff helpers, gitgutter signs, and fugitive commands. |
+| `curl` | `8.21.0-1` | No config-pinned minimum; must support HTTPS downloads | Required only for `:OmarchyPlugBootstrap` to download vim-plug. |
+| `nodejs` | `26.5.0-1` | Node.js 18+ | Required only when using `github/copilot.vim` inline suggestions. |
+| `npm` | `12.0.1-1` | Bundled/package version is fine with Node.js 18+ | Recommended with Node.js for Copilot tooling compatibility and any Node package-manager workflows. |
+| `python` | `3.14.6-1` | No config-pinned minimum | Runtime for Python tools. Not needed to start Vim or use native Python keyword completion. |
+| `python-lsp-server` | `1.15.0-1` | No config-pinned minimum | Enables Python LSP features through ALE. |
+| `python-black` | `26.5.1-1` | No config-pinned minimum | Enables Python formatting through `:ALEFix`. |
+| `python-isort` | `9.0.0b1-1` | No config-pinned minimum | Enables Python import sorting before `black` when `g:omarchy_python_format_imports = 1`. |
+| `python-flake8` | `1:7.3.0-2` | No config-pinned minimum | Enables Python lint diagnostics through ALE. |
+| `python-pylint` | `4.0.6-1` | No config-pinned minimum | Enables additional Python lint diagnostics through ALE. |
+| `ripgrep` | `15.2.0-1` | No config-pinned minimum | Enables fast project text search for `:Rg` and `<Leader>fr`. |
+| `bat` | `0.26.1-2` | No config-pinned minimum | Enables highlighted FZF previews. |
+| `fzf` | `0.74.2-1` | `0.54.0+` for `fzf.vim` | Enables interactive FZF file, git-file, text, buffer, line, symbol, and keymap pickers. |
 
 Arch's packaged `fzf` is current enough. The config lets vim-plug clone the Vim wrapper only and does not run an fzf binary install hook.
 
@@ -102,14 +112,14 @@ Check package install status and versions:
 
 ```sh
 dpkg-query -W -f='${binary:Package}\t${Version}\n' \
-  vim neovim git curl python3 python3-pylsp black isort flake8 pylint ripgrep bat fzf \
+  vim neovim git curl nodejs npm python3 python3-pylsp black isort flake8 pylint ripgrep bat fzf \
   2>/dev/null || true
 ```
 
 Check commands on `PATH`:
 
 ```sh
-for cmd in vim nvim git curl python3 pylsp black isort flake8 pylint rg batcat bat fzf; do
+for cmd in vim nvim git curl node npm python3 pylsp black isort flake8 pylint rg batcat bat fzf; do
   if command -v "$cmd" >/dev/null 2>&1; then
     printf '%-8s ' "$cmd"
     "$cmd" --version 2>/dev/null | head -n 1 || echo installed
@@ -133,7 +143,7 @@ Check package install status and versions:
 
 ```sh
 pacman -Q \
-  vim neovim git curl python python-lsp-server python-black python-isort \
+  vim neovim git curl nodejs npm python python-lsp-server python-black python-isort \
   python-flake8 python-pylint ripgrep bat fzf \
   2>/dev/null || true
 ```
@@ -141,7 +151,7 @@ pacman -Q \
 Check commands on `PATH`:
 
 ```sh
-for cmd in vim nvim git curl python pylsp black isort flake8 pylint rg bat fzf; do
+for cmd in vim nvim git curl node npm python pylsp black isort flake8 pylint rg bat fzf; do
   if command -v "$cmd" >/dev/null 2>&1; then
     printf '%-8s ' "$cmd"
     "$cmd" --version 2>/dev/null | head -n 1 || echo installed
@@ -176,6 +186,16 @@ sudo apt install vim neovim git curl python3-pylsp black isort flake8 pylint rip
 
 `python3-pynvim` is not required for this config because the config is Vimscript and does not use Python-hosted Neovim plugins. Install it only if you add plugins later that require Neovim's Python provider.
 
+### Debian 12: Add Copilot Inline Suggestions
+
+```sh
+sudo apt update
+sudo apt install nodejs npm
+```
+
+GitHub Copilot for Vim/Neovim requires Node.js `18+`. Debian 12's `nodejs`
+package satisfies that requirement.
+
 ### Arch: Vim Only
 
 ```sh
@@ -196,6 +216,12 @@ sudo pacman -S --needed \
 sudo pacman -S --needed \
   vim neovim git curl ripgrep bat fzf \
   python-lsp-server python-black python-isort python-flake8 python-pylint
+```
+
+### Arch: Add Copilot Inline Suggestions
+
+```sh
+sudo pacman -S --needed nodejs npm
 ```
 
 ## Set Up The Config
@@ -239,16 +265,52 @@ nvim
 nvim path/to/file.py
 ```
 
-### Vim Wrapper With Optional Plugin Flags
+### Wrapper Presets
 
-Use a wrapper if you want to enable optional plugins without editing `init.vim`:
+Use a wrapper if you want to enable optional plugins without editing
+`omarchy/vim/init.vim`. The wrapper itself is the file Vim or Neovim starts
+from; the wrapper then sources the canonical config from this git repo.
+
+Available wrapper presets (copy one of these manually, or as shown below, and edit the local copy as desired):
+
+- `init.vim`: default (same as `init_no_copilot_no_git.vim`)
+- `init_everything.vim`: all optional Omarchy features enabled.
+- `init_no_copilot_sugg.vim`: Copilot installed, but automatic inline
+  suggestions start disabled.
+- `init_no_copilot_cli.vim`: Copilot inline suggestions enabled, but the
+  separate Copilot CLI mapping disabled.
+- `init_no_copilot.vim`: FZF, gitgutter, fugitive, and Python helpers enabled;
+  Copilot disabled.
+- `init_no_copilot_no_git.vim`: FZF and Python helpers enabled; Copilot,
+  gitgutter, and fugitive disabled.
+- `init_no_fzf.vim`: all optional features except FZF.
+- `init_no_copilot_no_fzf.vim`: gitgutter, fugitive, and Python helpers
+  enabled; Copilot and FZF disabled.
+- `init_minimal.vim`: optional Omarchy flags explicitly disabled.
+
+Each wrapper contains this line:
+
+```vim
+let s:omarchy_vim_init = expand('~/dev_windows/dotfiles/omarchy/vim/init.vim')
+```
+
+Keep that path pointed at the git repo copy of `omarchy/vim/init.vim`. If your
+repo lives somewhere else, edit the copied wrapper before using it.
+
+### Vim Wrapper
+
+Copy the chosen wrapper to `~/.vimrc`:
 
 ```sh
-cat > ~/.vimrc <<EOF
-let g:omarchy_use_gitgutter = 1
-let g:omarchy_use_fugitive = 1
-execute 'source ' . fnameescape('$DOTFILES/omarchy/vim/init.vim')
-EOF
+WRAPPER="$DOTFILES/omarchy/vim/use_this_wrapper_for_nvim_init_vim/init_no_copilot.vim"
+
+if [ -L ~/.vimrc ]; then
+  rm ~/.vimrc
+elif [ -e ~/.vimrc ]; then
+  mv ~/.vimrc ~/.vimrc.bkup
+fi
+
+cp "$WRAPPER" ~/.vimrc
 ```
 
 Normal startup remains:
@@ -258,17 +320,21 @@ vim
 vim path/to/file.py
 ```
 
-### Neovim Wrapper With Optional Plugin Flags
+### Neovim Wrapper
 
-For Neovim, the wrapper goes at `~/.config/nvim/init.vim`:
+For Neovim, copy the chosen wrapper to `~/.config/nvim/init.vim`:
 
 ```sh
 mkdir -p ~/.config/nvim
-cat > ~/.config/nvim/init.vim <<EOF
-let g:omarchy_use_gitgutter = 1
-let g:omarchy_use_fugitive = 1
-execute 'source ' . fnameescape('$DOTFILES/omarchy/vim/init.vim')
-EOF
+WRAPPER="$DOTFILES/omarchy/vim/use_this_wrapper_for_nvim_init_vim/init_no_copilot.vim"
+
+if [ -L ~/.config/nvim/init.vim ]; then
+  rm ~/.config/nvim/init.vim
+elif [ -e ~/.config/nvim/init.vim ]; then
+  mv ~/.config/nvim/init.vim ~/.config/nvim/init.vim.bkup
+fi
+
+cp "$WRAPPER" ~/.config/nvim/init.vim
 ```
 
 Normal startup remains:
@@ -304,7 +370,7 @@ This downloads only vim-plug. It does not install ALE, FZF, Copilot, or any othe
 - fzf/fzf.vim are declared by default only when external `fzf` `0.54.0+` is already on `PATH`.
 - Copilot, gitgutter, and fugitive are declared only when their flags are set before sourcing `init.vim`.
 
-Close and reopen the editor after plugin installation. If you install `fzf` later, reopen Vim and run `:PlugInstall` again so vim-plug sees the updated plugin list. If you enabled optional plugins after the first install, run `:PlugInstall` again so vim-plug installs them.
+Close and reopen the editor after plugin installation. If you install `fzf` later, reopen Vim and run `:PlugInstall` again so vim-plug sees the updated plugin list. If you switch to a wrapper that enables more optional plugins after the first install, run `:PlugInstall` again so vim-plug installs them.
 
 ## Normal Startup Vs Test Startup
 
@@ -324,20 +390,24 @@ Use those only for isolated testing. They are not the normal daily startup comma
 
 ## Optional Plugins
 
-Optional plugins are off by default:
+Set these values before `source .../init.vim`. The preferred place is the
+chosen wrapper file copied to `~/.vimrc` for Vim or `~/.config/nvim/init.vim`
+for Neovim. You may also set them directly in your own `.vimrc` or `init.vim`,
+as long as the settings appear before the line that sources
+`omarchy/vim/init.vim`.
 
-- `g:omarchy_use_fzf = 1` requests `junegunn/fzf` and `junegunn/fzf.vim`. If external `fzf` `0.54.0+` is not found on `PATH`, the config resets this to `0`, shows a warning, and uses the fallback views. By default this is enabled automatically when `fzf` `0.54.0+` is found.
-- `g:omarchy_use_gitgutter = 1` enables `airblade/vim-gitgutter` for added/changed/removed signs.
-- `g:omarchy_use_fugitive = 1` enables `tpope/vim-fugitive` for `:Git`, `:Git blame`, and `:Gdiffsplit`.
-- `g:omarchy_install_copilot = 1` installs `github/copilot.vim` for optional inline suggestions. It requires Vim 9.0.0185+ or Neovim 0.6+ and Node.js.
-- `g:omarchy_copilot_suggestions_start_enabled = 1` starts automatic Copilot inline suggestions enabled. The default is `0`.
-- `g:omarchy_enable_copilot_cli_mapping = 1` enables `<Leader>ac` to open the separate GitHub Copilot CLI in a terminal split. The default is `0`.
-- `g:omarchy_python_format_imports = 0` formats Python with `black` only. The default is `1`, which runs `isort` and then `black`.
-- `g:omarchy_python_keyword_completion = 0` disables automatic native Python keyword completion.
-- `g:omarchy_python_keyword_completion_min_chars = 3` controls how many typed keyword characters are needed before the Python fallback menu opens automatically.
-- `g:omarchy_python_keyword_completion_max_lines = 5000` disables automatic Python keyword popup completion in larger buffers. Manual completion still works.
-
-Set the flags before `source .../init.vim`. The wrapper examples above are the preferred way for both Vim and Neovim. Do not put the flags after the `source` line; by then the plugin list has already been built.
+| Flag | Enable / use value | Disable / alternate value | Default | Effect | Dependencies and notes |
+| --- | --- | --- | --- | --- | --- |
+| `g:omarchy_use_fzf` | `1` | `0` | Auto: `1` only when external `fzf` is usable, otherwise `0` | Requests `junegunn/fzf` and `junegunn/fzf.vim`. | Requires external `fzf` `0.54.0+` on `PATH`. If set to `1` without a usable `fzf`, the config resets it to `0`, shows a warning, and uses fallback views. |
+| `g:omarchy_use_gitgutter` | `1` | `0` | `0` | Enables `airblade/vim-gitgutter` for added/changed/removed signs. | Requires `git` on `PATH`, a git worktree for useful signs, and `:PlugInstall` after enabling the flag. |
+| `g:omarchy_use_fugitive` | `1` | `0` | `0` | Enables `tpope/vim-fugitive` for `:Git`, `:Git blame`, and `:Gdiffsplit`. | Requires `git` on `PATH` and `:PlugInstall` after enabling the flag. |
+| `g:omarchy_install_copilot` | `1` | `0` | `0` | Installs `github/copilot.vim` for optional inline suggestions. | Requires Vim 9.0.0185+ or Neovim 0.6+, Node.js, and `:PlugInstall` after enabling the flag. |
+| `g:omarchy_copilot_suggestions_start_enabled` | `1` | `0` | `0` | Starts automatic Copilot inline suggestions enabled. | Only has an effect when `g:omarchy_install_copilot = 1`; it does not install Copilot by itself. |
+| `g:omarchy_enable_copilot_cli_mapping` | `1` | `0` | `0` | Enables `<Leader>ac` to open the separate GitHub Copilot CLI in a terminal split. | Does not require `g:omarchy_install_copilot = 1`. Requires the separate `copilot` executable on `PATH` and Vim/Neovim `:terminal` support. |
+| `g:omarchy_python_format_imports` | `1` for `isort` then `black` | `0` for `black` only | `1` | Controls Python `:ALEFix` formatter order. | Only affects Python `:ALEFix`; the selected formatter commands must be installed on `PATH`. |
+| `g:omarchy_python_keyword_completion` | `1` | `0` | `1` | Enables automatic native Python keyword completion. | Vim-native fallback completion for Python buffers. Does not require Python, ALE, or a language server. |
+| `g:omarchy_python_keyword_completion_min_chars` | Positive number, usually `3` | Not a boolean | `3` | Controls how many typed keyword characters are needed before the Python fallback menu opens automatically. | Only has an effect when `g:omarchy_python_keyword_completion = 1`. |
+| `g:omarchy_python_keyword_completion_max_lines` | Positive number, usually `5000` | `0` disables the size limit | `5000` | Skips automatic Python keyword popup completion in larger buffers. | Only has an effect when `g:omarchy_python_keyword_completion = 1`; manual completion still works. |
 
 Optional plugin checks after enabling flags:
 
@@ -414,22 +484,65 @@ When Copilot is installed with `g:omarchy_install_copilot = 1`, automatic inline
 
 Copilot support is optional and split into two separate tools.
 
-Inline suggestions use GitHub's official `github/copilot.vim` plugin. Enable plugin installation before sourcing this config:
+Inline suggestions use GitHub's official `github/copilot.vim` plugin:
+https://github.com/github/copilot.vim
+
+Requirements for inline suggestions:
+
+- Vim 9.0.0185+ or Neovim 0.6+.
+- Node.js 18+ on `PATH`.
+- `git` on `PATH` for vim-plug to clone the plugin.
+- A GitHub account with Copilot access.
+
+Check the local versions from the same shell that starts Vim or Neovim:
+
+```sh
+git --version
+node --version
+npm --version
+vim --version | head -n 1
+nvim --version | head -n 1
+```
+
+Enable plugin installation before sourcing this config:
 
 ```vim
 let g:omarchy_install_copilot = 1
 ```
 
-Then start Vim or Neovim and install plugins:
+Then start Vim or Neovim and confirm the flag was set early enough:
+
+```vim
+:echo g:omarchy_install_copilot
+```
+
+Expected: `1`.
+
+Install plugins:
 
 ```vim
 :PlugInstall
 ```
 
-Restart the editor, then authenticate the plugin:
+If `github/copilot.vim` does not appear in the vim-plug install window or
+`:PlugStatus`, the flag was not set before `omarchy/vim/init.vim` was sourced
+or the chosen wrapper has Copilot disabled. If it appears but fails to install,
+read the vim-plug install window and then run:
+
+```vim
+:messages
+:PlugStatus
+```
+
+Node.js is normally not needed for the `:PlugInstall` clone step itself; it is
+needed when the plugin runs. Missing or too-old Node.js usually shows up during
+`:Copilot setup` or runtime status checks.
+
+Restart the editor after plugin installation, then authenticate the plugin:
 
 ```vim
 :Copilot setup
+:OmarchyCopilotStatus
 ```
 
 Automatic inline suggestions stay off by default. To start them enabled:
@@ -491,6 +604,8 @@ Then use `<Leader>ac` or `:OmarchyCopilotChat` to open `copilot` in a terminal s
 
 Platform notes:
 
+- Git Bash uses the same `github/copilot.vim` plugin. Start Vim from Git Bash
+  after confirming `git`, `node`, and `npm` are visible in that shell.
 - `:OmarchyCopilotChat` requires a Vim/Neovim build with `:terminal`.
 - Terminal key handling varies by terminal, tmux, GUI Vim, Vim, and Neovim. `<Tab>` is the most reliable traditional completion key; `<M-/>` and other Alt mappings are terminal-dependent.
 - The CLI mapping only launches `copilot`; it does not pass broad authorization flags.
