@@ -1754,6 +1754,20 @@ nnoremap <silent> <Leader>lk :call <SID>RunCommand('ALEPreviousWrap')<CR>
 nnoremap <silent> <Leader>lf :call <SID>RunCommand('ALEFix')<CR>
 " MAP: <Leader>li | Show ALE info
 nnoremap <silent> <Leader>li :call <SID>RunCommand('ALEInfo')<CR>
+" Quickfix navigation is used for ALE references, grep results, compiler
+" errors, and other list-producing commands.
+" MAP: ]q | Next quickfix item
+nnoremap <silent> ]q :cnext<CR>
+" MAP: [q | Previous quickfix item
+nnoremap <silent> [q :cprevious<CR>
+" MAP: ]Q | Last quickfix item
+nnoremap <silent> ]Q :clast<CR>
+" MAP: [Q | First quickfix item
+nnoremap <silent> [Q :cfirst<CR>
+" MAP: <Leader>lq | Open quickfix list
+nnoremap <silent> <Leader>lq :copen<CR>
+" MAP: <Leader>lc | Close quickfix list
+nnoremap <silent> <Leader>lc :cclose<CR>
 command! OmarchyCopilotOn call <SID>SetCopilotEnabled(1)
 command! OmarchyCopilotOff call <SID>SetCopilotEnabled(0)
 command! OmarchyCopilotToggle call <SID>ToggleCopilot()

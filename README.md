@@ -751,6 +751,12 @@ diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 | `<Leader>lk` | previous ALE diagnostic |
 | `<Leader>lf` | run ALE fixers |
 | `<Leader>li` | show ALE info |
+| `]q` | next quickfix item |
+| `[q` | previous quickfix item |
+| `]Q` | last quickfix item |
+| `[Q` | first quickfix item |
+| `<Leader>lq` | open quickfix list |
+| `<Leader>lc` | close quickfix list |
 | `<Leader>at` | toggle Copilot inline suggestions, when `g:omarchy_install_copilot = 1` |
 | `<Leader>as` | request a Copilot inline suggestion, when `g:omarchy_install_copilot = 1` |
 | `<Leader>ac` | open Copilot CLI, when `g:omarchy_enable_copilot_cli_mapping = 1` |
@@ -773,6 +779,29 @@ diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 | `<Leader>sd` | delete a saved session |
 
 `<Leader>` is Space.
+
+## Quickfix Navigation
+
+Quickfix is Vim's built-in list for locations. This config uses it for
+LSP references by default, and other Vim commands may use it for grep results,
+compiler errors, test failures, or diagnostics.
+
+When you run `<Leader>lr`, ALE asks the Python LSP for references, writes all
+returned locations to the quickfix list, and jumps to the first item. Open the
+list with `<Leader>lq` to see all references. Move through them with `]q` and
+`[q`; jump to the last or first item with `]Q` and `[Q`. Close the list with
+`<Leader>lc`.
+
+Equivalent built-in commands:
+
+```vim
+:copen
+:cnext
+:cprevious
+:clast
+:cfirst
+:cclose
+```
 
 ## Sessions
 
