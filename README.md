@@ -770,6 +770,13 @@ diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 | `<Leader>rr` | refresh screen |
 | `<Leader>/` | toggle comment |
 | `<Leader>//` | force comment |
+| `<Leader>gb` | show git blame; uses fugitive when available, otherwise git CLI fallback |
+| `K` | show the blamed commit's short hash and subject, inside a Fugitive blame buffer |
+| `<Leader>gg` | open fugitive Git status, when `g:omarchy_use_fugitive = 1` |
+| `<Leader>gd` | open fugitive diff split, when `g:omarchy_use_fugitive = 1` |
+| `<Leader>gh` | preview gitgutter hunk, when `g:omarchy_use_gitgutter = 1` |
+| `<Leader>gs` | stage gitgutter hunk, when `g:omarchy_use_gitgutter = 1` |
+| `<Leader>gu` | undo gitgutter hunk, when `g:omarchy_use_gitgutter = 1` |
 | `<Leader>ds` | diff against saved file |
 | `<Leader>dg` | diff against git HEAD |
 | `<Leader>dq` | close active diff |
@@ -801,6 +808,65 @@ Equivalent built-in commands:
 :clast
 :cfirst
 :cclose
+```
+
+## Git And Blame
+
+`<Leader>gb` shows blame for the current tracked file.
+
+When Fugitive is installed, `<Leader>gb` runs:
+
+```vim
+:Git blame
+```
+
+Fugitive opens an interactive blame split. The blamed lines are aligned with
+the current file; move in the file or blame window to inspect commits. Use
+Fugitive's normal help from inside that window with `g?`. That is Fugitive's
+own help mapping, so this config does not reuse it for commit summaries.
+
+Inside a Fugitive blame window:
+
+```text
+K    echo the blamed commit's short hash and one-line subject
+<CR> open the full commit/patch for the blamed line
+g?   open Fugitive's blame help
+gq   close the blame view
+```
+
+The blame column itself stays compact: commit hash, author, and timestamp fit
+there reasonably well, but commit subjects often make the split too wide to be
+useful. Use `K` when you only need the oneline subject for the current line.
+Use `<CR>` when you need the commit message, diff, or surrounding patch.
+Close the blame window like a normal Vim split with `:close` or the window
+keymaps.
+
+When Fugitive is not installed, `<Leader>gb` falls back to:
+
+```sh
+git blame --date=short -w -- current-file
+```
+
+The fallback opens an unfiltered scratch buffer with the blame output. It is
+not as interactive as Fugitive, but it works without any Vim git plugin.
+
+FZF does not control blame. FZF affects picker commands such as file search,
+git-tracked file search, text search, buffer selection, symbols, sessions, and
+keymap lookup. Blame is either Fugitive-backed or plain Git CLI-backed.
+
+Fugitive-only mappings:
+
+```text
+<Leader>gg  Git status
+<Leader>gd  Fugitive diff split
+```
+
+Gitgutter mappings are separate from blame:
+
+```text
+<Leader>gh  preview current hunk
+<Leader>gs  stage current hunk
+<Leader>gu  undo current hunk
 ```
 
 ## Sessions

@@ -2259,9 +2259,82 @@ function! s:DiffGitHead() abort
   call s:StartDiffScratch('[HEAD] ' . fnamemodify(l:file, ':t'), l:lines)
 endfunction
 
+function! s:GitBlame() abort
+  if s:CommandExists('Git')
+    Git blame
+    return
+  endif
+
+  let l:file = expand('%:p')
+  if !executable('git') || empty(l:file) || !filereadable(l:file)
+    echo 'git and a saved file are required for :OmarchyGitBlame.'
+    return
+  endif
+
+  let l:dir = expand('%:p:h')
+  let l:root_list = systemlist('git -C ' . shellescape(l:dir) . ' rev-parse --show-toplevel 2>/dev/null')
+  if v:shell_error || empty(l:root_list)
+    echo 'Current file is not in a git repository.'
+    return
+  endif
+
+  let l:root = fnamemodify(l:root_list[0], ':p')
+  let l:rel = substitute(fnamemodify(l:file, ':p'), '^' . escape(l:root, '\.^$*~[]'), '', '')
+  let l:rel = substitute(l:rel, '\\', '/', 'g')
+  let l:tracked = systemlist('git -C ' . shellescape(l:root) . ' ls-files --full-name -- ' . shellescape(l:rel))
+  if v:shell_error || empty(l:tracked)
+    echo 'Current file is not tracked by git.'
+    return
+  endif
+
+  let l:lines = systemlist('git -C ' . shellescape(l:root) . ' blame --date=short -w -- ' . shellescape(l:tracked[0]))
+  if v:shell_error
+    echo 'git blame failed for current file.'
+    return
+  endif
+  call s:OpenScratch('[blame] ' . fnamemodify(l:file, ':t'), l:lines)
+endfunction
+
+function! s:FugitiveBlameCommitFromLine() abort
+  let l:commit = matchstr(getline('.'), '^\^\=[*?]*\zs\x\{5,\}\ze\>')
+  if empty(l:commit) || l:commit =~# '^0\+$'
+    return ''
+  endif
+  return l:commit
+endfunction
+
+function! s:FugitiveBlameShowSubject() abort
+  if &filetype !=# 'fugitiveblame' || !exists('*FugitiveExecute')
+    echo 'Open a Fugitive blame buffer with :Git blame first.'
+    return
+  endif
+
+  let l:commit = s:FugitiveBlameCommitFromLine()
+  if empty(l:commit)
+    echo 'No committed blame entry under cursor.'
+    return
+  endif
+
+  let l:result = FugitiveExecute(['show', '-s', '--format=%h %s', l:commit], bufnr('%'))
+  if get(l:result, 'exit_status', 1)
+    echo get(get(l:result, 'stderr', []), 0, 'Could not read blame commit.')
+    return
+  endif
+
+  for l:line in get(l:result, 'stdout', [])
+    if !empty(l:line)
+      echo l:line
+      return
+    endif
+  endfor
+  echo 'Commit has no subject.'
+endfunction
+
 command! DiffSaved call <SID>DiffSaved()
 command! DiffGitHead call <SID>DiffGitHead()
 command! DiffClose call <SID>DiffClose()
+command! OmarchyGitBlame call <SID>GitBlame()
+command! OmarchyFugitiveBlameSubject call <SID>FugitiveBlameShowSubject()
 " MAP: <Leader>ds | Diff buffer against saved file
 nnoremap <silent> <Leader>ds :DiffSaved<CR>
 " MAP: <Leader>dg | Diff buffer against git HEAD
@@ -2295,11 +2368,18 @@ if g:omarchy_use_gitgutter
   nnoremap <silent> <Leader>gu :call <SID>RunCommand('GitGutterUndoHunk')<CR>
 endif
 
+" MAP: <Leader>gb | Show git blame; uses fugitive when available, otherwise git CLI
+nnoremap <silent> <Leader>gb :OmarchyGitBlame<CR>
+
+augroup omarchy_fugitive_blame
+  autocmd!
+  " In Fugitive blame buffers, K echoes the short commit and subject under the cursor.
+  autocmd FileType fugitiveblame nnoremap <buffer><silent> K :OmarchyFugitiveBlameSubject<CR>
+augroup END
+
 if g:omarchy_use_fugitive
   " MAP: <Leader>gg | Open fugitive Git status
   nnoremap <silent> <Leader>gg :call <SID>RunCommand('Git')<CR>
-  " MAP: <Leader>gb | Open fugitive Git blame
-  nnoremap <silent> <Leader>gb :call <SID>RunCommand('Git blame')<CR>
   " MAP: <Leader>gd | Open fugitive diff split
   nnoremap <silent> <Leader>gd :call <SID>RunCommand('Gdiffsplit')<CR>
 endif

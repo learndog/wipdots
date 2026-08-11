@@ -44,5 +44,6 @@
   - also try to keep personal wrappers out of the dotfiles repos if there is anything too personal in them
 
 ### Maybe
+* Debug and debug ui for python?
 * Other functionality from previous config attempts
   - Mine zarchive\vimrc_ale\.vimrc_ale for features
