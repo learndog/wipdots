@@ -139,6 +139,7 @@ let g:ale_lint_on_filetype_changed = get(g:, 'ale_lint_on_filetype_changed', 0)
 let g:ale_lint_on_text_changed = get(g:, 'ale_lint_on_text_changed', 'never')
 let g:ale_lint_on_insert_leave = get(g:, 'ale_lint_on_insert_leave', 0)
 let g:ale_lint_on_save = get(g:, 'ale_lint_on_save', 1)
+let g:ale_references_show_contents = get(g:, 'ale_references_show_contents', 0)
 " ALE's Python root scan can block for 20+ seconds at the MSYS filesystem root.
 " Ruff receives the input filename and finds configuration itself, so skip
 " ALE's root-changing scan.
@@ -249,6 +250,24 @@ function! s:PathInList(path, paths) abort
   return 0
 endfunction
 
+function! s:PathUnderRoot(path, root) abort
+  if empty(a:path) || empty(a:root)
+    return 0
+  endif
+  let l:path = s:NormalizePath(resolve(expand(a:path)))
+  let l:root = substitute(s:NormalizePath(resolve(expand(a:root))), '/$', '', '')
+  return l:path ==# l:root || stridx(l:path, l:root . '/') == 0
+endfunction
+
+function! s:PathUnderAnyRoot(path, roots) abort
+  for l:root in a:roots
+    if s:PathUnderRoot(a:path, l:root)
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
+
 function! s:PythonEnvList(value) abort
   let l:items = []
   if type(a:value) == v:t_list
@@ -296,6 +315,22 @@ function! s:PythonEnvInterpreter(root) abort
   return ''
 endfunction
 
+function! s:ExternalPythonPath(path) abort
+  let l:path = expand(a:path)
+  if has('win32unix')
+    let l:drive = matchlist(l:path, '^/\([A-Za-z]\)\(/\|$\)')
+    if !empty(l:drive)
+      return toupper(l:drive[1]) . ':' . strpart(l:path, 2)
+    endif
+
+    let l:cygdrive = matchlist(l:path, '^/cygdrive/\([A-Za-z]\)\(/\|$\)')
+    if !empty(l:cygdrive)
+      return toupper(l:cygdrive[1]) . ':' . strpart(l:path, 11)
+    endif
+  endif
+  return l:path
+endfunction
+
 function! s:PythonProjectEnvRoots(buffer) abort
   let l:roots = []
   let l:filename = bufexists(a:buffer) ? fnamemodify(bufname(a:buffer), ':p') : ''
@@ -338,7 +373,7 @@ function! s:PythonProjectInterpreter(buffer) abort
   for l:root in s:PythonProjectEnvRoots(a:buffer)
     let l:python = s:PythonEnvInterpreter(l:root)
     if !empty(l:python)
-      return l:python
+      return s:ExternalPythonPath(l:python)
     endif
   endfor
   return ''
@@ -376,9 +411,26 @@ function! s:PythonResolvedTool(buffer, tool) abort
   return empty(l:candidates) ? '' : l:candidates[0]
 endfunction
 
+function! s:PythonInterpreterForTool(buffer, tool_path) abort
+  for l:root in s:PythonToolEnvRoots() + s:PythonProjectEnvRoots(a:buffer)
+    if s:PathUnderRoot(a:tool_path, l:root)
+      let l:python = s:PythonEnvInterpreter(l:root)
+      if !empty(l:python)
+        return l:python
+      endif
+    endif
+  endfor
+  return s:PythonResolvedTool(a:buffer, 'python')
+endfunction
+
 function! s:PythonConfigurePylspProjectEnv(buffer) abort
   let l:python = s:PythonProjectInterpreter(a:buffer)
   if empty(l:python)
+    return
+  endif
+  " If pylsp itself is already running from the project env, Jedi's default
+  " environment is the right one. Avoid adding an unnecessary override.
+  if s:PathUnderAnyRoot(s:PythonResolvedTool(a:buffer, 'pylsp'), s:PythonProjectEnvRoots(a:buffer))
     return
   endif
 
@@ -492,9 +544,9 @@ function! s:ConfigurePythonAleTools(buffer) abort
     let l:variable = 'ale_python_' . l:ale_name . '_executable'
     if has('win32unix') && l:ale_name ==# 'pylsp'
       " ALE otherwise combines cmd.exe syntax with MSYS paths. Run the
-      " project interpreter through a small URI adapter instead.
+      " Python interpreter that owns pylsp through a small URI adapter instead.
       let l:pylsp = s:PythonResolvedTool(a:buffer, 'pylsp')
-      let l:python = s:PythonResolvedTool(a:buffer, 'python')
+      let l:python = s:PythonInterpreterForTool(a:buffer, l:pylsp)
       if !empty(l:pylsp) && !empty(l:python) && filereadable(s:pylsp_msys_wrapper)
         let l:options = getbufvar(a:buffer, 'omarchy_python_pylsp_original_options', v:null)
         if l:options is v:null
@@ -726,6 +778,7 @@ function! OmarchyDebug() abort
         \ 'g:ale_lint_on_filetype_changed=' . string(g:ale_lint_on_filetype_changed),
         \ 'g:ale_lint_on_text_changed=' . string(g:ale_lint_on_text_changed),
         \ 'g:ale_lint_on_insert_leave=' . string(g:ale_lint_on_insert_leave),
+        \ 'g:ale_references_show_contents=' . string(g:ale_references_show_contents),
         \ ':ALEInfo command exists=' . string(exists(':ALEInfo') == 2),
         \ ':ALEGoToDefinition command exists=' . string(exists(':ALEGoToDefinition') == 2),
         \ ':ALEFindReferences command exists=' . string(exists(':ALEFindReferences') == 2),

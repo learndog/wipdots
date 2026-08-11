@@ -630,15 +630,21 @@ Wrong-setting behavior:
 
 What happens internally:
 
-- For `pylsp`, the config sets
-  `pylsp.plugins.jedi.environment` to the detected project Python executable.
-  `pylsp` uses Jedi for completion, go-to-definition, hover, references,
-  signatures, and symbols. This tells Jedi, "resolve imports using the project
-  interpreter," even though the `pylsp` executable itself came from the editor
-  tools env.
+- For `pylsp`, if `pylsp` itself is running from the project env, the config
+  leaves Jedi's environment alone. That preserves the simple project-venv
+  workflow. If `pylsp` is running from a separate editor tools env, the config
+  sets `pylsp.plugins.jedi.environment` to the detected project Python
+  executable. `pylsp` uses Jedi for completion, go-to-definition, hover,
+  references, signatures, and symbols. This tells Jedi, "resolve imports using
+  the project interpreter," even though the `pylsp` executable itself came from
+  the editor tools env. In Git Bash/MSYS Vim, the config converts MSYS paths
+  such as `/c/Users/me/app/.venv/Scripts/python.exe` to native-style paths such
+  as `C:/Users/me/app/.venv/Scripts/python.exe` before sending that setting to
+  native Windows `pylsp`.
 - For Pyright, the config sets `python.pythonPath` to the detected project
   Python executable. Pyright then analyzes imports against the project env while
-  `pyright-langserver` still runs from the editor tools env or `PATH`.
+  `pyright-langserver` still runs from the editor tools env or `PATH`. The same
+  MSYS-to-native path conversion is applied when needed.
 - Ruff, Flake8, and Pylint are run as editor tools. Ruff normally reads project
   config from `pyproject.toml`/Ruff config files and does not need to be
   installed in the project env. Pylint is more likely to need project imports,
@@ -666,6 +672,7 @@ override defaults without modifying the canonical config.
 | `g:omarchy_python_lint_on_open` | `0` | Queues a separate ALE lint pass, including configured external linters, when a Python buffer opens. |
 | `g:omarchy_python_lint_on_open_delay` | `500` | Delay in milliseconds for the optional open-time lint pass. |
 | `g:omarchy_python_references_command` | `'ALEFindReferences -quickfix'` | Uses ALE's quickfix reference list without requiring fzf. |
+| `g:ale_references_show_contents` | `0` | Keeps ALE's quickfix reference path from reading every referenced line; this avoids list-index errors from stale/out-of-range LSP locations. Use `ALEFindReferences -contents` only when you want inline reference text. |
 | `g:omarchy_python_format_imports` | `1` | Historical name: runs Ruff lint fixes/import cleanup before `ruff format`; `0` runs only `ruff format`. |
 | `g:omarchy_python_keyword_completion` | `1` | Enables Vim-native Python keyword and buffer completion. |
 | `g:omarchy_python_keyword_completion_min_chars` | `3` | Characters typed before the automatic native completion menu opens. |

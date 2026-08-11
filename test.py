@@ -6,6 +6,10 @@ def hello(name: str) -> str:
 
 def hello(name: str) -> str:
   """this fn says hello"""
-  print(f"Hello {name}")
+  print(f"Hello there {name}")
+  print(f"I said hi")
 
 hello("Ted")
+hello("Ned")
+hello("Fred")
+hello("Sam")
