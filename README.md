@@ -77,7 +77,7 @@ needs the command-line behavior described in the final column.
 | `python3` | `3.11.2-1 and others` | No config-pinned minimum | Runtime for Python tools. Not needed to start Vim or use native Python keyword completion. |
 | `python3-pylsp` | `1.7.1-1` | No config-pinned minimum | Enables Python LSP features through ALE. |
 | `python3-rope` | Distribution version | No config-pinned minimum | Improves pylsp rename and refactoring support. |
-| `ruff` | Not packaged in Debian 12 stable | No config-pinned minimum | Default fast Python linter and fixer/formatter; install with pipx or a project virtualenv. |
+| `ruff` | Not packaged in Debian 12 stable | No config-pinned minimum | Default fast Python linter and fixer/formatter; install with pipx or the editor tools env. |
 | `flake8` | `5.0.4-4` | No config-pinned minimum | Optional traditional Python lint diagnostics through ALE. |
 | `pylint` | `2.16.2-2` | No config-pinned minimum | Optional deeper Python diagnostics; generally slower and noisier than Ruff. |
 | `black` | `23.1.0-1` | No config-pinned minimum | Optional formatter when selected with a custom `g:ale_fixers`. |
@@ -475,6 +475,36 @@ fixing are separate functions:
 
 ### Profiles And Dependencies
 
+Keep the editor tools separate from project dependencies:
+
+```text
+editor tools env:
+  contains pylsp, ruff, optional flake8/pylint, and optional pyright
+
+project env:
+  contains numpy, pandas, django, requests, your package, and other runtime deps
+```
+
+The recommended editor tools env is `~/.venvs/vim-tools`, which matches the
+default `g:omarchy_python_tools_env`. Vim and Neovim prefer executables from
+that env first, then fall back to `PATH`, then project envs only as a
+compatibility fallback. This means opening Vim from a project shell should not
+force you to install `pylsp` or `ruff` into that project's `.venv`.
+
+Zero-configuration still works. If `~/.venvs/vim-tools` does not exist, or if
+it exists but does not contain the requested tool, the config keeps looking.
+That means a user can still activate a project `.venv`, install `pylsp` and
+`ruff` there, open Vim from that shell, and get the default `pylsp + ruff`
+profile without setting any Omarchy options. This is supported as the simple
+fallback path, even though the dedicated editor tools env is the cleaner
+long-term setup.
+
+Project imports are handled separately. For project envs named `.venv`, `venv`,
+or `env`, the config detects the project Python and passes it to the selected
+LSP for import analysis. For conda or micromamba projects, activate the project
+env before launching Vim or set `g:omarchy_python_project_env`/the buffer-local
+`b:omarchy_python_project_env` to that environment root.
+
 | Profile | Settings | Dependencies | Use when |
 | --- | --- | --- | --- |
 | Default no-Node | `g:omarchy_python_lsp = 'pylsp'`, `g:omarchy_python_linters = ['ruff']` | `python-lsp-server[rope]`, Ruff | Recommended general setup; fast linting and no Node.js requirement. |
@@ -486,30 +516,133 @@ Ruff is the recommended editor linter. Pylint provides deeper semantic/design
 checks but is slower and often noisier. Running both Flake8 and Pylint is
 usually redundant; use the combination only when a project requires both.
 
-Install the default profile in a virtualenv:
+Install the default profile in the dedicated editor tools env:
 
 ```sh
-python -m pip install "python-lsp-server[rope]" ruff
+python -m venv ~/.venvs/vim-tools
+~/.venvs/vim-tools/bin/python -m pip install -U pip
+~/.venvs/vim-tools/bin/python -m pip install -U "python-lsp-server[rope]" pylsp-rope ruff
 ```
 
-For the Node profile, install Pyright and Ruff:
+On Windows-native Python, replace `bin/python` with `Scripts/python.exe`.
+
+For the Node profile, install Pyright globally and keep Ruff in the editor
+tools env:
 
 ```sh
 npm install -g pyright
-python -m pip install ruff
 ```
 
 Optional linters can be installed in the same environment:
 
 ```sh
-python -m pip install flake8 pylint
+~/.venvs/vim-tools/bin/python -m pip install -U flake8 pylint
 ```
 
+If you prefer conda or micromamba for editor tools, create one dedicated env
+and point `g:omarchy_python_tools_env` at the environment root:
+
+```vim
+let g:omarchy_python_tools_env = expand('~/mambaforge/envs/vim-tools')
+```
+
+Use the equivalent root for your machine. It is the directory that contains
+`bin/python` on Linux/macOS or `python.exe` and `Scripts/` on Windows. Project
+dependencies do not belong in this env; install them in the project env.
+
 The Debian and Arch package-oriented default installs are listed under
-[Install Missing Requirements](#install-missing-requirements). The config uses
-the inherited `PATH` and active `VIRTUAL_ENV`, and also searches upward from a
-Python buffer for project virtualenvs such as `.venv`, `venv`, and `env`. Both
-Unix `bin` and Windows `Scripts` layouts are supported.
+[Install Missing Requirements](#install-missing-requirements). System-package
+or `pipx` installs work too because the config falls back to Vim's inherited
+`PATH` when a tool is not found in `g:omarchy_python_tools_env`.
+
+### Project Env Detection
+
+There are two different paths involved:
+
+```text
+g:omarchy_python_tools_env:
+  env root where editor tools are installed
+
+project env:
+  env root where project packages are installed
+```
+
+For `g:omarchy_python_tools_env` and `g:omarchy_python_project_env`, provide
+the environment root, not the Python executable path. Examples:
+
+```text
+~/.venvs/vim-tools
+/home/me/work/app/.venv
+/opt/conda/envs/myproject
+C:/Users/me/.venvs/vim-tools
+C:/Users/me/mambaforge/envs/myproject
+```
+
+To identify a currently active environment, run:
+
+```sh
+python -c "import sys; print(sys.executable)"
+```
+
+If the output is `/home/me/work/app/.venv/bin/python`, the env root is
+`/home/me/work/app/.venv`. If the output is
+`C:\Users\me\work\app\.venv\Scripts\python.exe`, the env root is
+`C:\Users\me\work\app\.venv`. If the output is from conda or micromamba and
+looks like `/opt/conda/envs/myproject/bin/python` or
+`C:\Users\me\mambaforge\envs\myproject\python.exe`, use the corresponding
+`.../envs/myproject` directory as the root.
+
+For normal projects, prefer a project-local env named `.venv`:
+
+```sh
+cd myproject
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+On Windows-native Python, activation and executable paths use `Scripts` instead
+of `bin`.
+
+If a project's environment is not located under the project directory, set the
+project env root before sourcing `init.vim`:
+
+```vim
+let g:omarchy_python_project_env = expand('~/mambaforge/envs/myproject')
+```
+
+For a one-off buffer-local override, set:
+
+```vim
+let b:omarchy_python_project_env = expand('~/mambaforge/envs/myproject')
+```
+
+Wrong-setting behavior:
+
+- If `g:omarchy_python_tools_env` points to a missing directory, it is ignored.
+  If it points to an existing env that does not contain `pylsp`, `ruff`, or the
+  requested tool, the config falls back to `PATH` and then project envs.
+- If `g:omarchy_python_project_env` points to a missing directory or a directory
+  without Python, project env detection continues. If it points to a real but
+  wrong env with Python, the LSP will trust it; Vim cannot know which import
+  environment you intended. Leave this option unset unless auto-detection cannot
+  find the right project env.
+
+What happens internally:
+
+- For `pylsp`, the config sets
+  `pylsp.plugins.jedi.environment` to the detected project Python executable.
+  `pylsp` uses Jedi for completion, go-to-definition, hover, references,
+  signatures, and symbols. This tells Jedi, "resolve imports using the project
+  interpreter," even though the `pylsp` executable itself came from the editor
+  tools env.
+- For Pyright, the config sets `python.pythonPath` to the detected project
+  Python executable. Pyright then analyzes imports against the project env while
+  `pyright-langserver` still runs from the editor tools env or `PATH`.
+- Ruff, Flake8, and Pylint are run as editor tools. Ruff normally reads project
+  config from `pyproject.toml`/Ruff config files and does not need to be
+  installed in the project env. Pylint is more likely to need project imports,
+  so it is intentionally opt-in rather than the default.
 
 Git Bash Vim uses an MSYS path model while project virtualenvs contain native
 Windows executables. The config uses `/usr/bin/bash` and
@@ -527,6 +660,8 @@ override defaults without modifying the canonical config.
 | --- | --- | --- |
 | `g:omarchy_python_lsp` | `'pylsp'` | Selects `pylsp`, `pyright`, or an empty string/`'none'` to disable Python LSP actions. |
 | `g:omarchy_python_linters` | `['ruff']` | Selects external Python linters. Supported built-ins are Ruff, Flake8, and Pylint. |
+| `g:omarchy_python_tools_env` | `expand('~/.venvs/vim-tools')` | Preferred editor tools env. Put `pylsp`, `ruff`, optional `flake8`/`pylint`, and optional Python-packaged `pyright` here. |
+| `g:omarchy_python_project_env` | `''` | Optional project env root override when the project env is not discoverable as `.venv`, `venv`, `env`, `$VIRTUAL_ENV`, or `$CONDA_PREFIX`. Prefer `b:omarchy_python_project_env` for per-project overrides. |
 | `g:omarchy_python_lsp_on_open` | `1` | Starts the selected LSP asynchronously after cheap dependency checks when a Python buffer opens. |
 | `g:omarchy_python_lint_on_open` | `0` | Queues a separate ALE lint pass, including configured external linters, when a Python buffer opens. |
 | `g:omarchy_python_lint_on_open_delay` | `500` | Delay in milliseconds for the optional open-time lint pass. |
@@ -921,7 +1056,8 @@ Inside Vim:
 Expected:
 
 - `:ALEInfo` shows `pylsp` and `ruff` for the default profile, with executable
-  paths from the active or project virtualenv when applicable.
+  paths from `g:omarchy_python_tools_env` when that env has been created, or
+  from Vim's inherited `PATH` otherwise.
 - opening the file starts pylsp but does not queue a separate Ruff open-time
   pass; saving or running `:ALELint` reports the unused `sys` import.
 - `:ALEFix` runs Ruff lint fixes/import cleanup followed by `ruff format` by
@@ -1147,12 +1283,12 @@ vim -Nu /tmp/omarchy-sessions-wrapper.vim
   not install the ALE editor plugin.
 - pylsp is missing: install `python3-pylsp python3-rope` on Debian,
   `python-lsp-server python-rope` on Arch, or
-  `python -m pip install "python-lsp-server[rope]"` in the active/project
-  virtualenv, then restart Vim.
+  `~/.venvs/vim-tools/bin/python -m pip install "python-lsp-server[rope]"`
+  in the editor tools env, then restart Vim.
 - Python tools are installed but ALE cannot see them: run `:ALEInfo` and
-  `:OmarchyDebug`, then check
-  `command -v python pylsp pyright-langserver ruff flake8 pylint`. Vim inherits
-  an activated virtualenv and also searches common project virtualenv names.
+  `:OmarchyDebug`, then check `g:omarchy_python_tools_env`, the reported
+  candidate paths, and
+  `command -v python pylsp pyright-langserver ruff flake8 pylint`.
 - Git Bash pylsp navigation fails or stalls: confirm `/usr/bin/bash` and the
   resolved `.venv/Scripts/python.exe` and `pylsp.exe` paths in
   `:OmarchyDebug`. The MSYS adapter is used only for Git Bash Vim with pylsp.

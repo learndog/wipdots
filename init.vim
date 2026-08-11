@@ -84,10 +84,12 @@ let g:omarchy_python_lsp_on_open = get(g:, 'omarchy_python_lsp_on_open', 1)
 let g:omarchy_python_lint_on_open = get(g:, 'omarchy_python_lint_on_open', 0)
 let g:omarchy_python_lint_on_open_delay = get(g:, 'omarchy_python_lint_on_open_delay', 500)
 let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_command', 'ALEFindReferences -quickfix')
+let g:omarchy_python_tools_env = get(g:, 'omarchy_python_tools_env', expand('~/.venvs/vim-tools'))
+let g:omarchy_python_project_env = get(g:, 'omarchy_python_project_env', '')
 
 " Python tooling profile: basic Node-available setup.
-" Dependencies: pyright-langserver from npm, ruff from pip/pipx.
-" Install: npm install -g pyright; python -m pip install ruff
+" Dependencies: pyright-langserver from npm, ruff from the editor tools env.
+" Install: npm install -g pyright; ~/.venvs/vim-tools/bin/python -m pip install ruff
 " Arch: sudo pacman -S pyright ruff
 " Debian stable: sudo apt install nodejs npm pipx; sudo npm install -g pyright; pipx install ruff
 " Tradeoff: Pyright generally gives stronger type-aware navigation and
@@ -100,8 +102,8 @@ let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_com
 " let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
 
 " Python tooling profile: stronger Python analysis.
-" Dependencies: pyright-langserver from npm, ruff and pylint from pip/pipx.
-" Install: npm install -g pyright; python -m pip install ruff pylint
+" Dependencies: pyright-langserver from npm, ruff and pylint from the editor tools env.
+" Install: npm install -g pyright; ~/.venvs/vim-tools/bin/python -m pip install ruff pylint
 " Arch: sudo pacman -S pyright ruff python-pylint
 " Debian stable: sudo apt install nodejs npm pylint pipx; sudo npm install -g pyright; pipx install ruff
 " Tradeoff: more complete diagnostics, but pylint can be slow and noisy. Prefer
@@ -237,15 +239,72 @@ function! s:PythonVirtualenvNames() abort
   return get(g:, 'ale_virtualenv_dir_names', ['.venv', 'env', 've', 'venv', 'virtualenv', '.env'])
 endfunction
 
-function! s:PythonToolCandidates(buffer, tool) abort
+function! s:PathInList(path, paths) abort
+  let l:normalized = s:NormalizePath(resolve(expand(a:path)))
+  for l:path in a:paths
+    if s:NormalizePath(resolve(expand(l:path))) ==# l:normalized
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
+
+function! s:PythonEnvList(value) abort
+  let l:items = []
+  if type(a:value) == v:t_list
+    let l:items = copy(a:value)
+  elseif type(a:value) == v:t_string && !empty(a:value)
+    let l:items = [a:value]
+  endif
+  return map(filter(l:items, 'type(v:val) == v:t_string && !empty(v:val)'), 'expand(v:val)')
+endfunction
+
+function! s:PythonToolEnvRoots() abort
+  return filter(s:PythonEnvList(get(g:, 'omarchy_python_tools_env', '')), 'isdirectory(v:val)')
+endfunction
+
+function! s:PythonEnvToolCandidates(root, tool) abort
+  let l:candidates = []
+  for l:path in [
+        \ a:root . '/Scripts/' . a:tool . '.exe',
+        \ a:root . '/Scripts/' . a:tool . '.cmd',
+        \ a:root . '/Scripts/' . a:tool,
+        \ a:root . '/bin/' . a:tool,
+        \ a:root . '/' . a:tool . '.exe',
+        \ a:root . '/' . a:tool,
+        \ ]
+    if filereadable(l:path)
+      call add(l:candidates, l:path)
+    endif
+  endfor
+  return l:candidates
+endfunction
+
+function! s:PythonEnvInterpreter(root) abort
+  for l:path in [
+        \ a:root . '/Scripts/python.exe',
+        \ a:root . '/Scripts/python',
+        \ a:root . '/bin/python',
+        \ a:root . '/bin/python3',
+        \ a:root . '/python.exe',
+        \ a:root . '/python',
+        \ ]
+    if filereadable(l:path)
+      return l:path
+    endif
+  endfor
+  return ''
+endfunction
+
+function! s:PythonProjectEnvRoots(buffer) abort
   let l:roots = []
   let l:filename = bufexists(a:buffer) ? fnamemodify(bufname(a:buffer), ':p') : ''
   let l:start = empty(l:filename) ? getcwd() : fnamemodify(l:filename, ':h')
   let l:project_root = s:PythonProjectRoot(a:buffer)
+  let l:tool_roots = s:PythonToolEnvRoots()
 
-  if !empty($VIRTUAL_ENV) && isdirectory($VIRTUAL_ENV)
-    call add(l:roots, $VIRTUAL_ENV)
-  endif
+  let l:explicit = getbufvar(a:buffer, 'omarchy_python_project_env', get(g:, 'omarchy_python_project_env', ''))
+  call extend(l:roots, s:PythonEnvList(l:explicit))
 
   for l:dir in s:FindUpwards(l:start)
     for l:name in s:PythonVirtualenvNames()
@@ -259,18 +318,37 @@ function! s:PythonToolCandidates(buffer, tool) abort
     endif
   endfor
 
-  let l:candidates = []
+  if !empty($VIRTUAL_ENV) && isdirectory($VIRTUAL_ENV)
+    call add(l:roots, $VIRTUAL_ENV)
+  endif
+  if !empty($CONDA_PREFIX) && isdirectory($CONDA_PREFIX)
+    call add(l:roots, $CONDA_PREFIX)
+  endif
+
+  let l:result = []
   for l:root in s:ListUnique(l:roots)
-    for l:path in [
-          \ l:root . '/Scripts/' . a:tool . '.exe',
-          \ l:root . '/Scripts/' . a:tool . '.cmd',
-          \ l:root . '/Scripts/' . a:tool,
-          \ l:root . '/bin/' . a:tool,
-          \ ]
-      if filereadable(l:path)
-        call add(l:candidates, l:path)
-      endif
-    endfor
+    if !s:PathInList(l:root, l:tool_roots)
+      call add(l:result, l:root)
+    endif
+  endfor
+  return l:result
+endfunction
+
+function! s:PythonProjectInterpreter(buffer) abort
+  for l:root in s:PythonProjectEnvRoots(a:buffer)
+    let l:python = s:PythonEnvInterpreter(l:root)
+    if !empty(l:python)
+      return l:python
+    endif
+  endfor
+  return ''
+endfunction
+
+function! s:PythonToolCandidates(buffer, tool) abort
+  let l:candidates = []
+
+  for l:root in s:PythonToolEnvRoots()
+    call extend(l:candidates, s:PythonEnvToolCandidates(l:root, a:tool))
   endfor
 
   if exists('*exepath')
@@ -279,6 +357,10 @@ function! s:PythonToolCandidates(buffer, tool) abort
       call add(l:candidates, l:path)
     endif
   endif
+
+  for l:root in s:PythonProjectEnvRoots(a:buffer)
+    call extend(l:candidates, s:PythonEnvToolCandidates(l:root, a:tool))
+  endfor
 
   return s:ListUnique(l:candidates)
 endfunction
@@ -292,6 +374,57 @@ endfunction
 function! s:PythonResolvedTool(buffer, tool) abort
   let l:candidates = s:PythonExecutableCandidates(a:buffer, a:tool)
   return empty(l:candidates) ? '' : l:candidates[0]
+endfunction
+
+function! s:PythonConfigurePylspProjectEnv(buffer) abort
+  let l:python = s:PythonProjectInterpreter(a:buffer)
+  if empty(l:python)
+    return
+  endif
+
+  let l:config = deepcopy(getbufvar(a:buffer, 'ale_python_pylsp_config',
+        \ get(g:, 'ale_python_pylsp_config', {})))
+  if type(l:config) != v:t_dict
+    let l:config = {}
+  endif
+  if !has_key(l:config, 'pylsp') || type(l:config.pylsp) != v:t_dict
+    let l:config.pylsp = {}
+  endif
+  if !has_key(l:config.pylsp, 'plugins') || type(l:config.pylsp.plugins) != v:t_dict
+    let l:config.pylsp.plugins = {}
+  endif
+  if !has_key(l:config.pylsp.plugins, 'jedi') || type(l:config.pylsp.plugins.jedi) != v:t_dict
+    let l:config.pylsp.plugins.jedi = {}
+  endif
+  if !has_key(l:config.pylsp.plugins.jedi, 'environment')
+    let l:config.pylsp.plugins.jedi.environment = l:python
+    call setbufvar(a:buffer, 'ale_python_pylsp_config', l:config)
+  endif
+endfunction
+
+function! s:PythonConfigurePyrightProjectEnv(buffer) abort
+  let l:python = s:PythonProjectInterpreter(a:buffer)
+  if empty(l:python)
+    return
+  endif
+
+  let l:config = deepcopy(getbufvar(a:buffer, 'ale_python_pyright_config',
+        \ get(g:, 'ale_python_pyright_config', {})))
+  if type(l:config) != v:t_dict
+    let l:config = {}
+  endif
+  if !has_key(l:config, 'python') || type(l:config.python) != v:t_dict
+    let l:config.python = {}
+  endif
+  if !has_key(l:config.python, 'pythonPath')
+    let l:config.python.pythonPath = l:python
+    call setbufvar(a:buffer, 'ale_python_pyright_config', l:config)
+  endif
+endfunction
+
+function! s:ConfigurePythonLspProjectEnv(buffer) abort
+  call s:PythonConfigurePylspProjectEnv(a:buffer)
+  call s:PythonConfigurePyrightProjectEnv(a:buffer)
 endfunction
 
 function! s:PythonProjectMarkers() abort
@@ -337,6 +470,8 @@ function! s:ConfigurePythonAleTools(buffer) abort
   if !bufexists(a:buffer) || getbufvar(a:buffer, '&filetype') !=# 'python'
     return
   endif
+
+  call s:ConfigurePythonLspProjectEnv(a:buffer)
 
   let l:tool_names = [tolower(get(g:, 'omarchy_python_lsp', ''))]
   call extend(l:tool_names, copy(get(g:, 'omarchy_python_linters', [])))
@@ -545,6 +680,9 @@ endfunction
 command! OmarchyFzfStatus call OmarchyFzfStatus()
 
 function! OmarchyDebug() abort
+  if &filetype ==# 'python'
+    call s:ConfigurePythonAleTools(bufnr('%'))
+  endif
   let l:lines = [
         \ 'Omarchy debug',
         \ '',
@@ -563,16 +701,25 @@ function! OmarchyDebug() abort
         \ 'g:omarchy_python_lsp_on_open=' . string(g:omarchy_python_lsp_on_open),
         \ 'g:omarchy_python_lint_on_open=' . string(g:omarchy_python_lint_on_open),
         \ 'g:omarchy_python_references_command=' . string(g:omarchy_python_references_command),
+        \ 'g:omarchy_python_tools_env=' . string(g:omarchy_python_tools_env),
+        \ 'g:omarchy_python_project_env=' . string(g:omarchy_python_project_env),
         \ '$VIRTUAL_ENV=' . $VIRTUAL_ENV,
+        \ '$CONDA_PREFIX=' . $CONDA_PREFIX,
         \ 'python project root=' . s:PythonProjectRoot(bufnr('%')),
+        \ 'python tools env roots=' . string(s:PythonToolEnvRoots()),
+        \ 'python project env roots=' . string(s:PythonProjectEnvRoots(bufnr('%'))),
+        \ 'python project interpreter=' . s:PythonProjectInterpreter(bufnr('%')),
         \ 'buffer ALE shell=' . getbufvar(bufnr('%'), 'ale_shell', ''),
         \ 'buffer pylsp executable=' . getbufvar(bufnr('%'), 'ale_python_pylsp_executable', ''),
         \ 'buffer pylsp server executable=' . getbufvar(bufnr('%'), 'omarchy_python_pylsp_server_executable', ''),
+        \ 'buffer pylsp config=' . string(getbufvar(bufnr('%'), 'ale_python_pylsp_config', get(g:, 'ale_python_pylsp_config', {}))),
+        \ 'buffer pyright executable=' . getbufvar(bufnr('%'), 'ale_python_pyright_executable', ''),
+        \ 'buffer pyright config=' . string(getbufvar(bufnr('%'), 'ale_python_pyright_config', get(g:, 'ale_python_pyright_config', {}))),
         \ 'pylsp MSYS wrapper=' . s:pylsp_msys_wrapper,
         \ 'buffer ruff executable=' . getbufvar(bufnr('%'), 'ale_python_ruff_executable', ''),
-        \ 'pylsp local candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'pylsp')),
+        \ 'pylsp tool candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'pylsp')),
         \ 'pylsp executable candidates=' . string(s:PythonExecutableCandidates(bufnr('%'), 'pylsp')),
-        \ 'ruff local candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'ruff')),
+        \ 'ruff tool candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'ruff')),
         \ 'ruff executable candidates=' . string(s:PythonExecutableCandidates(bufnr('%'), 'ruff')),
         \ 'g:ale_linters=' . string(g:ale_linters),
         \ 'g:ale_lint_on_enter=' . string(g:ale_lint_on_enter),
@@ -1004,12 +1151,12 @@ endfunction
 
 function! s:PythonLspInstallHint(name) abort
   if a:name ==# 'pylsp'
-    return 'Install python-lsp-server in the same shell Vim uses, or set g:omarchy_python_lsp = "".'
+    return 'Install python-lsp-server in g:omarchy_python_tools_env or put pylsp on PATH; project virtualenvs are used for import analysis, not as the preferred editor tool source.'
   endif
   if a:name ==# 'pyright'
-    return 'Install pyright so pyright-langserver is on PATH, or use the no-Node pylsp profile.'
+    return 'Install pyright so pyright-langserver is in g:omarchy_python_tools_env or on PATH, or use the no-Node pylsp profile.'
   endif
-  return 'Install the configured language server, or set g:omarchy_python_lsp = "".'
+  return 'Install the configured language server in g:omarchy_python_tools_env or on PATH, or set g:omarchy_python_lsp = "".'
 endfunction
 
 function! s:PythonLspExecutableName(buffer, name) abort
@@ -1053,7 +1200,7 @@ function! s:PythonConfiguredLspPrereqsAvailable(buffer, noisy) abort
   if !l:available
     if a:noisy && !has_key(s:python_lsp_warning_shown, l:name)
       echohl WarningMsg
-      echom 'Python LSP "' . l:name . '" is configured, but executable "' . l:executable . '" is not available in PATH, $VIRTUAL_ENV, or project .venv. ' . s:PythonLspInstallHint(l:name)
+      echom 'Python LSP "' . l:name . '" is configured, but executable "' . l:executable . '" is not available in g:omarchy_python_tools_env, PATH, or fallback project envs. ' . s:PythonLspInstallHint(l:name)
       echohl None
       let s:python_lsp_warning_shown[l:name] = 1
     endif
@@ -1126,7 +1273,7 @@ function! s:PythonConfiguredLintPrereqsAvailable(buffer, noisy) abort
 
   if a:noisy && !empty(l:missing)
     echohl WarningMsg
-    echom 'Python linters unavailable: ' . join(l:missing, ', ') . '. Activate the project virtualenv or install the configured tools; ALE was not invoked for missing-only linting.'
+    echom 'Python linters unavailable: ' . join(l:missing, ', ') . '. Install configured tools in g:omarchy_python_tools_env or on PATH; ALE was not invoked for missing-only linting.'
     echohl None
   endif
   return l:available
