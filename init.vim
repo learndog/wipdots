@@ -76,12 +76,12 @@ let g:omarchy_python_keyword_completion_max_lines = get(g:, 'omarchy_python_keyw
 " Optional extra pylsp code actions: python -m pip install pylsp-rope
 " Arch: sudo pacman -S python-lsp-server python-rope ruff
 " Debian stable: sudo apt install python3-pylsp python3-rope python3-pylsp-rope pipx; pipx install ruff
-" Tradeoff: keeps the toolchain Python-only while still enabling LSP features
-" on Python file open. Ruff provides fast diagnostics; pylint remains a manual
-" or wrapper opt-in for deeper but slower checks.
+" Tradeoff: keeps the toolchain Python-only. LSP features start on explicit
+" language actions by default to keep Python file open cheap; set
+" g:omarchy_python_lsp_on_open = 1 only after the local LSP startup is fast.
 let g:omarchy_python_lsp = get(g:, 'omarchy_python_lsp', 'pylsp')
 let g:omarchy_python_linters = get(g:, 'omarchy_python_linters', ['ruff'])
-let g:omarchy_python_lsp_on_open = get(g:, 'omarchy_python_lsp_on_open', 1)
+let g:omarchy_python_lsp_on_open = get(g:, 'omarchy_python_lsp_on_open', 0)
 let g:omarchy_python_lint_on_open = get(g:, 'omarchy_python_lint_on_open', 0)
 let g:omarchy_python_lint_on_open_delay = get(g:, 'omarchy_python_lint_on_open_delay', 500)
 let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_command', 'ALEFindReferences -quickfix')
@@ -95,7 +95,7 @@ let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_com
 " diagnostics than pylsp, while ruff keeps linting fast.
 " let g:omarchy_python_lsp = 'pyright'
 " let g:omarchy_python_linters = ['ruff']
-" let g:omarchy_python_lsp_on_open = 1
+" let g:omarchy_python_lsp_on_open = 0
 " let g:omarchy_python_lint_on_open = 0
 " let g:omarchy_python_lint_on_open_delay = 500
 " let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
@@ -109,7 +109,7 @@ let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_com
 " this for larger projects or when the environment has already proven fast.
 " let g:omarchy_python_lsp = 'pyright'
 " let g:omarchy_python_linters = ['ruff', 'pylint']
-" let g:omarchy_python_lsp_on_open = 1
+" let g:omarchy_python_lsp_on_open = 0
 " let g:omarchy_python_lint_on_open = 0
 " let g:omarchy_python_lint_on_open_delay = 500
 " let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
@@ -200,6 +200,71 @@ function! s:FzfPathCandidates() abort
   endif
 
   return l:candidates
+endfunction
+
+function! s:ListUnique(items) abort
+  let l:seen = {}
+  let l:result = []
+  for l:item in a:items
+    if empty(l:item) || has_key(l:seen, l:item)
+      continue
+    endif
+    let l:seen[l:item] = 1
+    call add(l:result, l:item)
+  endfor
+  return l:result
+endfunction
+
+function! s:FindUpwards(start) abort
+  let l:dir = empty(a:start) ? getcwd() : fnamemodify(a:start, ':p')
+  let l:dirs = []
+  while !empty(l:dir)
+    call add(l:dirs, l:dir)
+    let l:parent = fnamemodify(l:dir, ':h')
+    if l:parent ==# l:dir
+      break
+    endif
+    let l:dir = l:parent
+  endwhile
+  return l:dirs
+endfunction
+
+function! s:PythonVirtualenvNames() abort
+  return get(g:, 'ale_virtualenv_dir_names', ['.venv', 'env', 've', 'venv', 'virtualenv', '.env'])
+endfunction
+
+function! s:PythonToolCandidates(buffer, tool) abort
+  let l:roots = []
+  let l:filename = bufexists(a:buffer) ? fnamemodify(bufname(a:buffer), ':p') : ''
+  let l:start = empty(l:filename) ? getcwd() : fnamemodify(l:filename, ':h')
+
+  if !empty($VIRTUAL_ENV)
+    call add(l:roots, $VIRTUAL_ENV)
+  endif
+
+  for l:dir in s:FindUpwards(l:start)
+    for l:name in s:PythonVirtualenvNames()
+      call add(l:roots, l:dir . '/' . l:name)
+    endfor
+  endfor
+
+  let l:candidates = []
+  for l:root in s:ListUnique(l:roots)
+    call add(l:candidates, l:root . '/Scripts/' . a:tool . '.exe')
+    call add(l:candidates, l:root . '/Scripts/' . a:tool . '.cmd')
+    call add(l:candidates, l:root . '/Scripts/' . a:tool)
+    call add(l:candidates, l:root . '/bin/' . a:tool)
+  endfor
+
+  if exists('*exepath')
+    call add(l:candidates, exepath(a:tool))
+  endif
+
+  return s:ListUnique(l:candidates)
+endfunction
+
+function! s:PythonExecutableCandidates(buffer, tool) abort
+  return filter(copy(s:PythonToolCandidates(a:buffer, a:tool)), 'executable(v:val)')
 endfunction
 
 function! s:ExternalFzfPath() abort
@@ -352,6 +417,11 @@ function! OmarchyDebug() abort
         \ 'g:omarchy_python_lsp_on_open=' . string(g:omarchy_python_lsp_on_open),
         \ 'g:omarchy_python_lint_on_open=' . string(g:omarchy_python_lint_on_open),
         \ 'g:omarchy_python_references_command=' . string(g:omarchy_python_references_command),
+        \ '$VIRTUAL_ENV=' . $VIRTUAL_ENV,
+        \ 'pylsp local candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'pylsp')),
+        \ 'pylsp executable candidates=' . string(s:PythonExecutableCandidates(bufnr('%'), 'pylsp')),
+        \ 'ruff local candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'ruff')),
+        \ 'ruff executable candidates=' . string(s:PythonExecutableCandidates(bufnr('%'), 'ruff')),
         \ 'g:ale_linters=' . string(g:ale_linters),
         \ 'g:ale_lint_on_enter=' . string(g:ale_lint_on_enter),
         \ 'g:ale_lint_on_filetype_changed=' . string(g:ale_lint_on_filetype_changed),
@@ -788,11 +858,86 @@ function! s:PythonLspInstallHint(name) abort
   return 'Install the configured language server, or set g:omarchy_python_lsp = "".'
 endfunction
 
+function! s:PythonLspExecutableName(name) abort
+  if a:name ==# 'pylsp'
+    return get(g:, 'ale_python_pylsp_executable', 'pylsp')
+  endif
+  if a:name ==# 'pyright'
+    return get(g:, 'ale_python_pyright_executable', 'pyright-langserver')
+  endif
+  return a:name
+endfunction
+
+function! s:ExecutableLooksLikePath(executable_name) abort
+  return a:executable_name =~# '[/\\]'
+endfunction
+
+function! s:PythonConfiguredLspPrereqsAvailable(buffer, noisy) abort
+  let l:name = tolower(get(g:, 'omarchy_python_lsp', ''))
+  if empty(l:name) || l:name ==# 'none'
+    if a:noisy
+      echo 'Python LSP is disabled. Set g:omarchy_python_lsp to "pylsp" or "pyright" to enable language actions.'
+    endif
+    return 0
+  endif
+
+  let l:executable = s:PythonLspExecutableName(l:name)
+  let l:candidates = s:ExecutableLooksLikePath(l:executable)
+        \ ? [l:executable]
+        \ : s:PythonToolCandidates(a:buffer, l:executable)
+  let l:available = !empty(filter(copy(l:candidates), 'executable(v:val)'))
+
+  if !l:available
+    if a:noisy && !has_key(s:python_lsp_warning_shown, l:name)
+      echohl WarningMsg
+      echom 'Python LSP "' . l:name . '" is configured, but executable "' . l:executable . '" is not available in PATH, $VIRTUAL_ENV, or project .venv. ' . s:PythonLspInstallHint(l:name)
+      echohl None
+      let s:python_lsp_warning_shown[l:name] = 1
+    endif
+
+    call s:Debug('Python LSP prerequisite unavailable: ' . l:name . ' executable=' . l:executable)
+    return 0
+  endif
+
+  if l:name ==# 'pyright' && !executable('node')
+    if a:noisy && !has_key(s:python_lsp_warning_shown, l:name . ':node')
+      echohl WarningMsg
+      echom 'Python LSP "pyright" requires Node.js, but executable "node" is not available. Install Node.js or use the no-Node pylsp profile.'
+      echohl None
+      let s:python_lsp_warning_shown[l:name . ':node'] = 1
+    endif
+
+    call s:Debug('Python LSP prerequisite unavailable: pyright requires node')
+    return 0
+  endif
+
+  return 1
+endfunction
+
 function! s:AleLspInstallHint() abort
-  return 'ALE is not loaded from ' . s:ale_plugin_dir . '. Run :PlugInstall inside this Vim; installing pylsp/ruff with pip only installs Python tools, not the Vim ALE plugin.'
+  return 'ALE is not loaded. Run :PlugInstall inside this Vim; installing pylsp/ruff with pip only installs Python tools, not the Vim ALE plugin. This config installs vim-plug plugins under ' . s:ale_plugin_dir . '.'
+endfunction
+
+function! s:AleCommandsAvailable(noisy) abort
+  if exists(':ALEInfo') == 2
+    return 1
+  endif
+
+  if a:noisy
+    echohl WarningMsg
+    echom s:AleLspInstallHint()
+    echohl None
+  endif
+
+  call s:Debug('ALE commands unavailable')
+  return 0
 endfunction
 
 function! s:PythonEnabledLspLinters(buffer, noisy) abort
+  if !s:AleCommandsAvailable(a:noisy)
+    return v:null
+  endif
+
   try
     return ale#lsp_linter#GetEnabled(a:buffer)
   catch
@@ -820,10 +965,8 @@ function! s:PythonLspExecutableAvailable(buffer, linter, noisy) abort
   if empty(l:executable)
     let l:executable = l:name
   endif
-  if l:name ==# 'pylsp' && l:executable ==# l:name
-    let l:executable = get(g:, 'ale_python_pylsp_executable', 'pylsp')
-  elseif l:name ==# 'pyright' && l:executable ==# l:name
-    let l:executable = get(g:, 'ale_python_pyright_executable', 'pyright-langserver')
+  if (l:name ==# 'pylsp' || l:name ==# 'pyright') && l:executable ==# l:name
+    let l:executable = s:PythonLspExecutableName(l:name)
   endif
 
   try
@@ -860,11 +1003,7 @@ function! s:PythonLspExecutableAvailable(buffer, linter, noisy) abort
 endfunction
 
 function! s:PythonLspAvailableForBuffer(buffer, noisy) abort
-  let l:configured_lsp = tolower(get(g:, 'omarchy_python_lsp', ''))
-  if empty(l:configured_lsp) || l:configured_lsp ==# 'none'
-    if a:noisy
-      echo 'Python LSP is disabled. Set g:omarchy_python_lsp to "pylsp" or "pyright" to enable language actions.'
-    endif
+  if !s:PythonConfiguredLspPrereqsAvailable(a:buffer, a:noisy)
     return 0
   endif
 
