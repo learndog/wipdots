@@ -57,14 +57,63 @@
 " 1. Flags ---------------------------------------------------------------------
 let s:config_file = resolve(expand('<sfile>:p'))
 let s:plug_home = has('nvim') ? stdpath('data') . '/site' : expand('~/.vim')
+let s:ale_plugin_dir = s:plug_home . '/plugged/ale'
 let g:omarchy_use_fugitive = get(g:, 'omarchy_use_fugitive', 0)
 let g:omarchy_use_gitgutter = get(g:, 'omarchy_use_gitgutter', 0)
-let g:omarchy_fzf_min_version = get(g:, 'omarchy_fzf_min_version', '0.54.0')
+" Reduce the enablement check to allow 0.38.0. It appears to provide the basic picker functionality
+" at least for the Aug 2026 version of fzf.vim.
+" let g:omarchy_fzf_min_version = get(g:, 'omarchy_fzf_min_version', '0.54.0')
+let g:omarchy_fzf_min_version = get(g:, 'omarchy_fzf_min_version', '0.38.0')
 let g:omarchy_use_fzf = get(g:, 'omarchy_use_fzf', -1)
 let g:omarchy_python_format_imports = get(g:, 'omarchy_python_format_imports', 1)
 let g:omarchy_python_keyword_completion = get(g:, 'omarchy_python_keyword_completion', 1)
 let g:omarchy_python_keyword_completion_min_chars = get(g:, 'omarchy_python_keyword_completion_min_chars', 3)
 let g:omarchy_python_keyword_completion_max_lines = get(g:, 'omarchy_python_keyword_completion_max_lines', 5000)
+
+" Python tooling profile: default no-Node setup.
+" Dependencies: python-lsp-server and ruff, usually installed with pip/pipx.
+" Install: python -m pip install "python-lsp-server[rope]" ruff
+" Optional extra pylsp code actions: python -m pip install pylsp-rope
+" Arch: sudo pacman -S python-lsp-server python-rope ruff
+" Debian stable: sudo apt install python3-pylsp python3-rope python3-pylsp-rope pipx; pipx install ruff
+" Tradeoff: keeps the toolchain Python-only while still enabling LSP features
+" on Python file open. Ruff provides fast diagnostics; pylint remains a manual
+" or wrapper opt-in for deeper but slower checks.
+let g:omarchy_python_lsp = get(g:, 'omarchy_python_lsp', 'pylsp')
+let g:omarchy_python_linters = get(g:, 'omarchy_python_linters', ['ruff'])
+let g:omarchy_python_lsp_on_open = get(g:, 'omarchy_python_lsp_on_open', 1)
+let g:omarchy_python_lint_on_open = get(g:, 'omarchy_python_lint_on_open', 0)
+let g:omarchy_python_lint_on_open_delay = get(g:, 'omarchy_python_lint_on_open_delay', 500)
+let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_command', 'ALEFindReferences -quickfix')
+
+" Python tooling profile: basic Node-available setup.
+" Dependencies: pyright-langserver from npm, ruff from pip/pipx.
+" Install: npm install -g pyright; python -m pip install ruff
+" Arch: sudo pacman -S pyright ruff
+" Debian stable: sudo apt install nodejs npm pipx; sudo npm install -g pyright; pipx install ruff
+" Tradeoff: Pyright generally gives stronger type-aware navigation and
+" diagnostics than pylsp, while ruff keeps linting fast.
+" let g:omarchy_python_lsp = 'pyright'
+" let g:omarchy_python_linters = ['ruff']
+" let g:omarchy_python_lsp_on_open = 1
+" let g:omarchy_python_lint_on_open = 0
+" let g:omarchy_python_lint_on_open_delay = 500
+" let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
+
+" Python tooling profile: stronger Python analysis.
+" Dependencies: pyright-langserver from npm, ruff and pylint from pip/pipx.
+" Install: npm install -g pyright; python -m pip install ruff pylint
+" Arch: sudo pacman -S pyright ruff python-pylint
+" Debian stable: sudo apt install nodejs npm pylint pipx; sudo npm install -g pyright; pipx install ruff
+" Tradeoff: more complete diagnostics, but pylint can be slow and noisy. Prefer
+" this for larger projects or when the environment has already proven fast.
+" let g:omarchy_python_lsp = 'pyright'
+" let g:omarchy_python_linters = ['ruff', 'pylint']
+" let g:omarchy_python_lsp_on_open = 1
+" let g:omarchy_python_lint_on_open = 0
+" let g:omarchy_python_lint_on_open_delay = 500
+" let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
+
 let g:omarchy_install_copilot = get(g:, 'omarchy_install_copilot', 0)
 let g:omarchy_copilot_suggestions_start_enabled = get(g:, 'omarchy_copilot_suggestions_start_enabled', 0)
 let g:omarchy_enable_copilot_cli_mapping = get(g:, 'omarchy_enable_copilot_cli_mapping', 0)
@@ -83,6 +132,11 @@ let s:debug_log = []
 " ALE completion must be enabled before ALE loads.
 let g:ale_completion_enabled = get(g:, 'ale_completion_enabled', 1)
 let g:ale_completion_delay = get(g:, 'ale_completion_delay', 100)
+let g:ale_lint_on_enter = get(g:, 'ale_lint_on_enter', 0)
+let g:ale_lint_on_filetype_changed = get(g:, 'ale_lint_on_filetype_changed', 0)
+let g:ale_lint_on_text_changed = get(g:, 'ale_lint_on_text_changed', 'never')
+let g:ale_lint_on_insert_leave = get(g:, 'ale_lint_on_insert_leave', 0)
+let g:ale_lint_on_save = get(g:, 'ale_lint_on_save', 1)
 
 " Disable gitgutter's default maps before the plugin loads.
 let g:gitgutter_map_keys = 0
@@ -92,9 +146,10 @@ if g:omarchy_install_copilot
   let g:copilot_enabled = get(g:, 'copilot_enabled', g:omarchy_copilot_suggestions_start_enabled ? 1 : 0)
   let g:copilot_version = get(g:, 'copilot_version', v:false)
   let g:copilot_filetypes = get(g:, 'copilot_filetypes', {
+        \ 'python': v:true,
         \ 'gitcommit': v:false,
-        \ 'markdown': v:false,
-        \ 'text': v:false,
+        \ 'markdown': v:true,
+        \ 'text': v:true,
         \ 'help': v:false,
         \ })
 endif
@@ -169,6 +224,10 @@ function! s:SystemFzfVersion() abort
 endfunction
 
 function! s:ResolveFzfFlag() abort
+  if g:omarchy_use_fzf == 0
+    return
+  endif
+
   let l:version = s:SystemFzfVersion()
   let l:available = s:VersionAtLeast(l:version, g:omarchy_fzf_min_version)
 
@@ -195,9 +254,24 @@ function! s:Debug(message) abort
   endif
 endfunction
 
+function! s:BufferNamed(name) abort
+  for l:buf in range(1, bufnr('$'))
+    if bufexists(l:buf) && bufname(l:buf) ==# a:name
+      return l:buf
+    endif
+  endfor
+  return -1
+endfunction
+
 function! s:OpenScratch(title, lines) abort
+  let l:title = a:title
+  let l:index = 2
+  while s:BufferNamed(l:title) != -1
+    let l:title = a:title . ' (' . l:index . ')'
+    let l:index += 1
+  endwhile
   botright new
-  execute 'file ' . fnameescape(a:title)
+  execute 'file ' . fnameescape(l:title)
   setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
   setlocal modifiable
   call setline(1, empty(a:lines) ? [''] : a:lines)
@@ -211,6 +285,21 @@ function! s:OpenPickerScratch(title, lines, sink, ...) abort
   let b:omarchy_picker_sink = a:sink
   let b:omarchy_picker_root = get(a:, 1, '')
   nnoremap <buffer><silent> <CR> :call call(b:omarchy_picker_sink, [getline('.')])<CR>
+endfunction
+
+function! s:ClosePickerScratch() abort
+  if !exists('b:omarchy_picker_sink')
+    return
+  endif
+  let l:buf = bufnr('%')
+  if winnr('$') > 1
+    close
+  else
+    enew
+  endif
+  if bufexists(l:buf)
+    execute 'silent! bwipeout! ' . l:buf
+  endif
 endfunction
 
 function! s:WarnFzfFallback(feature) abort
@@ -250,11 +339,32 @@ function! OmarchyDebug() abort
         \ '',
         \ 'config_file=' . s:config_file,
         \ 'config_readable=' . string(filereadable(s:config_file)),
+        \ 'plug_home=' . s:plug_home,
+        \ 'ale_plugin_dir=' . s:ale_plugin_dir,
+        \ 'ale_plugin_dir_exists=' . string(isdirectory(s:ale_plugin_dir)),
         \ 'cwd=' . getcwd(),
         \ 'shell=' . &shell,
         \ 'shellcmdflag=' . &shellcmdflag,
         \ 'shellslash=' . string(&shellslash),
         \ 'g:omarchy_use_fzf=' . string(g:omarchy_use_fzf),
+        \ 'g:omarchy_python_lsp=' . string(g:omarchy_python_lsp),
+        \ 'g:omarchy_python_linters=' . string(g:omarchy_python_linters),
+        \ 'g:omarchy_python_lsp_on_open=' . string(g:omarchy_python_lsp_on_open),
+        \ 'g:omarchy_python_lint_on_open=' . string(g:omarchy_python_lint_on_open),
+        \ 'g:omarchy_python_references_command=' . string(g:omarchy_python_references_command),
+        \ 'g:ale_linters=' . string(g:ale_linters),
+        \ 'g:ale_lint_on_enter=' . string(g:ale_lint_on_enter),
+        \ 'g:ale_lint_on_filetype_changed=' . string(g:ale_lint_on_filetype_changed),
+        \ 'g:ale_lint_on_text_changed=' . string(g:ale_lint_on_text_changed),
+        \ 'g:ale_lint_on_insert_leave=' . string(g:ale_lint_on_insert_leave),
+        \ ':ALEInfo command exists=' . string(exists(':ALEInfo') == 2),
+        \ ':ALEGoToDefinition command exists=' . string(exists(':ALEGoToDefinition') == 2),
+        \ ':ALEFindReferences command exists=' . string(exists(':ALEFindReferences') == 2),
+        \ 'pylsp executable=' . string(executable('pylsp')) . ' path=' . exepath('pylsp'),
+        \ 'pyright-langserver executable=' . string(executable('pyright-langserver')) . ' path=' . exepath('pyright-langserver'),
+        \ 'node executable=' . string(executable('node')) . ' path=' . exepath('node'),
+        \ 'ruff executable=' . string(executable('ruff')) . ' path=' . exepath('ruff'),
+        \ 'pylint executable=' . string(executable('pylint')) . ' path=' . exepath('pylint'),
         \ 'fzf candidates=' . string(s:FzfPathCandidates()),
         \ 'fzf path=' . (empty(s:ExternalFzfPath()) ? 'none' : s:ExternalFzfPath()),
         \ 'fzf version=' . (empty(s:SystemFzfVersion()) ? 'none' : s:SystemFzfVersion()),
@@ -482,6 +592,10 @@ function! s:FzfRun(spec) abort
     call s:Debug('FzfRun skipped')
     return 0
   endif
+  if !exists('*fzf#run') || !exists('*fzf#wrap')
+    call s:Debug('FzfRun skipped; fzf#run/fzf#wrap missing')
+    return 0
+  endif
   try
     call s:Debug('FzfRun entering fzf#run')
     call fzf#run(fzf#wrap(a:spec))
@@ -635,18 +749,192 @@ nnoremap <silent> <Leader>fl :call <SID>BufferLines()<CR>
 nnoremap <silent> <Leader>fm :call <SID>RunCommand('Maps')<CR>
 
 " 7. ALE -----------------------------------------------------------------------
-let g:ale_linters = get(g:, 'ale_linters', {'python': ['pylsp', 'flake8', 'pylint']})
+function! s:PythonAleLinters() abort
+  let l:linters = []
+  let l:lsp = tolower(get(g:, 'omarchy_python_lsp', ''))
+  if !empty(l:lsp) && l:lsp !=# 'none'
+    call add(l:linters, l:lsp)
+  endif
+  call extend(l:linters, copy(get(g:, 'omarchy_python_linters', [])))
+  return l:linters
+endfunction
+
+let g:ale_linters = get(g:, 'ale_linters', {'python': s:PythonAleLinters()})
 if !exists('g:ale_fixers')
-  let g:ale_fixers = {'python': (g:omarchy_python_format_imports ? ['isort', 'black'] : ['black'])}
+  let g:ale_fixers = {'python': (g:omarchy_python_format_imports ? ['ruff', 'ruff_format'] : ['ruff_format'])}
 endif
 let g:ale_fix_on_save = get(g:, 'ale_fix_on_save', 0)
 let g:ale_sign_error = get(g:, 'ale_sign_error', 'E')
 let g:ale_sign_warning = get(g:, 'ale_sign_warning', 'W')
 let g:ale_echo_msg_format = get(g:, 'ale_echo_msg_format', '[%linter%] %s [%severity%]')
 let g:ale_hover_to_preview = get(g:, 'ale_hover_to_preview', 1)
+let s:python_lsp_warning_shown = {}
 
 function! s:SetAleOmnifunc() abort
   setlocal omnifunc=ale#completion#OmniFunc
+endfunction
+
+function! s:PythonLspStarted(linter, details) abort
+  call s:Debug('Python LSP started: ' . get(a:linter, 'name', 'unknown'))
+endfunction
+
+function! s:PythonLspInstallHint(name) abort
+  if a:name ==# 'pylsp'
+    return 'Install python-lsp-server in the same shell Vim uses, or set g:omarchy_python_lsp = "".'
+  endif
+  if a:name ==# 'pyright'
+    return 'Install pyright so pyright-langserver is on PATH, or use the no-Node pylsp profile.'
+  endif
+  return 'Install the configured language server, or set g:omarchy_python_lsp = "".'
+endfunction
+
+function! s:AleLspInstallHint() abort
+  return 'ALE is not loaded from ' . s:ale_plugin_dir . '. Run :PlugInstall inside this Vim; installing pylsp/ruff with pip only installs Python tools, not the Vim ALE plugin.'
+endfunction
+
+function! s:PythonEnabledLspLinters(buffer, noisy) abort
+  try
+    return ale#lsp_linter#GetEnabled(a:buffer)
+  catch
+    if a:noisy
+      echohl WarningMsg
+      echom 'ALE LSP support is not available. ' . s:AleLspInstallHint() . ' (' . v:exception . ')'
+      echohl None
+    endif
+
+    call s:Debug('ALE LSP unavailable: ' . v:exception)
+    return v:null
+  endtry
+endfunction
+
+function! s:PythonLspExecutableAvailable(buffer, linter, noisy) abort
+  let l:name = get(a:linter, 'name', tolower(get(g:, 'omarchy_python_lsp', '')))
+  let l:executable = l:name
+
+  try
+    let l:executable = ale#linter#GetExecutable(a:buffer, a:linter)
+  catch
+    call s:Debug('ALE executable lookup failed for ' . l:name . ': ' . v:exception)
+  endtry
+
+  if empty(l:executable)
+    let l:executable = l:name
+  endif
+  if l:name ==# 'pylsp' && l:executable ==# l:name
+    let l:executable = get(g:, 'ale_python_pylsp_executable', 'pylsp')
+  elseif l:name ==# 'pyright' && l:executable ==# l:name
+    let l:executable = get(g:, 'ale_python_pyright_executable', 'pyright-langserver')
+  endif
+
+  try
+    let l:available = ale#engine#IsExecutable(a:buffer, l:executable)
+  catch
+    let l:available = executable(l:executable)
+    call s:Debug('ALE executable check fallback for ' . l:executable . ': ' . v:exception)
+  endtry
+
+  if l:available
+    if l:name ==# 'pyright' && !executable('node')
+      if a:noisy && !has_key(s:python_lsp_warning_shown, l:name . ':node')
+        echohl WarningMsg
+        echom 'Python LSP "pyright" requires Node.js, but executable "node" is not available. Install Node.js or use the no-Node pylsp profile.'
+        echohl None
+        let s:python_lsp_warning_shown[l:name . ':node'] = 1
+      endif
+
+      call s:Debug('Python LSP unavailable: pyright requires node')
+      return 0
+    endif
+    return 1
+  endif
+
+  if a:noisy && !has_key(s:python_lsp_warning_shown, l:name)
+    echohl WarningMsg
+    echom 'Python LSP "' . l:name . '" is configured, but executable "' . l:executable . '" is not available. ' . s:PythonLspInstallHint(l:name)
+    echohl None
+    let s:python_lsp_warning_shown[l:name] = 1
+  endif
+
+  call s:Debug('Python LSP unavailable: ' . l:name . ' executable=' . l:executable)
+  return 0
+endfunction
+
+function! s:PythonLspAvailableForBuffer(buffer, noisy) abort
+  let l:configured_lsp = tolower(get(g:, 'omarchy_python_lsp', ''))
+  if empty(l:configured_lsp) || l:configured_lsp ==# 'none'
+    if a:noisy
+      echo 'Python LSP is disabled. Set g:omarchy_python_lsp to "pylsp" or "pyright" to enable language actions.'
+    endif
+    return 0
+  endif
+
+  let l:enabled_linters = s:PythonEnabledLspLinters(a:buffer, a:noisy)
+  if type(l:enabled_linters) != v:t_list
+    return 0
+  endif
+
+  let l:saw_lsp = 0
+  for l:linter in l:enabled_linters
+    if empty(get(l:linter, 'lsp', ''))
+      continue
+    endif
+
+    let l:saw_lsp = 1
+    if s:PythonLspExecutableAvailable(a:buffer, l:linter, a:noisy)
+      return 1
+    endif
+  endfor
+
+  if a:noisy && !l:saw_lsp
+    echo 'No enabled Python LSP linter found. Check g:omarchy_python_lsp and g:ale_linters.'
+  endif
+  return 0
+endfunction
+
+function! s:RunPythonLspCommand(command) abort
+  let l:name = matchstr(a:command, '^\S\+')
+  if &filetype ==# 'python'
+        \ && index(['ALEGoToDefinition', 'ALEFindReferences', 'ALEHover', 'ALERename', 'ALECodeAction'], l:name) >= 0
+        \ && !s:PythonLspAvailableForBuffer(bufnr(''), 1)
+    return
+  endif
+
+  call s:RunCommand(a:command)
+endfunction
+
+function! s:StartPythonLspForBuffer(buffer, timer) abort
+  if !g:omarchy_python_lsp_on_open
+        \ || !bufexists(a:buffer)
+        \ || getbufvar(a:buffer, '&filetype') !=# 'python'
+    return
+  endif
+
+  let l:enabled_linters = s:PythonEnabledLspLinters(a:buffer, 0)
+  if type(l:enabled_linters) != v:t_list
+    return
+  endif
+
+  for l:linter in l:enabled_linters
+    if !empty(get(l:linter, 'lsp', ''))
+          \ && s:PythonLspExecutableAvailable(a:buffer, l:linter, 0)
+      try
+        call ale#lsp_linter#StartLSP(a:buffer, l:linter, function('<SID>PythonLspStarted'))
+      catch
+        call s:Debug('Python LSP start failed: ' . v:exception)
+      endtry
+    endif
+  endfor
+endfunction
+
+function! s:LintPythonBuffer(buffer, timer) abort
+  if !g:omarchy_python_lint_on_open
+        \ || !bufexists(a:buffer)
+        \ || getbufvar(a:buffer, '&filetype') !=# 'python'
+        \ || !exists('*ale#Queue')
+    return
+  endif
+
+  call ale#Queue(0, 'lint_file', a:buffer)
 endfunction
 
 function! s:PythonCompleteStart() abort
@@ -764,6 +1052,13 @@ endfunction
 function! s:SetupPythonCompletion() abort
   call s:SetAleOmnifunc()
   setlocal completefunc=OmarchyPythonComplete
+  if exists('*timer_start')
+    call timer_start(0, function('<SID>StartPythonLspForBuffer', [bufnr('%')]))
+    call timer_start(g:omarchy_python_lint_on_open_delay, function('<SID>LintPythonBuffer', [bufnr('%')]))
+  else
+    call s:StartPythonLspForBuffer(bufnr('%'), 0)
+    call s:LintPythonBuffer(bufnr('%'), 0)
+  endif
   augroup omarchy_python_keyword_completion
     autocmd! * <buffer>
     autocmd TextChangedI <buffer> call <SID>MaybeAutoPythonKeywordComplete()
@@ -885,15 +1180,15 @@ function! s:TabComplete() abort
 endfunction
 
 " MAP: <Leader>ld | ALE go to definition
-nnoremap <silent> <Leader>ld :call <SID>RunCommand('ALEGoToDefinition')<CR>
+nnoremap <silent> <Leader>ld :call <SID>RunPythonLspCommand('ALEGoToDefinition')<CR>
 " MAP: <Leader>lr | ALE find references
-nnoremap <silent> <Leader>lr :call <SID>RunCommand('ALEFindReferences -contents')<CR>
+nnoremap <silent> <Leader>lr :call <SID>RunPythonLspCommand(g:omarchy_python_references_command)<CR>
 " MAP: <Leader>lh | ALE hover
-nnoremap <silent> <Leader>lh :call <SID>RunCommand('ALEHover')<CR>
+nnoremap <silent> <Leader>lh :call <SID>RunPythonLspCommand('ALEHover')<CR>
 " MAP: <Leader>ln | ALE rename symbol
-nnoremap <silent> <Leader>ln :call <SID>RunCommand('ALERename')<CR>
+nnoremap <silent> <Leader>ln :call <SID>RunPythonLspCommand('ALERename')<CR>
 " MAP: <Leader>la | ALE code action
-nnoremap <silent> <Leader>la :call <SID>RunCommand('ALECodeAction')<CR>
+nnoremap <silent> <Leader>la :call <SID>RunPythonLspCommand('ALECodeAction')<CR>
 " MAP: <Leader>lj | Next ALE diagnostic
 nnoremap <silent> <Leader>lj :call <SID>RunCommand('ALENextWrap')<CR>
 " MAP: <Leader>lk | Previous ALE diagnostic
@@ -1010,24 +1305,47 @@ endfunction
 
 let s:git_root_cache = {}
 let s:git_branch_cache = {}
-function! s:GitRootForBuffer(bufnr, file) abort
-  if !executable('git') || empty(a:file)
-    return ''
+function! s:GitInfoForBuffer(bufnr, file) abort
+  if empty(a:file)
+    return {}
   endif
-
   let l:cached = get(s:git_root_cache, a:bufnr, {})
   if get(l:cached, 'file', '') ==# a:file
-    return get(l:cached, 'root', '')
+    return l:cached
   endif
 
   let l:dir = fnamemodify(a:file, ':p:h')
-  let l:root = systemlist('git -C ' . shellescape(l:dir) . ' rev-parse --show-toplevel 2>/dev/null')
-  if v:shell_error || empty(l:root)
-    let s:git_root_cache[a:bufnr] = {'file': a:file, 'root': ''}
-    return ''
-  endif
-  let s:git_root_cache[a:bufnr] = {'file': a:file, 'root': l:root[0]}
-  return l:root[0]
+  while !empty(l:dir)
+    let l:dotgit = l:dir . '/.git'
+    if isdirectory(l:dotgit)
+      let s:git_root_cache[a:bufnr] = {'file': a:file, 'root': l:dir, 'git_dir': l:dotgit}
+      return s:git_root_cache[a:bufnr]
+    elseif filereadable(l:dotgit)
+      let l:lines = readfile(l:dotgit, '', 1)
+      let l:match = empty(l:lines) ? [] : matchlist(l:lines[0], '^gitdir:\s*\(.\+\)$')
+      if !empty(l:match)
+        let l:git_dir = fnamemodify(l:match[1], ':p')
+        if l:match[1] !~# '^\%(/\|[A-Za-z]:[\/\\]\)'
+          let l:git_dir = fnamemodify(l:dir . '/' . l:match[1], ':p')
+        endif
+        let s:git_root_cache[a:bufnr] = {'file': a:file, 'root': l:dir, 'git_dir': substitute(l:git_dir, '[\/\\]$', '', '')}
+        return s:git_root_cache[a:bufnr]
+      endif
+    endif
+
+    let l:parent = fnamemodify(l:dir, ':h')
+    if l:parent ==# l:dir
+      break
+    endif
+    let l:dir = l:parent
+  endwhile
+
+  let s:git_root_cache[a:bufnr] = {'file': a:file, 'root': '', 'git_dir': ''}
+  return s:git_root_cache[a:bufnr]
+endfunction
+
+function! s:GitRootForBuffer(bufnr, file) abort
+  return get(s:GitInfoForBuffer(a:bufnr, a:file), 'root', '')
 endfunction
 
 function! OmarchyRefreshGitStatus() abort
@@ -1038,7 +1356,8 @@ function! OmarchyRefreshGitStatus() abort
 endfunction
 
 function! OmarchyGitBranch() abort
-  let l:root = s:GitRootForBuffer(bufnr(''), expand('%:p'))
+  let l:info = s:GitInfoForBuffer(bufnr(''), expand('%:p'))
+  let l:root = get(l:info, 'root', '')
   if empty(l:root)
     return ''
   endif
@@ -1047,11 +1366,24 @@ function! OmarchyGitBranch() abort
   if has_key(s:git_branch_cache, l:key)
     return s:git_branch_cache[l:key]
   endif
-  let l:branch = systemlist('git -C ' . shellescape(l:key) . ' branch --show-current 2>/dev/null')
-  if v:shell_error || empty(l:branch) || empty(l:branch[0])
-    let l:branch = systemlist('git -C ' . shellescape(l:key) . ' rev-parse --abbrev-ref HEAD 2>/dev/null')
+
+  let l:head_file = get(l:info, 'git_dir', '') . '/HEAD'
+  if !filereadable(l:head_file)
+    let s:git_branch_cache[l:key] = ''
+    return ''
   endif
-  let s:git_branch_cache[l:key] = v:shell_error || empty(l:branch) ? '' : '[' . s:StatusEscape(l:branch[0]) . ']'
+
+  let l:head = readfile(l:head_file, '', 1)
+  if empty(l:head)
+    let s:git_branch_cache[l:key] = ''
+    return ''
+  endif
+
+  let l:branch = matchstr(l:head[0], '^ref: refs/heads/\zs.\+')
+  if empty(l:branch)
+    let l:branch = strpart(l:head[0], 0, 7)
+  endif
+  let s:git_branch_cache[l:key] = empty(l:branch) ? '' : '[' . s:StatusEscape(l:branch) . ']'
   return s:git_branch_cache[l:key]
 endfunction
 
@@ -1399,4 +1731,196 @@ if g:omarchy_use_fugitive
   nnoremap <silent> <Leader>gb :call <SID>RunCommand('Git blame')<CR>
   " MAP: <Leader>gd | Open fugitive diff split
   nnoremap <silent> <Leader>gd :call <SID>RunCommand('Gdiffsplit')<CR>
+endif
+
+" 13. Sessions ----------------------------------------------------------------
+" Built-in session save/restore via :mksession/:source. No plugin needed.
+let g:omarchy_use_sessions = get(g:, 'omarchy_use_sessions', 1)
+let g:omarchy_session_dir = get(g:, 'omarchy_session_dir', expand('~/.vim/sessions'))
+let g:omarchy_sessionoptions = get(g:, 'omarchy_sessionoptions', 'blank,buffers,curdir,folds,help,tabpages,winsize')
+
+let s:session_lookup = {}
+
+function! s:SessionDir() abort
+  if !isdirectory(g:omarchy_session_dir)
+    call mkdir(g:omarchy_session_dir, 'p')
+  endif
+  return g:omarchy_session_dir
+endfunction
+
+function! s:SessionDefaultName() abort
+  let l:file = expand('%:p')
+  if !empty(l:file)
+    return fnamemodify(l:file, ':t:r')
+  endif
+  let l:dir = getcwd()
+  if !empty(l:dir)
+    return fnamemodify(l:dir, ':t')
+  endif
+  return 'default'
+endfunction
+
+function! s:SessionSanitize(name) abort
+  return substitute(a:name, '[\\/:*?"<>|]', '_', 'g')
+endfunction
+
+function! s:SessionPath(name) abort
+  return s:SessionDir() . '/' . s:SessionSanitize(a:name) . '.vim'
+endfunction
+
+function! s:SessionFiles() abort
+  return glob(s:SessionDir() . '/*.vim', 0, 1)
+endfunction
+
+function! s:SessionBuildLookup() abort
+  let s:session_lookup = {}
+  for l:path in s:SessionFiles()
+    let l:name = fnamemodify(l:path, ':t:r')
+    let s:session_lookup[l:name] = l:path
+  endfor
+  return sort(keys(s:session_lookup))
+endfunction
+
+function! s:SessionNamesLine(line) abort
+  return matchstr(a:line, '^\s*\zs.\{-}\ze\s*$')
+endfunction
+
+function! s:SessionSave(...) abort
+  let l:name = (a:0 && !empty(a:1)) ? s:SessionSanitize(a:1) : ''
+  if empty(l:name)
+    let l:name = input('Session name [' . s:SessionDefaultName() . ']: ', s:SessionDefaultName())
+    let l:name = s:SessionSanitize(l:name)
+    if empty(l:name)
+      echo 'Session save cancelled.'
+      return
+    endif
+  endif
+  let l:force = (a:0 >= 2) && a:2
+  let l:path = s:SessionPath(l:name)
+  if filereadable(l:path) && !l:force
+    if confirm(printf('Overwrite session "%s"?', l:name), "&Yes\n&No", 1) != 1
+      echo 'Session save cancelled.'
+      return
+    endif
+  endif
+  call s:SessionDir()
+  let l:sessionoptions = &sessionoptions
+  try
+    let &sessionoptions = g:omarchy_sessionoptions
+    execute 'mksession! ' . fnameescape(l:path)
+  finally
+    let &sessionoptions = l:sessionoptions
+  endtry
+  call s:Debug('SessionSave wrote: ' . l:path)
+  echo 'Session saved: ' . l:name
+endfunction
+
+function! s:SessionSource(path) abort
+  call s:Debug('SessionRestore sourcing: ' . a:path)
+  execute 'source ' . fnameescape(a:path)
+endfunction
+
+function! s:SessionRestoreSink(line) abort
+  let l:name = s:SessionNamesLine(a:line)
+  if !has_key(s:session_lookup, l:name)
+    return
+  endif
+  let l:path = s:session_lookup[l:name]
+  call s:ClosePickerScratch()
+  call s:SessionSource(l:path)
+endfunction
+
+function! s:SessionRestore(...) abort
+  if a:0 && !empty(a:1)
+    let l:path = s:SessionPath(a:1)
+    if !filereadable(l:path)
+      echo 'No session named "' . a:1 . '" in ' . g:omarchy_session_dir . '.'
+      return
+    endif
+    call s:SessionSource(l:path)
+    return
+  endif
+  let l:names = s:SessionBuildLookup()
+  if empty(l:names)
+    echo 'No saved sessions in ' . g:omarchy_session_dir . '.'
+    return
+  endif
+  if s:HasFzf()
+    if s:FzfRun({
+          \ 'source': l:names,
+          \ 'sink': function('<SID>SessionRestoreSink'),
+          \ 'options': '--prompt="Sessions> " --no-multi'
+          \ })
+      return
+    endif
+  endif
+  call s:WarnFzfFallback('Sessions')
+  call s:OpenPickerScratch('[Omarchy sessions]', l:names, function('<SID>SessionRestoreSink'))
+endfunction
+
+function! s:SessionDeleteSink(line) abort
+  let l:name = s:SessionNamesLine(a:line)
+  if !has_key(s:session_lookup, l:name)
+    return
+  endif
+  if confirm(printf('Delete session "%s"?', l:name), "&Yes\n&No", 2) == 1
+    call delete(s:session_lookup[l:name])
+    call s:Debug('SessionDelete removed: ' . s:session_lookup[l:name])
+    echo 'Session deleted: ' . l:name
+  else
+    echo 'Delete cancelled.'
+  endif
+endfunction
+
+function! s:SessionDelete() abort
+  let l:names = s:SessionBuildLookup()
+  if empty(l:names)
+    echo 'No saved sessions in ' . g:omarchy_session_dir . '.'
+    return
+  endif
+  if s:HasFzf()
+    if s:FzfRun({
+          \ 'source': l:names,
+          \ 'sink': function('<SID>SessionDeleteSink'),
+          \ 'options': '--prompt="Sessions> " --no-multi'
+          \ })
+      return
+    endif
+  endif
+  call s:WarnFzfFallback('Sessions delete')
+  call s:OpenPickerScratch('[Omarchy sessions]', l:names, function('<SID>SessionDeleteSink'))
+endfunction
+
+function! s:SessionList() abort
+  let l:names = s:SessionBuildLookup()
+  if empty(l:names)
+    echo 'No saved sessions in ' . g:omarchy_session_dir . '.'
+    return
+  endif
+  let l:lines = map(l:names, 'v:val . "  ->  " . s:session_lookup[v:val]')
+  call s:OpenScratch('[Omarchy sessions]', l:lines)
+endfunction
+
+function! OmarchySessionStatus() abort
+  echo 'g:omarchy_use_sessions=' . string(g:omarchy_use_sessions)
+  echo 'g:omarchy_session_dir=' . g:omarchy_session_dir
+  echo 'g:omarchy_sessionoptions=' . g:omarchy_sessionoptions
+  echo 'saved session count=' . len(s:SessionFiles())
+endfunction
+
+if g:omarchy_use_sessions
+  command! -nargs=? -bang SessionSave call <SID>SessionSave(<q-args>, <bang>0)
+  command! -nargs=? SessionRestore call <SID>SessionRestore(<q-args>)
+  command! SessionList call <SID>SessionList()
+  command! SessionDelete call <SID>SessionDelete()
+  command! OmarchySessionStatus call OmarchySessionStatus()
+
+  " MAP: <Leader>ss | Save current session
+  nnoremap <silent> <Leader>ss :SessionSave<CR>
+  " MAP: <Leader>sr | Restore a saved session
+  nnoremap <silent> <Leader>sr :SessionRestore<CR>
+  " MAP: <Leader>sl | List saved sessions
+  nnoremap <silent> <Leader>sl :SessionList<CR>
+  " MAP: <Leader>sd | Delete a saved session
+  nnoremap <silent> <Leader>sd :SessionDelete<CR>
 endif

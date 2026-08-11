@@ -26,7 +26,7 @@ Recommended tools:
 - `ripgrep` (`rg`): powers `:Rg` and `<Leader>fr`.
 - `bat`/`batcat`: syntax-highlighted fzf previews.
 - `bash`: fzf.vim preview support. Debian and Arch normally have it.
-- `fzf` `0.54.0+`: enables fzf/fzf.vim integration when found on `PATH`.
+- `fzf` `0.54.0+`: enables fzf/fzf.vim integration when found on `PATH`. (0.38.0 seems to be okay on Debian)
 
 Python-only tools:
 
@@ -35,6 +35,8 @@ Python-only tools:
 - `black`, `isort`, `flake8`, `pylint`: Python formatters/linters configured in ALE.
 
 Without Python installed, this config should still load and the editor, statusline, keymap reference, comments, diffs, and window/buffer helpers should still work. Python LSP/completion/lint/fix features will be absent or degraded. FZF commands require a current `fzf` executable and are disabled by default when one is not found.
+
+Session save/restore uses only built-in Vim functionality (`:mksession` and `:source`) and requires no additional tools.
 
 ## Version Tables
 
@@ -62,9 +64,9 @@ needs the command-line behavior described in the final column.
 | `pylint` | `2.16.2-2` | No config-pinned minimum | Enables additional Python lint diagnostics through ALE. |
 | `ripgrep` | `13.0.0-4` | No config-pinned minimum | Enables fast project text search for `:Rg` and `<Leader>fr`. |
 | `bat` | `0.22.1-4` | No config-pinned minimum | Enables highlighted FZF previews; Debian's executable is `batcat`. |
-| `fzf` | `0.38.0-1` | `0.54.0+` for `fzf.vim` | Debian's package is too old for this Vim FZF integration. Install a current external `fzf` for interactive FZF pickers; otherwise fallback pickers are used. |
+| `fzf` | `0.38.0-1` | `0.54.0+` for `fzf.vim` | Debian's package is too old for this Vim FZF integration. Install a current external `fzf` for interactive FZF pickers; otherwise fallback pickers are used. 0.38.0+ is also allowed for now even if not fully compatible|
 
-Current `fzf.vim` requires fzf `0.54.0+`. Debian 12 packages fzf `0.38.0`, so Debian users should install a current `fzf` binary through another trusted channel if they want Vim FZF commands. The config no longer runs the fzf repository's `./install --bin` hook or enables fzf.vim by default without a current external `fzf`.
+Current `fzf.vim` requires fzf `0.54.0+` (or 0.38.0). Debian 12 packages fzf `0.38.0`, so Debian users should install a current `fzf` binary through another trusted channel if they want full compatibility, but 0.38.0 seems to suffice for FZF commands. The config no longer runs the fzf repository's `./install --bin` hook or enables fzf.vim by default without a current external `fzf`.
 
 ### Arch Linux
 
@@ -84,13 +86,13 @@ Current `fzf.vim` requires fzf `0.54.0+`. Debian 12 packages fzf `0.38.0`, so De
 | `python-pylint` | `4.0.6-1` | No config-pinned minimum | Enables additional Python lint diagnostics through ALE. |
 | `ripgrep` | `15.2.0-1` | No config-pinned minimum | Enables fast project text search for `:Rg` and `<Leader>fr`. |
 | `bat` | `0.26.1-2` | No config-pinned minimum | Enables highlighted FZF previews. |
-| `fzf` | `0.74.2-1` | `0.54.0+` for `fzf.vim` | Enables interactive FZF file, git-file, text, buffer, line, symbol, and keymap pickers. |
+| `fzf` | `0.74.2-1` | `0.54.0+` (or 0.38.0+) for `fzf.vim` | Enables interactive FZF file, git-file, text, buffer, line, symbol, and keymap pickers. |
 
 Arch's packaged `fzf` is current enough. The config lets vim-plug clone the Vim wrapper only and does not run an fzf binary install hook.
 
 ### Git Bash On Windows
 
-Git for Windows includes an MSYS Vim. This config should load there, but FZF integration is not enabled by default unless an external `fzf` `0.54.0+` is already on `PATH`. This avoids fzf.vim's interactive binary download prompt and keeps plugin installation explicit. The non-FZF fallback views, including `:Keymaps` and `<Leader>fk`, remain available.
+Git for Windows includes an MSYS Vim. This config should load there, but FZF integration is not enabled by default unless an external `fzf` `0.54.0+` (or 0.38.0+) is already on `PATH`. This avoids fzf.vim's interactive binary download prompt and keeps plugin installation explicit. The non-FZF fallback views, including `:Keymaps` and `<Leader>fk`, remain available.
 
 If a previous run downloaded `~/.vim/plugged/fzf/bin/fzf.exe`, reopen Vim with this config and run:
 
@@ -102,7 +104,7 @@ Accept removal of `fzf` and `fzf.vim` if they are no longer declared. The config
 
 If Git Bash still finds that binary, check shell startup files such as `~/.bashrc` and remove any PATH entry pointing at `~/.vim/plugged/fzf/bin`. Inside Vim, run `:OmarchyFzfStatus` to see FZF candidates, the accepted external path, version, and whether FZF integration is usable.
 
-Without FZF, `<Leader>ff`, `<Leader>fg`, `<Leader>fr`, `<Leader>fl`, `<Leader>fs`, and `<Leader>fk` use unfiltered scratch-buffer fallback pickers. Press `<CR>` on an item to open/jump and `q` to close the picker. The fallback prints a reminder to install external `fzf` `0.54.0+` on `PATH` and rerun `:PlugInstall` for interactive filtering.
+Without FZF, `<Leader>ff`, `<Leader>fg`, `<Leader>fr`, `<Leader>fl`, `<Leader>fs`, and `<Leader>fk` use unfiltered scratch-buffer fallback pickers. Press `<CR>` on an item to open/jump and `q` to close the picker. The fallback prints a reminder to install external `fzf` `0.54.0+` (0.38.0+ also ok) on `PATH` and rerun `:PlugInstall` for interactive filtering.
 
 ## Check What Is Installed
 
@@ -273,10 +275,9 @@ from; the wrapper then sources the canonical config from this git repo.
 
 Available wrapper presets (copy one of these manually, or as shown below, and edit the local copy as desired):
 
-- `init.vim`: default (same as `init_no_copilot_no_git.vim`)
-- `init_everything.vim`: all optional Omarchy features enabled.
-- `init_no_copilot_sugg.vim`: Copilot installed, but automatic inline
+- `init_copilot_no_sugg.vim`: Copilot installed, but automatic inline
   suggestions start disabled.
+- `init_everything.vim`: all optional Omarchy features enabled.
 - `init_no_copilot_cli.vim`: Copilot inline suggestions enabled, but the
   separate Copilot CLI mapping disabled.
 - `init_no_copilot.vim`: FZF, gitgutter, fugitive, and Python helpers enabled;
@@ -291,7 +292,7 @@ Available wrapper presets (copy one of these manually, or as shown below, and ed
 Each wrapper contains this line:
 
 ```vim
-let s:omarchy_vim_init = expand('~/dev_windows/dotfiles/omarchy/vim/init.vim')
+let s:omarchy_vim_init = expand('~/dev/dotfiles/omarchy/vim/init.vim')
 ```
 
 Keep that path pointed at the git repo copy of `omarchy/vim/init.vim`. If your
@@ -367,7 +368,7 @@ This downloads only vim-plug. It does not install ALE, FZF, Copilot, or any othe
 `:PlugInstall` installs the plugins declared by this config:
 
 - ALE is declared by default.
-- fzf/fzf.vim are declared by default only when external `fzf` `0.54.0+` is already on `PATH`.
+- fzf/fzf.vim are declared by default only when external `fzf` `0.54.0+` (or 0.38.0+) is already on `PATH`.
 - Copilot, gitgutter, and fugitive are declared only when their flags are set before sourcing `init.vim`.
 
 Close and reopen the editor after plugin installation. If you install `fzf` later, reopen Vim and run `:PlugInstall` again so vim-plug sees the updated plugin list. If you switch to a wrapper that enables more optional plugins after the first install, run `:PlugInstall` again so vim-plug installs them.
@@ -398,7 +399,7 @@ as long as the settings appear before the line that sources
 
 | Flag | Enable / use value | Disable / alternate value | Default | Effect | Dependencies and notes |
 | --- | --- | --- | --- | --- | --- |
-| `g:omarchy_use_fzf` | `1` | `0` | Auto: `1` only when external `fzf` is usable, otherwise `0` | Requests `junegunn/fzf` and `junegunn/fzf.vim`. | Requires external `fzf` `0.54.0+` on `PATH`. If set to `1` without a usable `fzf`, the config resets it to `0`, shows a warning, and uses fallback views. |
+| `g:omarchy_use_fzf` | `1` | `0` | Auto: `1` only when external `fzf` is usable, otherwise `0` | Requests `junegunn/fzf` and `junegunn/fzf.vim`. | Requires external `fzf` `0.54.0+` on `PATH`. If set to `1` without a usable `fzf`, the config resets it to `0`, shows a warning, and uses fallback views. But we allow 0.38.0+ because it seems to work for the fzf pickers |
 | `g:omarchy_use_gitgutter` | `1` | `0` | `0` | Enables `airblade/vim-gitgutter` for added/changed/removed signs. | Requires `git` on `PATH`, a git worktree for useful signs, and `:PlugInstall` after enabling the flag. |
 | `g:omarchy_use_fugitive` | `1` | `0` | `0` | Enables `tpope/vim-fugitive` for `:Git`, `:Git blame`, and `:Gdiffsplit`. | Requires `git` on `PATH` and `:PlugInstall` after enabling the flag. |
 | `g:omarchy_install_copilot` | `1` | `0` | `0` | Installs `github/copilot.vim` for optional inline suggestions. | Requires Vim 9.0.0185+ or Neovim 0.6+, Node.js, and `:PlugInstall` after enabling the flag. |
@@ -458,8 +459,28 @@ Optional plugin checks after enabling flags:
 | `<Leader>ds` | diff against saved file |
 | `<Leader>dg` | diff against git HEAD |
 | `<Leader>dq` | close active diff |
+| `<Leader>ss` | save current session |
+| `<Leader>sr` | restore a saved session |
+| `<Leader>sl` | list saved sessions |
+| `<Leader>sd` | delete a saved session |
 
 `<Leader>` is Space.
+
+## Sessions
+
+Session save/restore is built into this config using Vim's `:mksession` and `:source`; no plugin is required.
+
+Sessions are stored as `.vim` files in `~/.vim/sessions` by default. Override with `g:omarchy_session_dir` before sourcing `init.vim`. Sessions are enabled by default; set `g:omarchy_use_sessions = 0` before sourcing `init.vim` to disable the commands and keymaps below.
+
+Usage:
+
+- `<Leader>ss` or `:SessionSave [name]` saves the current window layout, buffers, and (with the default `sessionoptions`) working directory. It prompts for a name, defaulting to the current buffer name, else the working-directory basename. `:SessionSave!` overwrites without asking; a plain `:SessionSave` prompts before overwriting an existing session.
+- `<Leader>sr` or `:SessionRestore [name]` restores a session. With a name it restores that session directly; without one it shows a picker backed by fzf when available, otherwise an unfiltered scratch-buffer fallback.
+- `<Leader>sl` or `:SessionList` opens a read-only list of saved sessions and their full paths.
+- `<Leader>sd` or `:SessionDelete` opens the same picker and deletes the chosen session after confirmation.
+- `:OmarchySessionStatus` echoes the session flags, directory, and saved-session count.
+
+Sessions are saved per-name and restored with `:source`, so they behave the same in Vim and Neovim and are shared between them by default. No Node.js, Rust, Go, or Python tooling is required.
 
 ## Completion Usage
 
@@ -664,7 +685,7 @@ Inside Vim or Neovim:
 :PlugInstall
 ```
 
-Expected: `:OmarchyPlugBootstrap` installs vim-plug if needed, and `:PlugInstall` installs ALE. It installs fzf/fzf.vim only when a current external `fzf` is found. Setting `g:omarchy_use_fzf = 1` without external `fzf` `0.54.0+` should produce a warning and reset FZF integration to fallback mode. No plugin post-install hook should run the fzf binary installer. Node, Rust, and Go toolchains should not be installed or required unless you opted in to Copilot.
+Expected: `:OmarchyPlugBootstrap` installs vim-plug if needed, and `:PlugInstall` installs ALE. It installs fzf/fzf.vim only when a current external `fzf` is found. Setting `g:omarchy_use_fzf = 1` without external `fzf` `0.54.0+` (we allow 0.38.0+) should produce a warning and reset FZF integration to fallback mode. No plugin post-install hook should run the fzf binary installer. Node, Rust, and Go toolchains should not be installed or required unless you opted in to Copilot.
 
 Optional check:
 
@@ -878,6 +899,43 @@ Expected:
 - The config launches only `copilot`; it does not pass blanket permission flags.
 - Vim/Neovim builds without `:terminal` report that `copilot` should be run from an external terminal.
 
+### 10. Sessions
+
+Sessions are built in and need no plugins. From the dotfiles repo, start a clean Vim:
+
+```sh
+vim -Nu omarchy/vim/init.vim
+```
+
+Inside Vim:
+
+```vim
+:SessionSave smoke
+:SessionList
+:SessionSave smoke   " prompts before overwrite unless :SessionSave! is used
+:SessionRestore smoke
+:SessionDelete
+```
+
+Expected:
+
+- `:SessionSave smoke` writes `~/.vim/sessions/smoke.vim`; `:SessionList` shows it.
+- Re-saving with the same name prompts for confirmation; `:SessionSave! smoke` does not.
+- `:SessionRestore smoke` reopens the saved layout; `<Leader>sr` shows a fzf picker when fzf is enabled, otherwise an unfiltered scratch-buffer fallback.
+- `:SessionDelete` removes the session file after confirmation.
+- `:OmarchySessionStatus` reports the flags, directory, and count.
+- No plugin, Node, Rust, Go, or Python requirement is added.
+
+To keep test artifacts out of `~/.vim/sessions`, run against a temporary directory:
+
+```sh
+cat >/tmp/omarchy-sessions-wrapper.vim <<EOF
+let g:omarchy_session_dir = expand('$TMPDIR') . '/omarchy-sessions-test'
+execute 'source ' . fnameescape('$PWD/omarchy/vim/init.vim')
+EOF
+vim -Nu /tmp/omarchy-sessions-wrapper.vim
+```
+
 ## Troubleshooting
 
 - `E492: Not an editor command: PlugInstall`: vim-plug did not load. Run `:OmarchyPlugBootstrap`, then run `:PlugInstall`.
@@ -897,7 +955,7 @@ Expected:
 
   Then run `:PlugInstall`. Startup intentionally does not download vim-plug by itself.
 - fzf commands fail: check that a current external `fzf` executable is on `PATH`, then rerun `:PlugInstall`. This config does not run fzf's `./install --bin` hook and does not use `~/.vim/plugged/fzf/bin/fzf.exe` as an implicit fallback. On Git Bash, leave `g:omarchy_use_fzf` unset unless you explicitly want to test FZF there.
-- `g:omarchy_use_fzf was set to 1...`: the config did not find external `fzf` `0.54.0+` on `PATH`, so it reset FZF integration to `0` for this session and will use fallback views.
+- `g:omarchy_use_fzf was set to 1...`: the config did not find external `fzf` `0.54.0+` (we allow 0.38.0+) on `PATH`, so it reset FZF integration to `0` for this session and will use fallback views.
 - FZF diagnosis: run `:OmarchyFzfStatus` inside Vim.
 - Keymap picker diagnosis: after pressing `<Leader>fk`, run `:OmarchyDebug` to see whether the picker entered FZF or fallback.
 - `Post-update hook for fzf ... /usr/share/vim/vimfiles/install not found` on Arch: update this repo and rerun `:PlugInstall` or `:PlugUpdate fzf`. The config no longer declares an fzf post-install hook.
