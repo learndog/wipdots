@@ -16,8 +16,11 @@ let g:omarchy_python_keyword_completion = 1
 " Python tooling: stronger profile; requires Node pyright-langserver plus ruff/pylint.
 let g:omarchy_python_lsp = 'pyright'
 let g:omarchy_python_linters = ['ruff', 'pylint']
-let g:omarchy_python_lsp_on_open = 0
+let g:omarchy_python_lsp_on_open = 1
 let g:omarchy_python_lint_on_open = 0
+let g:omarchy_python_lint_on_open_delay = 500
+let g:ale_lint_on_save = 1
+let g:ale_fix_on_save = 0
 let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
 
 execute 'source ' . fnameescape(s:omarchy_vim_init)

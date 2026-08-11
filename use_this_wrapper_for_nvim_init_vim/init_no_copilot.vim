@@ -16,8 +16,11 @@ let g:omarchy_python_keyword_completion = 1
 " Python tooling: no-Node default. See README.md for Pyright and stronger profiles.
 let g:omarchy_python_lsp = 'pylsp'
 let g:omarchy_python_linters = ['ruff']
-let g:omarchy_python_lsp_on_open = 0
+let g:omarchy_python_lsp_on_open = 1
 let g:omarchy_python_lint_on_open = 0
+let g:omarchy_python_lint_on_open_delay = 500
+let g:ale_lint_on_save = 1
+let g:ale_fix_on_save = 0
 let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
 
 execute 'source ' . fnameescape(s:omarchy_vim_init)

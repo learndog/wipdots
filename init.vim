@@ -76,12 +76,11 @@ let g:omarchy_python_keyword_completion_max_lines = get(g:, 'omarchy_python_keyw
 " Optional extra pylsp code actions: python -m pip install pylsp-rope
 " Arch: sudo pacman -S python-lsp-server python-rope ruff
 " Debian stable: sudo apt install python3-pylsp python3-rope python3-pylsp-rope pipx; pipx install ruff
-" Tradeoff: keeps the toolchain Python-only. LSP features start on explicit
-" language actions by default to keep Python file open cheap; set
-" g:omarchy_python_lsp_on_open = 1 only after the local LSP startup is fast.
+" Tradeoff: keeps the toolchain Python-only. The LSP starts asynchronously
+" after a Python buffer opens, after cheap ALE/server prerequisite checks.
 let g:omarchy_python_lsp = get(g:, 'omarchy_python_lsp', 'pylsp')
 let g:omarchy_python_linters = get(g:, 'omarchy_python_linters', ['ruff'])
-let g:omarchy_python_lsp_on_open = get(g:, 'omarchy_python_lsp_on_open', 0)
+let g:omarchy_python_lsp_on_open = get(g:, 'omarchy_python_lsp_on_open', 1)
 let g:omarchy_python_lint_on_open = get(g:, 'omarchy_python_lint_on_open', 0)
 let g:omarchy_python_lint_on_open_delay = get(g:, 'omarchy_python_lint_on_open_delay', 500)
 let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_command', 'ALEFindReferences -quickfix')
@@ -95,7 +94,7 @@ let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_com
 " diagnostics than pylsp, while ruff keeps linting fast.
 " let g:omarchy_python_lsp = 'pyright'
 " let g:omarchy_python_linters = ['ruff']
-" let g:omarchy_python_lsp_on_open = 0
+" let g:omarchy_python_lsp_on_open = 1
 " let g:omarchy_python_lint_on_open = 0
 " let g:omarchy_python_lint_on_open_delay = 500
 " let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
@@ -109,7 +108,7 @@ let g:omarchy_python_references_command = get(g:, 'omarchy_python_references_com
 " this for larger projects or when the environment has already proven fast.
 " let g:omarchy_python_lsp = 'pyright'
 " let g:omarchy_python_linters = ['ruff', 'pylint']
-" let g:omarchy_python_lsp_on_open = 0
+" let g:omarchy_python_lsp_on_open = 1
 " let g:omarchy_python_lint_on_open = 0
 " let g:omarchy_python_lint_on_open_delay = 500
 " let g:omarchy_python_references_command = 'ALEFindReferences -quickfix'
@@ -118,6 +117,7 @@ let g:omarchy_install_copilot = get(g:, 'omarchy_install_copilot', 0)
 let g:omarchy_copilot_suggestions_start_enabled = get(g:, 'omarchy_copilot_suggestions_start_enabled', 0)
 let g:omarchy_enable_copilot_cli_mapping = get(g:, 'omarchy_enable_copilot_cli_mapping', 0)
 let s:python_dictionary_file = fnamemodify(s:config_file, ':h') . '/python-complete.txt'
+let s:pylsp_msys_wrapper = fnamemodify(s:config_file, ':h') . '/pylsp-msys.py'
 let s:python_dictionary_fallback_words = [
       \ 'False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await',
       \ 'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except',
@@ -137,6 +137,10 @@ let g:ale_lint_on_filetype_changed = get(g:, 'ale_lint_on_filetype_changed', 0)
 let g:ale_lint_on_text_changed = get(g:, 'ale_lint_on_text_changed', 'never')
 let g:ale_lint_on_insert_leave = get(g:, 'ale_lint_on_insert_leave', 0)
 let g:ale_lint_on_save = get(g:, 'ale_lint_on_save', 1)
+" ALE's Python root scan can block for 20+ seconds at the MSYS filesystem root.
+" Ruff receives the input filename and finds configuration itself, so skip
+" ALE's root-changing scan.
+let g:ale_python_ruff_change_directory = get(g:, 'ale_python_ruff_change_directory', 0)
 
 " Disable gitgutter's default maps before the plugin loads.
 let g:gitgutter_map_keys = 0
@@ -237,35 +241,177 @@ function! s:PythonToolCandidates(buffer, tool) abort
   let l:roots = []
   let l:filename = bufexists(a:buffer) ? fnamemodify(bufname(a:buffer), ':p') : ''
   let l:start = empty(l:filename) ? getcwd() : fnamemodify(l:filename, ':h')
+  let l:project_root = s:PythonProjectRoot(a:buffer)
 
-  if !empty($VIRTUAL_ENV)
+  if !empty($VIRTUAL_ENV) && isdirectory($VIRTUAL_ENV)
     call add(l:roots, $VIRTUAL_ENV)
   endif
 
   for l:dir in s:FindUpwards(l:start)
     for l:name in s:PythonVirtualenvNames()
-      call add(l:roots, l:dir . '/' . l:name)
+      let l:root = l:dir . '/' . l:name
+      if isdirectory(l:root)
+        call add(l:roots, l:root)
+      endif
     endfor
+    if s:NormalizePath(resolve(l:dir)) ==# s:NormalizePath(l:project_root)
+      break
+    endif
   endfor
 
   let l:candidates = []
   for l:root in s:ListUnique(l:roots)
-    call add(l:candidates, l:root . '/Scripts/' . a:tool . '.exe')
-    call add(l:candidates, l:root . '/Scripts/' . a:tool . '.cmd')
-    call add(l:candidates, l:root . '/Scripts/' . a:tool)
-    call add(l:candidates, l:root . '/bin/' . a:tool)
+    for l:path in [
+          \ l:root . '/Scripts/' . a:tool . '.exe',
+          \ l:root . '/Scripts/' . a:tool . '.cmd',
+          \ l:root . '/Scripts/' . a:tool,
+          \ l:root . '/bin/' . a:tool,
+          \ ]
+      if filereadable(l:path)
+        call add(l:candidates, l:path)
+      endif
+    endfor
   endfor
 
   if exists('*exepath')
-    call add(l:candidates, exepath(a:tool))
+    let l:path = exepath(a:tool)
+    if !empty(l:path) && filereadable(l:path)
+      call add(l:candidates, l:path)
+    endif
   endif
 
   return s:ListUnique(l:candidates)
 endfunction
 
 function! s:PythonExecutableCandidates(buffer, tool) abort
-  return filter(copy(s:PythonToolCandidates(a:buffer, a:tool)), 'executable(v:val)')
+  " Candidates are exact readable files. Avoid executable() here: Git for
+  " Windows Vim can spend seconds checking each nonexistent MSYS path.
+  return s:PythonToolCandidates(a:buffer, a:tool)
 endfunction
+
+function! s:PythonResolvedTool(buffer, tool) abort
+  let l:candidates = s:PythonExecutableCandidates(a:buffer, a:tool)
+  return empty(l:candidates) ? '' : l:candidates[0]
+endfunction
+
+function! s:PythonProjectMarkers() abort
+  return [
+        \ 'pyproject.toml', 'setup.cfg', 'tox.ini', 'MANIFEST.in',
+        \ 'mypy.ini', '.mypy.ini', 'pycodestyle.cfg', '.flake8', '.flake8rc',
+        \ 'pylama.ini', 'pylintrc', '.pylintrc', 'pyrightconfig.json',
+        \ 'pyrightconfig.toml', 'Pipfile', 'Pipfile.lock', 'poetry.lock',
+        \ 'ty.toml', '.tool-versions', 'uv.lock',
+        \ ]
+endfunction
+
+function! s:PythonProjectRoot(buffer) abort
+  let l:filename = bufexists(a:buffer) ? fnamemodify(bufname(a:buffer), ':p') : ''
+  let l:start = empty(l:filename) ? getcwd() : fnamemodify(l:filename, ':h')
+  let l:fallback = resolve(l:start)
+
+  for l:dir in s:FindUpwards(l:start)
+    " Never probe the MSYS or drive root. On Git for Windows those checks can
+    " block for tens of seconds and may resolve to the Git installation tree.
+    let l:parent = fnamemodify(l:dir, ':h')
+    if l:parent ==# l:dir || l:dir ==# '/' || l:dir =~# '^[A-Za-z]:[/\\]\?$'
+      break
+    endif
+
+    for l:marker in s:PythonProjectMarkers()
+      if filereadable(l:dir . '/' . l:marker)
+        return resolve(l:dir)
+      endif
+    endfor
+
+    if isdirectory(l:dir . '/.git') || filereadable(l:dir . '/.git')
+      return resolve(l:dir)
+    endif
+  endfor
+
+  " A standalone script is a one-file project. Its directory is a valid pylsp
+  " root and avoids an unbounded filesystem walk.
+  return l:fallback
+endfunction
+
+function! s:ConfigurePythonAleTools(buffer) abort
+  if !bufexists(a:buffer) || getbufvar(a:buffer, '&filetype') !=# 'python'
+    return
+  endif
+
+  let l:tool_names = [tolower(get(g:, 'omarchy_python_lsp', ''))]
+  call extend(l:tool_names, copy(get(g:, 'omarchy_python_linters', [])))
+  call extend(l:tool_names, copy(get(get(g:, 'ale_fixers', {}), 'python', [])))
+  let l:tools = {
+        \ 'pylsp': 'pylsp',
+        \ 'pyright': 'pyright-langserver',
+        \ 'ruff': 'ruff',
+        \ 'ruff_format': 'ruff',
+        \ 'flake8': 'flake8',
+        \ 'pylint': 'pylint',
+        \ }
+  let l:resolved = {}
+  for l:ale_name in s:ListUnique(l:tool_names)
+    if !has_key(l:tools, l:ale_name)
+      continue
+    endif
+    let l:variable = 'ale_python_' . l:ale_name . '_executable'
+    if has('win32unix') && l:ale_name ==# 'pylsp'
+      " ALE otherwise combines cmd.exe syntax with MSYS paths. Run the
+      " project interpreter through a small URI adapter instead.
+      let l:pylsp = s:PythonResolvedTool(a:buffer, 'pylsp')
+      let l:python = s:PythonResolvedTool(a:buffer, 'python')
+      if !empty(l:pylsp) && !empty(l:python) && filereadable(s:pylsp_msys_wrapper)
+        let l:options = getbufvar(a:buffer, 'omarchy_python_pylsp_original_options', v:null)
+        if l:options is v:null
+          let l:options = getbufvar(a:buffer, 'ale_python_pylsp_options',
+                \ get(g:, 'ale_python_pylsp_options', ''))
+          call setbufvar(a:buffer, 'omarchy_python_pylsp_original_options', l:options)
+        endif
+        call setbufvar(a:buffer, 'omarchy_python_pylsp_server_executable', l:pylsp)
+        call setbufvar(a:buffer, l:variable, l:python)
+        call setbufvar(a:buffer, 'ale_python_pylsp_options',
+              \ shellescape(s:pylsp_msys_wrapper) . (empty(l:options) ? '' : ' ' . l:options))
+      endif
+      continue
+    endif
+    let l:existing = getbufvar(a:buffer, l:variable, '')
+    if !empty(l:existing) && filereadable(l:existing)
+      continue
+    endif
+    let l:tool = l:tools[l:ale_name]
+    if !has_key(l:resolved, l:tool)
+      let l:resolved[l:tool] = s:PythonResolvedTool(a:buffer, l:tool)
+    endif
+    let l:path = l:resolved[l:tool]
+    if !empty(l:path)
+      call setbufvar(a:buffer, l:variable, l:path)
+    endif
+  endfor
+endfunction
+
+function! s:ConfigurePythonAleShell(buffer) abort
+  if !has('win32unix')
+    return
+  endif
+  " exepath('bash') can resolve to the Windows System32 WSL shim here.
+  " Git Bash Vim always exposes its own shell at this MSYS path.
+  if filereadable('/usr/bin/bash')
+    call setbufvar(a:buffer, 'ale_shell', '/usr/bin/bash')
+    call setbufvar(a:buffer, 'ale_shell_arguments', '-c')
+  endif
+endfunction
+
+" Override only the Python LSP roots. Preserve a user-supplied string root or
+" any existing per-linter root callbacks.
+let g:ale_root = get(g:, 'ale_root', {})
+if type(g:ale_root) == v:t_dict
+  if !has_key(g:ale_root, 'pylsp')
+    let g:ale_root.pylsp = function('<SID>PythonProjectRoot')
+  endif
+  if !has_key(g:ale_root, 'pyright')
+    let g:ale_root.pyright = function('<SID>PythonProjectRoot')
+  endif
+endif
 
 function! s:ExternalFzfPath() abort
   for l:path in s:FzfPathCandidates()
@@ -418,6 +564,12 @@ function! OmarchyDebug() abort
         \ 'g:omarchy_python_lint_on_open=' . string(g:omarchy_python_lint_on_open),
         \ 'g:omarchy_python_references_command=' . string(g:omarchy_python_references_command),
         \ '$VIRTUAL_ENV=' . $VIRTUAL_ENV,
+        \ 'python project root=' . s:PythonProjectRoot(bufnr('%')),
+        \ 'buffer ALE shell=' . getbufvar(bufnr('%'), 'ale_shell', ''),
+        \ 'buffer pylsp executable=' . getbufvar(bufnr('%'), 'ale_python_pylsp_executable', ''),
+        \ 'buffer pylsp server executable=' . getbufvar(bufnr('%'), 'omarchy_python_pylsp_server_executable', ''),
+        \ 'pylsp MSYS wrapper=' . s:pylsp_msys_wrapper,
+        \ 'buffer ruff executable=' . getbufvar(bufnr('%'), 'ale_python_ruff_executable', ''),
         \ 'pylsp local candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'pylsp')),
         \ 'pylsp executable candidates=' . string(s:PythonExecutableCandidates(bufnr('%'), 'pylsp')),
         \ 'ruff local candidates=' . string(s:PythonToolCandidates(bufnr('%'), 'ruff')),
@@ -841,7 +993,9 @@ let g:ale_hover_to_preview = get(g:, 'ale_hover_to_preview', 1)
 let s:python_lsp_warning_shown = {}
 
 function! s:SetAleOmnifunc() abort
-  setlocal omnifunc=ale#completion#OmniFunc
+  if s:AleCommandsAvailable(0)
+    setlocal omnifunc=ale#completion#OmniFunc
+  endif
 endfunction
 
 function! s:PythonLspStarted(linter, details) abort
@@ -858,18 +1012,26 @@ function! s:PythonLspInstallHint(name) abort
   return 'Install the configured language server, or set g:omarchy_python_lsp = "".'
 endfunction
 
-function! s:PythonLspExecutableName(name) abort
+function! s:PythonLspExecutableName(buffer, name) abort
   if a:name ==# 'pylsp'
-    return get(g:, 'ale_python_pylsp_executable', 'pylsp')
+    return getbufvar(a:buffer, 'ale_python_pylsp_executable', get(g:, 'ale_python_pylsp_executable', 'pylsp'))
   endif
   if a:name ==# 'pyright'
-    return get(g:, 'ale_python_pyright_executable', 'pyright-langserver')
+    return getbufvar(a:buffer, 'ale_python_pyright_executable', get(g:, 'ale_python_pyright_executable', 'pyright-langserver'))
   endif
   return a:name
 endfunction
 
 function! s:ExecutableLooksLikePath(executable_name) abort
   return a:executable_name =~# '[/\\]'
+endfunction
+
+function! s:PythonExecutableAvailable(executable_name) abort
+  " Exact virtualenv paths were already resolved as readable files. Calling
+  " executable() repeatedly for them is disproportionately slow in MSYS Vim.
+  return s:ExecutableLooksLikePath(a:executable_name)
+        \ ? filereadable(a:executable_name)
+        \ : executable(a:executable_name)
 endfunction
 
 function! s:PythonConfiguredLspPrereqsAvailable(buffer, noisy) abort
@@ -881,11 +1043,12 @@ function! s:PythonConfiguredLspPrereqsAvailable(buffer, noisy) abort
     return 0
   endif
 
-  let l:executable = s:PythonLspExecutableName(l:name)
+  call s:ConfigurePythonAleTools(a:buffer)
+  let l:executable = s:PythonLspExecutableName(a:buffer, l:name)
   let l:candidates = s:ExecutableLooksLikePath(l:executable)
         \ ? [l:executable]
         \ : s:PythonToolCandidates(a:buffer, l:executable)
-  let l:available = !empty(filter(copy(l:candidates), 'executable(v:val)'))
+  let l:available = !empty(filter(copy(l:candidates), 's:PythonExecutableAvailable(v:val)'))
 
   if !l:available
     if a:noisy && !has_key(s:python_lsp_warning_shown, l:name)
@@ -933,13 +1096,59 @@ function! s:AleCommandsAvailable(noisy) abort
   return 0
 endfunction
 
+function! s:PythonConfiguredLintPrereqsAvailable(buffer, noisy) abort
+  let l:configured = copy(get(g:, 'omarchy_python_linters', []))
+  if empty(l:configured)
+    return 0
+  endif
+  if !s:AleCommandsAvailable(a:noisy)
+    return 0
+  endif
+
+  call s:ConfigurePythonAleTools(a:buffer)
+  let l:known_tools = {'ruff': 'ruff', 'flake8': 'flake8', 'pylint': 'pylint'}
+  let l:available = 0
+  let l:missing = []
+  for l:name in l:configured
+    if !has_key(l:known_tools, l:name)
+      " Let ALE handle custom linters this config does not know how to resolve.
+      let l:available = 1
+      continue
+    endif
+    let l:variable = 'ale_python_' . l:name . '_executable'
+    let l:executable = getbufvar(a:buffer, l:variable, get(g:, l:variable, l:known_tools[l:name]))
+    if s:PythonExecutableAvailable(l:executable)
+      let l:available = 1
+    else
+      call add(l:missing, l:known_tools[l:name])
+    endif
+  endfor
+
+  if a:noisy && !empty(l:missing)
+    echohl WarningMsg
+    echom 'Python linters unavailable: ' . join(l:missing, ', ') . '. Activate the project virtualenv or install the configured tools; ALE was not invoked for missing-only linting.'
+    echohl None
+  endif
+  return l:available
+endfunction
+
 function! s:PythonEnabledLspLinters(buffer, noisy) abort
   if !s:AleCommandsAvailable(a:noisy)
     return v:null
   endif
 
   try
-    return ale#lsp_linter#GetEnabled(a:buffer)
+    let l:linters = ale#lsp_linter#GetEnabled(a:buffer)
+    if has('win32unix')
+      for l:linter in l:linters
+        if get(l:linter, 'name', '') ==# 'pylsp'
+          " ALE's default cwd command uses `cd /d`, which Git Bash cannot
+          " execute. pylsp receives the project root in LSP initialization.
+          let l:linter.cwd = ''
+        endif
+      endfor
+    endif
+    return l:linters
   catch
     if a:noisy
       echohl WarningMsg
@@ -966,7 +1175,7 @@ function! s:PythonLspExecutableAvailable(buffer, linter, noisy) abort
     let l:executable = l:name
   endif
   if (l:name ==# 'pylsp' || l:name ==# 'pyright') && l:executable ==# l:name
-    let l:executable = s:PythonLspExecutableName(l:name)
+    let l:executable = s:PythonLspExecutableName(a:buffer, l:name)
   endif
 
   try
@@ -1045,6 +1254,7 @@ function! s:StartPythonLspForBuffer(buffer, timer) abort
   if !g:omarchy_python_lsp_on_open
         \ || !bufexists(a:buffer)
         \ || getbufvar(a:buffer, '&filetype') !=# 'python'
+        \ || !s:PythonConfiguredLspPrereqsAvailable(a:buffer, 0)
     return
   endif
 
@@ -1069,11 +1279,15 @@ function! s:LintPythonBuffer(buffer, timer) abort
   if !g:omarchy_python_lint_on_open
         \ || !bufexists(a:buffer)
         \ || getbufvar(a:buffer, '&filetype') !=# 'python'
-        \ || !exists('*ale#Queue')
+        \ || !s:PythonConfiguredLintPrereqsAvailable(a:buffer, 0)
     return
   endif
 
-  call ale#Queue(0, 'lint_file', a:buffer)
+  try
+    call ale#Queue(0, 'lint_file', a:buffer)
+  catch
+    call s:Debug('Python lint-on-open failed: ' . v:exception)
+  endtry
 endfunction
 
 function! s:PythonCompleteStart() abort
@@ -1189,6 +1403,10 @@ function! s:MaybeAutoPythonKeywordComplete() abort
 endfunction
 
 function! s:SetupPythonCompletion() abort
+  call s:ConfigurePythonAleShell(bufnr('%'))
+  call s:ConfigurePythonAleTools(bufnr('%'))
+  let b:ale_completion_enabled = s:AleCommandsAvailable(0)
+        \ && s:PythonConfiguredLspPrereqsAvailable(bufnr('%'), 0)
   call s:SetAleOmnifunc()
   setlocal completefunc=OmarchyPythonComplete
   if exists('*timer_start')
