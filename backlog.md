@@ -1,9 +1,9 @@
 ### Current backlog
+* Netrw as side panel but with better (and non-dangerous) keymaps (see the file explorer implementation in https://github.com/smnatale/nvim_native for ideas)
 * If not breaking std expectations, switch the right/left for git diff with <Space>dg. RHS new file is nicer.
-* Fix: <Leader>sk enters import mode (why). Map it to <Leader>fk so it works even if I confuse <Leader>s with <Leader>f. Same for all <Leader>f commands?
-* Check: How local or global in a project is the lsp info (eg does rename symbol cross file boundaries - if chg in module, do dependent files chg?)
+* Fix: <Leader>sk enters import mode (why). Map it to noop incase I confuse <Leader>s with <Leader>f.
+* Check Scope: How local or global in a project is the lsp info (eg does rename symbol cross file boundaries - if chg in module, do dependent files chg?) Add to the documentation. (I think rn global to the dir vim ran from, and lr?)
 * Functionality from previous helpers
-  - Netrw as side panel but with better (and non-dangerous) keymaps (see the file explorer implementation in https://github.com/smnatale/nvim_native for ideas)
   - jh and jl to move before after (or just after) nearest bracket on that side, eg after autoclose
   - config_endstuff?
   - 0 and maybe "'" or CTRL-' cycle navigation in line: start first last end

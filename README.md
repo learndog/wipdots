@@ -650,6 +650,41 @@ What happens internally:
   installed in the project env. Pylint is more likely to need project imports,
   so it is intentionally opt-in rather than the default.
 
+Scope is tool-specific. ALE is the Vim/Neovim client; the selected server or
+linter decides how much code it analyzes after ALE gives it a file and, for
+LSPs, a workspace root. This config gives `pylsp` and Pyright the nearest
+Python project marker found above the current file, or the nearest `.git`
+directory, as the LSP root. If neither exists, the current file's directory is
+treated as a small standalone project.
+
+LSP navigation and refactoring are therefore project-root scoped, not just
+current-file scoped. `<Leader>ld`, `<Leader>lr`, `<Leader>lh`, `<Leader>ln`,
+and `<Leader>la` ask `pylsp` or Pyright about the workspace rooted as described
+above and imports visible through the detected project Python. Definitions,
+references, and rename can cross files under that root when
+the language server can resolve the relationship. They are not limited to open
+buffers or git-tracked files, but they are also not a textual grep of every
+file. Dynamic imports, generated code, missing package metadata, unusual
+`sys.path` setup, ignored folders, or a weak server-side index can produce
+misses.
+
+Rename is an LSP symbol rename, not a general filesystem refactor. If a server
+returns edits for dependent files, ALE applies them, so renaming a function,
+class, variable, or resolvable import can update other files in the LSP
+workspace. Module/package file renames are more server-dependent; for `pylsp`,
+installing Rope support and `pylsp-rope` improves refactoring support, but you
+should still review the quickfix/edit result before trusting a broad rename.
+Manually renaming `foo.py` outside the LSP rename flow will not automatically
+rewrite `import foo` elsewhere.
+
+Ruff linting through ALE is narrower. With this config, save-time linting and
+`:ALELint` run the configured linter for the current Python buffer/file, while
+`:ALEFix` fixes/formats the current buffer. Ruff still discovers the nearest
+`pyproject.toml`, `ruff.toml`, or `.ruff.toml` relevant to that file and uses
+project settings such as import classification, but ALE is not asking Ruff to
+lint the whole repository. Run `ruff check .` or `ruff check path/to/project`
+outside Vim when you want a complete project pass.
+
 Git Bash Vim uses an MSYS path model while project virtualenvs contain native
 Windows executables. The config uses `/usr/bin/bash` and
 `pylsp-msys.py` for that specific combination so pylsp receives native Windows
