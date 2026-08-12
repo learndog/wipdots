@@ -974,8 +974,15 @@ function! s:GitRootForDir(dir) abort
   if !executable('git')
     return ''
   endif
-  let l:root = systemlist('git -C ' . shellescape(a:dir) . ' rev-parse --show-toplevel 2>/dev/null')
-  return v:shell_error || empty(l:root) ? '' : l:root[0]
+  try
+    let l:root = systemlist('git -C ' . shellescape(a:dir) . ' rev-parse --show-toplevel 2>/dev/null')
+  catch
+    return ''
+  endtry
+  if v:shell_error || empty(l:root) || empty(l:root[0]) || l:root[0] ==# '-1'
+    return ''
+  endif
+  return isdirectory(l:root[0]) ? l:root[0] : ''
 endfunction
 
 function! s:OpenFileSink(line) abort
@@ -1040,7 +1047,126 @@ nnoremap <silent> <Leader>bd :bdelete<CR>
 " MAP: <Leader>bo | Keep only current buffer
 nnoremap <silent> <Leader>bo :call <SID>BufferOnly()<CR>
 
-" 6. fzf -----------------------------------------------------------------------
+" 6. files and explorer --------------------------------------------------------
+let g:netrw_liststyle = get(g:, 'netrw_liststyle', 3)
+let g:netrw_banner = get(g:, 'netrw_banner', 0)
+let g:netrw_browse_split = get(g:, 'netrw_browse_split', 4)
+let g:netrw_altfile = get(g:, 'netrw_altfile', 1)
+let g:netrw_winsize = get(g:, 'netrw_winsize', -30)
+let g:netrw_keepdir = get(g:, 'netrw_keepdir', 1)
+
+function! s:NetrwWindow() abort
+  for l:winnr in range(1, winnr('$'))
+    let l:buf = winbufnr(l:winnr)
+    if l:buf > 0 && getbufvar(l:buf, '&filetype') ==# 'netrw'
+      return l:winnr
+    endif
+  endfor
+  return -1
+endfunction
+
+function! s:NetrwCloseWindow(winnr) abort
+  let l:current = winnr()
+  execute a:winnr . 'wincmd w'
+  if winnr('$') > 1
+    close
+  else
+    enew
+  endif
+  if l:current <= winnr('$') && l:current != a:winnr
+    execute l:current . 'wincmd w'
+  endif
+endfunction
+
+function! s:NetrwDefaultDir() abort
+  let l:file = expand('%:p')
+  let l:start = !empty(l:file) ? fnamemodify(l:file, ':h') : getcwd()
+  let l:root = s:GitRootForDir(l:start)
+  return empty(l:root) ? l:start : l:root
+endfunction
+
+function! s:NetrwOpen(dir) abort
+  let l:dir = empty(a:dir) ? getcwd() : a:dir
+  if !s:CommandExists('Lexplore')
+    silent! runtime plugin/netrwPlugin.vim
+  endif
+  if !s:CommandExists('Lexplore')
+    echo 'Netrw is not available in this Vim runtime.'
+    return
+  endif
+  execute 'Lexplore ' . fnameescape(l:dir)
+  if g:netrw_winsize < 0
+    execute 'vertical resize ' . abs(g:netrw_winsize)
+  endif
+endfunction
+
+function! s:NetrwToggle() abort
+  let l:winnr = s:NetrwWindow()
+  if l:winnr > 0
+    call s:NetrwCloseWindow(l:winnr)
+    return
+  endif
+  call s:NetrwOpen(s:NetrwDefaultDir())
+endfunction
+
+function! s:NetrwReveal() abort
+  let l:file = expand('%:p')
+  if empty(l:file)
+    call s:NetrwOpen(s:NetrwDefaultDir())
+    return
+  endif
+
+  let l:name = expand('%:t')
+  let @/ = '\V' . escape(l:name, '\')
+  call s:NetrwOpen(fnamemodify(l:file, ':h'))
+  silent! normal! n
+endfunction
+
+function! s:NetrwHelp() abort
+  help netrw-quickmap
+endfunction
+
+function! s:NetrwUnsafeKey(key) abort
+  echo 'Netrw file operation key "' . a:key . '" is disabled here. Use :help netrw for explicit commands.'
+endfunction
+
+function! s:NetrwBufferSetup() abort
+  setlocal number norelativenumber nowrap
+  setlocal statusline=netrw:\ <CR>/l\ open\ \|\ h/-\ up\ \|\ /\ search\ \|\ ?\ help\ \|\ q\ close
+
+  nnoremap <buffer><silent> q :call <SID>NetrwCloseWindow(winnr())<CR>
+  nnoremap <buffer><silent> ? :help netrw-quickmap<CR>
+  nnoremap <buffer><silent> <F1> :help netrw<CR>
+  nnoremap <buffer><silent> l <CR>
+  nnoremap <buffer><silent> h -
+  nnoremap <buffer><silent> R :edit<CR>
+  nnoremap <buffer><silent> <C-L> :edit<CR>
+
+  nnoremap <buffer><silent><nowait> D :call <SID>NetrwUnsafeKey('D')<CR>
+  nnoremap <buffer><silent><nowait> <Del> :call <SID>NetrwUnsafeKey('<Del>')<CR>
+  nnoremap <buffer><silent><nowait> d :call <SID>NetrwUnsafeKey('d')<CR>
+  nnoremap <buffer><silent><nowait> % :call <SID>NetrwUnsafeKey('%')<CR>
+  nnoremap <buffer><silent><nowait> x :call <SID>NetrwUnsafeKey('x')<CR>
+  nnoremap <buffer><silent><nowait> O :call <SID>NetrwUnsafeKey('O')<CR>
+  nnoremap <buffer><silent><nowait> m :call <SID>NetrwUnsafeKey('m')<CR>
+  nnoremap <buffer><silent><nowait> cd :call <SID>NetrwUnsafeKey('cd')<CR>
+endfunction
+
+augroup omarchy_netrw
+  autocmd!
+  autocmd FileType netrw call <SID>NetrwBufferSetup()
+augroup END
+
+command! FileExplorer call <SID>NetrwToggle()
+command! FileExplorerReveal call <SID>NetrwReveal()
+command! FileExplorerHelp call <SID>NetrwHelp()
+" MAP: <Leader>ee | Toggle left file explorer
+nnoremap <silent> <Leader>ee :FileExplorer<CR>
+" MAP: <Leader>eE | Reveal current file directory in explorer
+nnoremap <silent> <Leader>eE :FileExplorerReveal<CR>
+" MAP: <Leader>eh | Open file explorer help
+nnoremap <silent> <Leader>eh :FileExplorerHelp<CR>
+
 if exists('g:fzf_vim')
   let g:fzf_vim.preview_window = ['right,50%,<70(up,40%)', 'ctrl-/']
 else

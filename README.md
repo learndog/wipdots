@@ -136,7 +136,8 @@ If Git Bash still finds that binary, check shell startup files such as `~/.bashr
 
 Without FZF, `<Leader>ff`, `<Leader>fg`, `<Leader>fr`, `<Leader>fl`,
 `<Leader>fs`, and `<Leader>fk` use unfiltered scratch-buffer fallback pickers.
-Press `<CR>` on an item to open/jump and `q` to close the picker. Install an
+Press `<CR>` on an item to open/jump and `q` to close the picker. The Netrw file
+explorer maps under `<Leader>e` are built in and do not require FZF. Install an
 external `fzf` `0.38.0+` and rerun `:PlugInstall` to enable filtering.
 
 ## Check What Is Installed
@@ -771,6 +772,9 @@ diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 | Key | Action |
 | --- | --- |
 | `<Space><Space>` | pick open buffer |
+| `<Leader>ee` | toggle the left file explorer |
+| `<Leader>eE` | reveal the current file's directory in the explorer |
+| `<Leader>eh` | open Netrw file explorer help |
 | `<Leader>ff` | find project files |
 | `<Leader>fg` | find git-tracked files |
 | `<Leader>fr` | search text recursively under Vim's current working directory |
@@ -821,6 +825,58 @@ diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 | `<Leader>sd` | delete a saved session |
 
 `<Leader>` is Space.
+
+## File Explorer
+
+The file explorer uses Vim's built-in Netrw. It is configured as a simple
+left-side tree panel with the full Netrw banner hidden. It requires no plugin,
+FZF, Node.js, or shell command, and works in Vim and Neovim.
+
+Global maps and commands:
+
+| Key / Command | Action |
+| --- | --- |
+| `<Leader>ee` / `:FileExplorer` | Toggle the left explorer. In a git worktree it starts at the git root; otherwise it starts at the current file's directory or `:pwd`. |
+| `<Leader>eE` / `:FileExplorerReveal` | Open the explorer at the current file's directory and search to the current file name. |
+| `<Leader>eh` / `:FileExplorerHelp` | Open Netrw's quick map help. |
+
+No bare `e` or `ee` normal-mode map is installed. Vim's native `e` motion keeps
+its default behavior.
+
+Inside the explorer:
+
+| Key | Action |
+| --- | --- |
+| `<CR>` or `l` | Open the file under the cursor, or expand/collapse a directory. Files open in the previous editing window. |
+| `h` or `-` | Go up one directory. |
+| `/` | Search names in the visible Netrw listing. Use `n` and `N` for next/previous match. |
+| `R` or `<C-L>` | Refresh the listing. `R` is refresh here, not rename. |
+| `?` | Open Netrw quick map help. |
+| `<F1>` | Open the full Netrw help. |
+| `q` | Close the explorer. |
+
+The explorer intentionally disables several Netrw file-operation keys in its
+buffer: `D`, `<Del>`, `d`, `%`, `x`, `O`, `m`, and `cd`. These cover common
+delete, create, execute/obtain, mark-prefix, and current-directory-changing
+paths that are easy to hit by accident. Use explicit Ex commands after reading
+`:help netrw` if you intentionally want those Netrw operations.
+
+Default Netrw settings:
+
+```vim
+let g:netrw_liststyle = 3
+let g:netrw_banner = 0
+let g:netrw_browse_split = 4
+let g:netrw_altfile = 1
+let g:netrw_winsize = -30
+let g:netrw_keepdir = 1
+```
+
+You can override these before sourcing `omarchy/vim/init.vim`. Negative
+`g:netrw_winsize` values are treated as fixed columns; the default is a
+30-column left panel.
+
+> Ref: https://vimhelp.org/pi_netrw.txt.html
 
 ## Quickfix Navigation
 
@@ -1160,7 +1216,28 @@ Key checks:
 - `<Leader>fr` searches text recursively under Vim's current working directory. Check `:pwd` if the scope is unclear.
 - `<Leader>fk` shows config-defined mappings.
 
-### 4. Python Tooling
+### 4. File Explorer
+
+Inside Vim or Neovim:
+
+```vim
+:FileExplorer
+:FileExplorerReveal
+:FileExplorerHelp
+```
+
+Key checks:
+
+- `<Leader>ee` opens a left Netrw tree and pressing it again closes that tree.
+- `<Leader>eE` opens the explorer at the current file's directory and searches to the current file name.
+- In the explorer, `<CR>` and `l` open files or expand/collapse directories, while `h` and `-` go up one directory.
+- In the explorer, `/` searches visible names; `n` and `N` move through matches.
+- In the explorer, `R` and `<C-L>` refresh the listing.
+- In the explorer, `?` and `<F1>` open Netrw help.
+- In the explorer, `q` closes the tree.
+- In the explorer, accidental file-operation keys such as `D`, `<Del>`, `d`, `%`, `x`, `O`, `m`, and `cd` should echo a disabled-key message instead of performing the native Netrw action.
+
+### 5. Python Tooling
 
 Skip this section if you intentionally installed no Python support.
 
@@ -1220,7 +1297,7 @@ Key checks on a symbol:
 - Insert mode `<Tab>` after a word and `<M-/>` trigger completion without the two-key control sequence.
 - Insert mode `<Tab>`, `<S-Tab>`, and `<CR>` navigate or accept the visible completion menu.
 
-### 5. Python Symbols
+### 6. Python Symbols
 
 Inside the same Python file:
 
@@ -1232,7 +1309,7 @@ Expected: `Greeter`, `hello`, and `unused` appear. Selecting one jumps to its li
 
 This command is regex-based and does not require `pylsp`, but it is useful to test alongside Python files.
 
-### 6. Statusline
+### 7. Statusline
 
 Open a tracked file in this repo:
 
@@ -1242,7 +1319,7 @@ vim -Nu omarchy/vim/init.vim omarchy/vim/init.vim
 
 Expected statusline includes mode, file, position, filetype/encoding info, time, ALE counts when ALE is loaded, and git branch when `git` is available.
 
-### 7. Editing Helpers
+### 8. Editing Helpers
 
 Manual checks:
 
@@ -1256,7 +1333,7 @@ Manual checks:
 - `<Leader>dg` opens a diff against `HEAD` for a tracked file.
 - `q` or `<Leader>dq` closes an Omarchy diff and returns to the original buffer.
 
-### 8. Optional Flags
+### 9. Optional Flags
 
 Create a temporary wrapper for Vim:
 
@@ -1294,7 +1371,7 @@ Inside the editor:
 
 Expected: fugitive commands work. Gitgutter signs appear after editing a tracked file.
 
-### 9. GitHub Copilot
+### 10. GitHub Copilot
 
 Without Copilot enabled, startup should not require Node.js and the editor should behave as though Copilot is absent:
 
@@ -1351,7 +1428,7 @@ Expected:
 - The config launches only `copilot`; it does not pass blanket permission flags.
 - Vim/Neovim builds without `:terminal` report that `copilot` should be run from an external terminal.
 
-### 10. Sessions
+### 11. Sessions
 
 Sessions are built in and need no plugins. From the dotfiles repo, start a clean Vim:
 
