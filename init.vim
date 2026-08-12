@@ -935,6 +935,9 @@ set autoindent
 set linebreak
 set textwidth=0
 set colorcolumn=
+set foldenable
+set foldlevelstart=99
+set foldnestmax=10
 set backspace=indent,eol,start
 set completeopt=menu,menuone,noselect,noinsert
 set shortmess+=c
@@ -1048,8 +1051,52 @@ function! s:FzfRun(spec) abort
   endtry
 endfunction
 
-" MAP: <Space><Space> | Pick open buffer
-nnoremap <silent> <Space><Space> :call <SID>RunCommand('Buffers')<CR>
+function! s:BufferPickerLine(buffer) abort
+  let l:name = bufname(a:buffer)
+  if empty(l:name)
+    let l:name = '[No Name]'
+  else
+    let l:name = fnamemodify(l:name, ':~:.')
+  endif
+  let l:current = a:buffer == bufnr('%') ? '%' : ' '
+  let l:modified = getbufvar(a:buffer, '&modified') ? '+' : ' '
+  return printf('%3d %s%s %s', a:buffer, l:current, l:modified, l:name)
+endfunction
+
+function! s:BufferPickerSink(line) abort
+  let l:buffer = str2nr(matchstr(a:line, '^\s*\zs\d\+'))
+  if l:buffer <= 0 || !bufexists(l:buffer)
+    return
+  endif
+  call s:ClosePickerScratch()
+  execute 'buffer ' . l:buffer
+endfunction
+
+function! s:BufferPicker() abort
+  if s:HasFzf() && s:CommandExists('Buffers')
+    Buffers
+    return
+  endif
+
+  let l:items = []
+  for l:buffer in range(1, bufnr('$'))
+    if buflisted(l:buffer)
+      call add(l:items, s:BufferPickerLine(l:buffer))
+    endif
+  endfor
+  if empty(l:items)
+    echo 'No listed buffers.'
+    return
+  endif
+  if !s:HasFzf()
+    call s:WarnFzfFallback('Buffers')
+  endif
+  call s:OpenPickerScratch('[Omarchy buffers]', l:items, function('<SID>BufferPickerSink'))
+endfunction
+
+command! OmarchyBuffers call <SID>BufferPicker()
+" MAP: <Space><Space> | Pick open buffer; falls back without FZF
+nnoremap <silent> <Space><Space> :OmarchyBuffers<CR>
 " MAP: <Leader>bn | Next buffer
 nnoremap <silent> <Leader>bn :bnext<CR>
 " MAP: <Leader>bp | Previous buffer
@@ -2197,6 +2244,123 @@ inoremap ( ()<Left>
 inoremap [ []<Left>
 inoremap { {}<Left>
 
+let s:closing_delimiter_pattern = "[])}>\"'`]"
+let s:left_delimiter_pattern = "[[({<\"'`]"
+
+function! s:MovePastDelimiter(line, column, mode) abort
+  let l:last_column = max([1, col([a:line, '$']) - 1])
+  if a:column < l:last_column
+    call cursor(a:line, a:column + 1)
+    if a:mode ==# 'insert'
+      startinsert
+    endif
+  else
+    call cursor(a:line, l:last_column)
+    if a:mode ==# 'insert'
+      startinsert!
+    endif
+  endif
+endfunction
+
+function! s:JumpPastNextClosingDelimiter(mode) abort
+  let l:position = getpos('.')
+  if a:mode ==# 'insert' && col('.') < col('$') - 1
+    call cursor(line('.'), col('.') + 1)
+  endif
+  let l:match = searchpos(s:closing_delimiter_pattern, 'W')
+  if l:match[0] == 0
+    call setpos('.', l:position)
+    echo 'No next closing bracket or quote.'
+    if a:mode ==# 'insert'
+      startinsert
+    endif
+    return
+  endif
+  call s:MovePastDelimiter(l:match[0], l:match[1], a:mode)
+endfunction
+
+function! s:JumpPastNearestLeftDelimiter(mode) abort
+  let l:position = getpos('.')
+  let l:match = searchpos(s:left_delimiter_pattern, 'bW')
+  if l:match[0] == 0
+    call setpos('.', l:position)
+    echo 'No previous left bracket or quote.'
+    if a:mode ==# 'insert'
+      startinsert
+    endif
+    return
+  endif
+  call s:MovePastDelimiter(l:match[0], l:match[1], a:mode)
+endfunction
+
+" MAP: jl | Jump past next closing bracket or quote
+nnoremap jl :<C-U>call <SID>JumpPastNextClosingDelimiter('normal')<CR>
+" MAP: jl | Insert-mode jump past next closing bracket or quote
+inoremap jl <C-O>:call <SID>JumpPastNextClosingDelimiter('insert')<CR>
+" MAP: jh | Jump just inside nearest left bracket or quote
+nnoremap jh :<C-U>call <SID>JumpPastNearestLeftDelimiter('normal')<CR>
+" MAP: jh | Insert-mode jump just inside nearest left bracket or quote
+inoremap jh <C-O>:call <SID>JumpPastNearestLeftDelimiter('insert')<CR>
+
+function! s:CycleLineNumbers() abort
+  if &number && &relativenumber
+    setlocal number norelativenumber
+    echo 'Line numbers: absolute'
+  elseif &number
+    setlocal nonumber norelativenumber
+    echo 'Line numbers: off'
+  else
+    setlocal number relativenumber
+    echo 'Line numbers: absolute + relative'
+  endif
+endfunction
+
+command! OmarchyLineNumbersToggle call <SID>CycleLineNumbers()
+" MAP: <Leader>nn | Cycle line numbers
+nnoremap <silent> <Leader>nn :OmarchyLineNumbersToggle<CR>
+" MAP: <F8> | Cycle line numbers
+nnoremap <silent> <F8> :OmarchyLineNumbersToggle<CR>
+
+function! s:ToggleSearchHighlight() abort
+  set hlsearch!
+  echo 'Search highlighting: ' . (&hlsearch ? 'on' : 'off')
+endfunction
+
+command! OmarchyToggleHighlight call <SID>ToggleSearchHighlight()
+
+function! s:ToggleZero() abort
+  let l:line = getline('.')
+  let l:last_column = max([1, col('$') - 1])
+  let l:first_non_space = match(l:line, '\S') + 1
+  if l:first_non_space <= 0
+    let l:first_non_space = 1
+  endif
+  if l:line =~# '\S'
+    let l:last_non_space = match(l:line, '\s*$')
+    if l:last_non_space <= 0
+      let l:last_non_space = l:last_column
+    endif
+  else
+    let l:last_non_space = l:last_column
+  endif
+
+  let l:current = col('.')
+  if l:current == 1 && l:first_non_space != 1
+    call cursor(line('.'), l:first_non_space)
+  elseif l:current == l:first_non_space && l:last_non_space != l:first_non_space
+    call cursor(line('.'), l:last_non_space)
+  elseif l:current == l:last_non_space && l:last_column != l:last_non_space
+    call cursor(line('.'), l:last_column)
+  elseif l:current == l:last_column
+    call cursor(line('.'), 1)
+  else
+    call cursor(line('.'), 1)
+  endif
+endfunction
+
+" MAP: 0 | Cycle first column, first text, last text, and last column
+nnoremap <silent> 0 :call <SID>ToggleZero()<CR>
+
 function! s:CommentPrefix() abort
   return get({
         \ 'python': '#',
@@ -2258,7 +2422,7 @@ xnoremap > >gv
 " MAP: < | Unindent selection and keep it
 xnoremap < <gv
 " MAP: <Leader>nh | Toggle search highlight
-nnoremap <silent> <Leader>nh :set hlsearch!<CR>
+nnoremap <silent> <Leader>nh :OmarchyToggleHighlight<CR>
 " MAP: <C-L> | Refresh screen
 nnoremap <silent> <C-L> :redraw!<CR>
 " MAP: <C-L> | Refresh screen from insert mode
@@ -2266,7 +2430,67 @@ inoremap <silent> <C-L> <C-O>:redraw!<CR>
 " MAP: <Leader>rr | Refresh screen
 nnoremap <silent> <Leader>rr :redraw!<CR>
 
-" 12. Diff and windows ---------------------------------------------------------
+" 12. Folding -----------------------------------------------------------------
+function! s:AnyClosedFold() abort
+  for l:line in range(1, line('$'))
+    if foldclosed(l:line) != -1
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
+
+function! s:ToggleAllFolds() abort
+  if s:AnyClosedFold()
+    normal! zR
+    echo 'All folds opened.'
+  else
+    normal! zM
+    echo 'All folds closed.'
+  endif
+endfunction
+
+function! s:SetFoldLevel(level) abort
+  if a:level !~# '^[0-9]$'
+    echo 'Fold level must be 0-9.'
+    return
+  endif
+  execute 'setlocal foldlevel=' . a:level
+  echo 'Fold level: ' . a:level
+endfunction
+
+command! OmarchyToggleAllFolds call <SID>ToggleAllFolds()
+command! -nargs=1 OmarchyFoldLevel call <SID>SetFoldLevel(<q-args>)
+
+augroup omarchy_folding
+  autocmd!
+  autocmd FileType python setlocal foldmethod=indent
+augroup END
+
+" MAP: <Leader>zz | Toggle all folds open or closed
+nnoremap <silent> <Leader>zz :OmarchyToggleAllFolds<CR>
+" MAP: <Leader>z0 | Set fold level 0
+nnoremap <silent> <Leader>z0 :OmarchyFoldLevel 0<CR>
+" MAP: <Leader>z1 | Set fold level 1
+nnoremap <silent> <Leader>z1 :OmarchyFoldLevel 1<CR>
+" MAP: <Leader>z2 | Set fold level 2
+nnoremap <silent> <Leader>z2 :OmarchyFoldLevel 2<CR>
+" MAP: <Leader>z3 | Set fold level 3
+nnoremap <silent> <Leader>z3 :OmarchyFoldLevel 3<CR>
+" MAP: <Leader>z4 | Set fold level 4
+nnoremap <silent> <Leader>z4 :OmarchyFoldLevel 4<CR>
+" MAP: <Leader>z5 | Set fold level 5
+nnoremap <silent> <Leader>z5 :OmarchyFoldLevel 5<CR>
+" MAP: <Leader>z6 | Set fold level 6
+nnoremap <silent> <Leader>z6 :OmarchyFoldLevel 6<CR>
+" MAP: <Leader>z7 | Set fold level 7
+nnoremap <silent> <Leader>z7 :OmarchyFoldLevel 7<CR>
+" MAP: <Leader>z8 | Set fold level 8
+nnoremap <silent> <Leader>z8 :OmarchyFoldLevel 8<CR>
+" MAP: <Leader>z9 | Set fold level 9
+nnoremap <silent> <Leader>z9 :OmarchyFoldLevel 9<CR>
+
+" 13. Diff and windows ---------------------------------------------------------
 let s:diff_sessions = {}
 
 function! s:DiffWindowForBuffer(bufnr) abort
@@ -2339,7 +2563,7 @@ function! s:StartDiffScratch(name, lines) abort
     call s:CloseDiffSession(l:origin_buf)
   endif
 
-  vert new
+  topleft vertical new
   execute 'file ' . fnameescape(a:name)
   setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nomodifiable
   setlocal modifiable
@@ -2480,10 +2704,45 @@ nnoremap <silent> <Leader>dg :DiffGitHead<CR>
 " MAP: <Leader>dq | Close active Omarchy diff
 nnoremap <silent> <Leader>dq :DiffClose<CR>
 
+function! s:WindowMaximizeToggle() abort
+  if exists('t:omarchy_window_restore') && !empty(t:omarchy_window_restore)
+    let l:restore = t:omarchy_window_restore
+    unlet t:omarchy_window_restore
+    silent! execute l:restore
+    echo 'Window layout restored.'
+    return
+  endif
+  let t:omarchy_window_restore = winrestcmd()
+  wincmd _
+  execute 'wincmd |'
+  echo 'Window maximized.'
+endfunction
+
+command! OmarchyWindowMaximizeToggle call <SID>WindowMaximizeToggle()
+
+" Do not add broad <C-h/j/k/l> remaps from config_endstuff.vim; they are terminal-sensitive and would conflict with the existing <C-L> refresh map.
 " MAP: <Leader>wh | Vertical split
 nnoremap <silent> <Leader>wh :vsplit<CR>
 " MAP: <Leader>wj | Horizontal split
 nnoremap <silent> <Leader>wj :split<CR>
+" MAP: <Leader>wv | Vertical split
+nnoremap <silent> <Leader>wv :vsplit<CR>
+" MAP: <Leader>ws | Horizontal split
+nnoremap <silent> <Leader>ws :split<CR>
+" MAP: <Leader>w<Left> | Focus window left
+nnoremap <silent> <Leader>w<Left> <C-W>h
+" MAP: <Leader>w<Down> | Focus window down
+nnoremap <silent> <Leader>w<Down> <C-W>j
+" MAP: <Leader>w<Up> | Focus window up
+nnoremap <silent> <Leader>w<Up> <C-W>k
+" MAP: <Leader>w<Right> | Focus window right
+nnoremap <silent> <Leader>w<Right> <C-W>l
+" MAP: <Leader>wp | Close preview window
+nnoremap <silent> <Leader>wp :pclose<CR>
+" MAP: <Leader>wm | Toggle window maximize
+nnoremap <silent> <Leader>wm :OmarchyWindowMaximizeToggle<CR>
+" MAP: <Leader>ww | Toggle window maximize
+nnoremap <silent> <Leader>ww :OmarchyWindowMaximizeToggle<CR>
 " MAP: <Leader>wc | Close window
 nnoremap <silent> <Leader>wc :close<CR>
 " MAP: <Leader>wo | Only keep current window
@@ -2522,7 +2781,7 @@ if g:omarchy_use_fugitive
   nnoremap <silent> <Leader>gd :call <SID>RunCommand('Gdiffsplit')<CR>
 endif
 
-" 13. Sessions ----------------------------------------------------------------
+" 14. Sessions ----------------------------------------------------------------
 " Built-in session save/restore via :mksession/:source. No plugin needed.
 let g:omarchy_use_sessions = get(g:, 'omarchy_use_sessions', 1)
 let g:omarchy_session_dir = get(g:, 'omarchy_session_dir', expand('~/.vim/sessions'))
@@ -2713,3 +2972,6 @@ if g:omarchy_use_sessions
   " MAP: <Leader>sd | Delete a saved session
   nnoremap <silent> <Leader>sd :SessionDelete<CR>
 endif
+
+" Final settings that must run after plugin and mapping setup.
+silent! set shortmess-=S

@@ -1,6 +1,6 @@
 ### Current backlog
 * If not breaking std expectations, switch the right/left for git diff with <Space>dg. RHS new file is nicer.
-* Fix: <Leader>sk enters import mode (why). Map it to noop incase I confuse <Leader>s with <Leader>f.
+* Fix: <Leader>sk enters insert mode (why). Map it to noop incase I confuse <Leader>s with <Leader>f.
 * Functionality from previous helpers
   - jh and jl to move before after (or just after) nearest bracket on that side, eg after autoclose
   - config_endstuff?

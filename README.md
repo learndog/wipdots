@@ -49,10 +49,11 @@ Python tooling:
   are not selected by the current defaults.
 
 Without Python installed, this config should still load and the editor,
-statusline, native completion, keymap reference, comments, diffs, sessions, and
-window/buffer helpers should still work. Python LSP, LSP-backed completion,
-linting, and fixing will be unavailable. FZF commands require a suitable fzf
-executable and otherwise use fallback pickers.
+statusline, native completion, keymap reference, comments, delimiter jumps,
+display toggles, folds, diffs, sessions, and window/buffer helpers should still
+work. Python LSP, LSP-backed completion, linting, and fixing will be
+unavailable. FZF commands require a suitable fzf executable and otherwise use
+fallback pickers where documented.
 
 Session save/restore uses only built-in Vim functionality (`:mksession` and `:source`) and requires no additional tools.
 
@@ -134,8 +135,8 @@ Accept removal of `fzf` and `fzf.vim` if they are no longer declared. The config
 
 If Git Bash still finds that binary, check shell startup files such as `~/.bashrc` and remove any PATH entry pointing at `~/.vim/plugged/fzf/bin`. Inside Vim, run `:OmarchyFzfStatus` to see FZF candidates, the accepted external path, version, and whether FZF integration is usable.
 
-Without FZF, `<Leader>ff`, `<Leader>fg`, `<Leader>fr`, `<Leader>fl`,
-`<Leader>fs`, and `<Leader>fk` use unfiltered scratch-buffer fallback pickers.
+Without FZF, `<Leader><Leader>`, `<Leader>ff`, `<Leader>fg`, `<Leader>fr`,
+`<Leader>fl`, `<Leader>fs`, and `<Leader>fk` use unfiltered scratch-buffer fallback pickers.
 Press `<CR>` on an item to open/jump and `q` to close the picker. The Netrw file
 explorer maps under `<Leader>e` are built in and do not require FZF. Install an
 external `fzf` `0.38.0+` and rerun `:PlugInstall` to enable filtering.
@@ -767,11 +768,39 @@ This does not disable LSP navigation or prevent the LSP from publishing its own
 diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 `:OmarchyDebug` for resolved project, virtualenv, shell, and prerequisite data.
 
+## User Feature Reference
+
+Use this as the short map of what the config can do. The sections below provide
+the detailed behavior, caveats, and setup notes.
+
+| Feature | Main keys / commands | Details |
+| --- | --- | --- |
+| Open-buffer picker | `<Leader><Leader>` / `<Space><Space>`, `:OmarchyBuffers` | Uses FZF when available; otherwise uses a built-in scratch picker. |
+| File explorer | `<Leader>ee`, `<Leader>eE`, `<Leader>eh` | Built-in Netrw tree, no plugin required. |
+| Project/file search | `<Leader>ff`, `<Leader>fg`, `<Leader>fr`, `<Leader>fl`, `<Leader>fs` | FZF-backed when available, with documented fallbacks for supported pickers. |
+| Keymap lookup | `<Leader>fk`, `:Keymaps` | Shows config-defined maps from `MAP:` comments. |
+| Python LSP actions | `<Leader>ld`, `<Leader>lr`, `<Leader>lh`, `<Leader>ln`, `<Leader>la` | ALE-backed definition, references, hover, rename, and code actions. |
+| Diagnostics and quickfix | `<Leader>lj`, `<Leader>lk`, `<Leader>lf`, `<Leader>li`, `]q`, `[q`, `<Leader>lq` | ALE diagnostics plus Vim quickfix navigation. |
+| Insert completion | `<Tab>`, `<S-Tab>`, `<CR>`, `<M-/>`, `<C-x><C-o>` | Native/ALE completion, with optional Copilot kept separate. |
+| Delimiter jumps | `jl`, `jh` in normal or insert mode | Jump around brackets and quotes, useful with auto-pairs. |
+| Line-position cycle | Normal `0` | Cycles first column, first text, last text, and last column. |
+| Display toggles | `<Leader>nn`, `<F8>`, `<Leader>nh` | Cycle line numbers and toggle search highlighting. |
+| Comments and line moves | `<Leader>/`, `<Leader>//`, `<M-j>`, `<M-k>` | Toggle comments and move lines/selections. |
+| Browser-safe windows | `<Leader>w...`, especially `<Leader>wm` / `<Leader>ww` | Split, focus, close, resize, and maximize without relying on `<C-w>`. |
+| Folding | `<Leader>zz`, `<Leader>z0`-`<Leader>z9` | Built-in folds; Python uses indent folding. |
+| Built-in diffs | `<Leader>ds`, `<Leader>dg`, `<Leader>dq` | Saved/HEAD base on the left, current buffer on the right. |
+| Git and blame | `<Leader>gb`, `<Leader>gg`, `<Leader>gd`, `<Leader>gh`, `<Leader>gs`, `<Leader>gu` | Fugitive/gitgutter integrations when enabled, with blame fallback. |
+| Sessions | `<Leader>ss`, `<Leader>sr`, `<Leader>sl`, `<Leader>sd` | Built-in session save, restore, list, and delete. |
+| Copilot, optional | `<Leader>at`, `<Leader>as`, `<Leader>ac`, insert `<C-J>` | Available only when the relevant Copilot flags/tools are enabled. |
+
+`<Leader>` is Space. For a complete flat list of mappings, use the table below
+or run `<Leader>fk` inside Vim.
+
 ## Main Keys
 
 | Key | Action |
 | --- | --- |
-| `<Space><Space>` | pick open buffer |
+| `<Space><Space>` / `<Leader><Leader>` | pick open buffer; uses FZF when available, otherwise a built-in scratch picker |
 | `<Leader>ee` | toggle the left file explorer |
 | `<Leader>eE` | reveal the current file's directory in the explorer |
 | `<Leader>eh` | open Netrw file explorer help |
@@ -805,10 +834,27 @@ diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 | Insert `<CR>` | accept visible completion menu item |
 | Insert `<M-/>` | trigger completion |
 | Insert `<C-J>` | accept Copilot inline suggestion, when `g:omarchy_install_copilot = 1` |
+| Normal/insert `jl` | jump just past the next closing bracket or quote |
+| Normal/insert `jh` | jump just past the nearest previous left bracket or quote |
+| Normal `0` | cycle first column, first text, last text, and last column |
+| `<Leader>nn` / `<F8>` | cycle line-number display |
+| `<Leader>nh` | toggle search highlighting |
 | `<C-L>` | refresh screen |
 | `<Leader>rr` | refresh screen |
 | `<Leader>/` | toggle comment |
 | `<Leader>//` | force comment |
+| `<Leader>wh` / `<Leader>wv` | open a vertical split |
+| `<Leader>wj` / `<Leader>ws` | open a horizontal split |
+| `<Leader>w<Left>` | focus the window to the left |
+| `<Leader>w<Down>` | focus the window below |
+| `<Leader>w<Up>` | focus the window above |
+| `<Leader>w<Right>` | focus the window to the right |
+| `<Leader>wp` | close preview window |
+| `<Leader>wm` / `<Leader>ww` | toggle current-window maximize |
+| `<Leader>wc` | close window |
+| `<Leader>wo` | keep only current window |
+| `<Leader>zz` | toggle all folds open or closed |
+| `<Leader>z0`-`<Leader>z9` | set fold level 0-9 |
 | `<Leader>gb` | show git blame; uses fugitive when available, otherwise git CLI fallback |
 | `K` | show the blamed commit's short hash and subject, inside a Fugitive blame buffer |
 | `<Leader>gg` | open fugitive Git status, when `g:omarchy_use_fugitive = 1` |
@@ -825,6 +871,56 @@ diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 | `<Leader>sd` | delete a saved session |
 
 `<Leader>` is Space.
+
+## Editing Navigation Helpers
+
+`jl` and `jh` are no-plugin delimiter jumps for both normal and insert mode.
+They are intended for auto-pair workflows, but work as general line/file
+navigation helpers.
+
+- `jl` jumps just past the next closing delimiter: `)`, `]`, `}`, `>`, `"`,
+  `'`, or backtick.
+- `jh` jumps just past the nearest previous left delimiter: `(`, `[`, `{`, `<`,
+  `"`, `'`, or backtick.
+- Searches do not wrap. If there is no matching delimiter in the requested
+  direction, the cursor stays where it was.
+
+Normal-mode `0` intentionally overrides Vim's default first-column motion. It
+cycles through first column, first non-space column, last non-space column, and
+last column. Use `^`, `g_`, and `$` directly when you want Vim's individual
+native motions.
+
+## Display Toggles
+
+`<Leader>nn` and `<F8>` cycle line-number display between absolute plus
+relative numbers, absolute numbers only, and no numbers. `<Leader>nh` toggles
+search highlighting and echoes the new state. The config also runs
+`set shortmess-=S` at the end where supported, so `/` and `?` searches show the
+current match position.
+
+## Windows And Folds
+
+The window maps under `<Leader>w` provide browser-safe alternatives for common
+`<C-w>` workflows. This matters in browser-hosted terminals such as GCP
+JupyterLab, where `<C-w>` may be intercepted by the browser.
+
+`<Leader>wm` and `<Leader>ww` toggle a no-plugin current-window maximize. The
+first press stores the current tab layout and maximizes the active window; the
+second press restores the stored layout. Existing Alt-arrow resize maps remain
+available when the terminal sends those keys.
+
+Folding uses built-in Vim folding. Python buffers use indent folds, startup
+keeps folds open with `foldlevelstart=99`, and native fold keys such as `za`,
+`zR`, and `zM` are preserved. Omarchy adds:
+
+```vim
+:OmarchyToggleAllFolds
+:OmarchyFoldLevel 0
+```
+
+`<Leader>zz` toggles all folds open/closed. `<Leader>z0` through `<Leader>z9`
+set `foldlevel`. ALE, pylsp, and Pyright may expose language-server folding
+data, but this config intentionally keeps folding built-in and maintainable.
 
 ## File Explorer
 
@@ -900,6 +996,26 @@ Equivalent built-in commands:
 :cfirst
 :cclose
 ```
+
+## Diffs
+
+Built-in Omarchy diffs do not require Fugitive:
+
+```vim
+:DiffSaved
+:DiffGitHead
+:DiffClose
+```
+
+`<Leader>ds` opens a diff between the saved file and the current buffer.
+`<Leader>dg` opens a diff between git `HEAD` and the current buffer for tracked
+files. These Omarchy diff windows place the saved/HEAD base on the left and the
+current buffer on the right, matching the common old-left/new-right side-by-side
+layout. Close the active Omarchy diff with `q` from the scratch diff window or
+`<Leader>dq` from either side.
+
+When Fugitive is enabled with `g:omarchy_use_fugitive = 1`, `<Leader>gd` still
+runs Fugitive's `:Gdiffsplit`. Fugitive owns that command's detailed behavior.
 
 ## Git And Blame
 
@@ -1211,7 +1327,8 @@ Expected: each opens fzf when fzf integration is enabled and a current `fzf` exe
 
 Key checks:
 
-- `<Space><Space>` opens buffers.
+- `<Space><Space>` opens buffers. With FZF enabled it opens the FZF buffer
+  picker; with FZF disabled it opens the built-in scratch-buffer picker.
 - `<Leader>ff` finds files.
 - `<Leader>fr` searches text recursively under Vim's current working directory. Check `:pwd` if the scope is unclear.
 - `<Leader>fk` shows config-defined mappings.
@@ -1324,13 +1441,33 @@ Expected statusline includes mode, file, position, filetype/encoding info, time,
 Manual checks:
 
 - `jj` and `jk` leave insert mode.
+- Normal and insert `jl` jump just past the next `)`, `]`, `}`, `>`, quote, or
+  backtick without jumping to an opener.
+- Normal and insert `jh` jump just past the nearest previous `(`, `[`, `{`, `<`,
+  quote, or backtick.
+- Normal `0` cycles through first column, first non-space column, last
+  non-space column, and last column. Check indented, unindented, blank, and
+  trailing-space lines.
+- `<Leader>nn` and `<F8>` cycle line numbers.
+- `<Leader>nh` toggles search highlighting and reports the new state.
 - `<Leader>/` toggles comments on one line and visual selections.
 - `<Leader>//` comments without toggling off.
 - Alt-j/k moves lines or visual selections if your terminal sends those keys.
 - Visual `<` and `>` keep the visual selection.
 - `<C-L>` and `<Leader>rr` refresh the screen.
+- `/` searches show the current match position where Vim/Neovim supports
+  `shortmess-=S`.
+- `<Leader>wm` and `<Leader>ww` maximize the current window and then restore the
+  previous tab layout.
+- `<Leader>w<Left>`, `<Leader>w<Down>`, `<Leader>w<Up>`, and
+  `<Leader>w<Right>` move between windows without relying on browser-sensitive
+  `<C-w>`.
+- In a Python file, `<Leader>zz` toggles all folds open/closed and
+  `<Leader>z0` through `<Leader>z9` set fold levels.
 - `<Leader>ds` opens a diff against the saved file.
 - `<Leader>dg` opens a diff against `HEAD` for a tracked file.
+- Built-in Omarchy diffs show saved/HEAD content on the left and the current
+  buffer on the right.
 - `q` or `<Leader>dq` closes an Omarchy diff and returns to the original buffer.
 
 ### 9. Optional Flags
@@ -1506,7 +1643,7 @@ vim -Nu /tmp/omarchy-sessions-wrapper.vim
 - Git Bash pylsp navigation fails or stalls: confirm `/usr/bin/bash` and the
   resolved `.venv/Scripts/python.exe` and `pylsp.exe` paths in
   `:OmarchyDebug`. The MSYS adapter is used only for Git Bash Vim with pylsp.
-- terminal keys fail: use `:verbose imap <key>` and check terminal/tmux key handling. Insert `<Tab>` after a word is the most reliable manual completion trigger; `<M-/>` is optional and terminal-dependent. `<C-x><C-o>` remains the built-in omnifunc fallback.
+- terminal keys fail: use `:verbose imap <key>` and check terminal/tmux key handling. Insert `<Tab>` after a word is the most reliable manual completion trigger; `<M-/>` is optional and terminal-dependent. `<C-x><C-o>` remains the built-in omnifunc fallback. In browser-hosted terminals that intercept `<C-w>`, use the `<Leader>w...` window maps instead.
 - optional plugin maps say a command is unavailable: the flag is probably enabled but `:PlugInstall` has not been rerun yet.
 - Copilot commands say the plugin is unavailable: set `g:omarchy_install_copilot = 1` before sourcing `init.vim`, run `:PlugInstall`, restart, then run `:Copilot setup`.
 - `:OmarchyCopilotChat` says the CLI is missing: install the separate GitHub Copilot CLI so the `copilot` executable is on `PATH`, or run `copilot` directly from a terminal after installation.
