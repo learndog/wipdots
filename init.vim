@@ -9,6 +9,11 @@
 "   good enough.
 " - Keep dependencies few, popular, focused, and optional where practical.
 " - Keep startup low-risk: opening Vim should not download or update software.
+" - Keep plugin actions manual: only explicit commands such as
+"   :OmarchyPlugBootstrap, :PlugInstall, :PlugUpdate, :PlugClean, and
+"   :PlugUpgrade should download, install, update, clean, or upgrade plugin
+"   code. Optional plugin declarations are controlled only by flags set before
+"   sourcing this config.
 " - Preserve wide Vim/Neovim compatibility and graceful degradation when tools
 "   are missing.
 " - Keep maintenance simple. Add complexity only when the runtime benefit is
@@ -69,6 +74,14 @@ let g:omarchy_python_format_imports = get(g:, 'omarchy_python_format_imports', 1
 let g:omarchy_python_keyword_completion = get(g:, 'omarchy_python_keyword_completion', 1)
 let g:omarchy_python_keyword_completion_min_chars = get(g:, 'omarchy_python_keyword_completion_min_chars', 3)
 let g:omarchy_python_keyword_completion_max_lines = get(g:, 'omarchy_python_keyword_completion_max_lines', 5000)
+let g:omarchy_timeoutlen = get(g:, 'omarchy_timeoutlen', 350)
+let g:omarchy_ttimeoutlen = get(g:, 'omarchy_ttimeoutlen', 50)
+let g:omarchy_visual_paste_preserve_register = get(g:, 'omarchy_visual_paste_preserve_register', 1)
+let g:omarchy_statusline_mode_colors = get(g:, 'omarchy_statusline_mode_colors', 1)
+let g:omarchy_file_explorer_focus = get(g:, 'omarchy_file_explorer_focus', 0)
+let g:omarchy_terminal_root_strategy = get(g:, 'omarchy_terminal_root_strategy', 'project')
+let g:omarchy_terminal_height = get(g:, 'omarchy_terminal_height', 15)
+let g:omarchy_terminal_command = get(g:, 'omarchy_terminal_command', executable('bash') ? 'bash --login -i' : '')
 
 " Python tooling profile: default no-Node setup.
 " Dependencies: python-lsp-server and ruff, usually installed with pip/pipx.
@@ -130,6 +143,7 @@ let s:python_dictionary_fallback_words = [
 let s:python_dictionary_words = []
 let s:python_dictionary_loaded = 0
 let s:debug_log = []
+let s:project_picker_root = ''
 
 " ALE completion must be enabled before ALE loads.
 let g:ale_completion_enabled = get(g:, 'ale_completion_enabled', 1)
@@ -919,7 +933,9 @@ endif
 set splitbelow
 set splitright
 set updatetime=300
-set timeoutlen=350
+execute 'set timeoutlen=' . g:omarchy_timeoutlen
+set ttimeout
+execute 'set ttimeoutlen=' . g:omarchy_ttimeoutlen
 set signcolumn=yes
 set wildmenu
 set wildmode=list:longest,full
@@ -941,10 +957,53 @@ set foldnestmax=10
 set backspace=indent,eol,start
 set completeopt=menu,menuone,noselect,noinsert
 set shortmess+=c
+set autoread
+
+if has('persistent_undo')
+  let s:undo_dir = has('nvim') ? stdpath('data') . '/undo' : expand('~/.vim/undo')
+  if !isdirectory(s:undo_dir)
+    silent! call mkdir(s:undo_dir, 'p')
+  endif
+  if isdirectory(s:undo_dir)
+    execute 'set undodir=' . fnameescape(s:undo_dir)
+  endif
+  set undofile
+endif
 
 if has('termguicolors')
   set termguicolors
 endif
+
+function! s:DefineStatuslineHighlights() abort
+  if !g:omarchy_statusline_mode_colors
+    return
+  endif
+  highlight OmarchyModeNormal ctermfg=White guifg=#d0d0d0
+  highlight OmarchyModeInsert ctermfg=Yellow guifg=#ff9e2c
+  highlight OmarchyModeVisual ctermfg=Blue guifg=#5fafff
+  highlight OmarchyModeOther ctermfg=Green guifg=#87d787
+endfunction
+
+call s:DefineStatuslineHighlights()
+
+augroup omarchy_statusline_colors
+  autocmd!
+  autocmd ColorScheme * call <SID>DefineStatuslineHighlights()
+augroup END
+
+augroup omarchy_checktime
+  autocmd!
+  autocmd BufEnter,CursorHold * silent! checktime
+  if exists('##FocusGained')
+    autocmd FocusGained * silent! checktime
+  endif
+augroup END
+
+augroup omarchy_filetypes
+  autocmd!
+  autocmd BufRead,BufNewFile *.bash setfiletype bash
+  autocmd BufRead,BufNewFile *.bq.sql,*.bigquery.sql setfiletype sql
+augroup END
 
 " 4. Leader and buffers ---------------------------------------------------------
 let mapleader = ' '
@@ -1012,6 +1071,49 @@ function! s:OpenFileSink(line) abort
   execute 'edit ' . fnameescape(l:file)
 endfunction
 
+function! s:OpenFileRight(file, focus_new) abort
+  if empty(a:file)
+    return
+  endif
+  let l:origin = exists('*win_getid') ? win_getid() : -1
+  execute 'rightbelow vertical split ' . fnameescape(a:file)
+  if !a:focus_new && l:origin > 0 && exists('*win_gotoid')
+    call win_gotoid(l:origin)
+  endif
+endfunction
+
+function! s:OpenBufferRight(buffer, focus_new) abort
+  if a:buffer <= 0 || !bufexists(a:buffer)
+    echo 'Buffer does not exist.'
+    return
+  endif
+  let l:origin = exists('*win_getid') ? win_getid() : -1
+  execute 'rightbelow vertical sbuffer ' . a:buffer
+  if !a:focus_new && l:origin > 0 && exists('*win_gotoid')
+    call win_gotoid(l:origin)
+  endif
+endfunction
+
+function! s:OpenCurrentBufferRight() abort
+  call s:OpenBufferRight(bufnr('%'), 1)
+endfunction
+
+function! s:OpenFileRightSink(line) abort
+  let l:file = matchstr(a:line, '^\s*\zs.\{-}\ze\s*$')
+  if empty(l:file)
+    return
+  endif
+  let l:root = exists('b:omarchy_picker_root') && !empty(b:omarchy_picker_root)
+        \ ? b:omarchy_picker_root
+        \ : s:project_picker_root
+  if !empty(l:root)
+        \ && fnamemodify(l:file, ':p') !=# l:file
+    let l:file = l:root . '/' . l:file
+  endif
+  call s:ClosePickerScratch()
+  call s:OpenFileRight(l:file, 1)
+endfunction
+
 function! s:OpenBufferLineSink(line) abort
   let l:lnum = str2nr(matchstr(a:line, '^\s*\zs\d\+'))
   if l:lnum <= 0
@@ -1072,6 +1174,15 @@ function! s:BufferPickerSink(line) abort
   execute 'buffer ' . l:buffer
 endfunction
 
+function! s:BufferPickerSplitSink(line) abort
+  let l:buffer = str2nr(matchstr(a:line, '^\s*\zs\d\+'))
+  if l:buffer <= 0 || !bufexists(l:buffer)
+    return
+  endif
+  call s:ClosePickerScratch()
+  call s:OpenBufferRight(l:buffer, 1)
+endfunction
+
 function! s:BufferPicker() abort
   if s:HasFzf() && s:CommandExists('Buffers')
     Buffers
@@ -1094,7 +1205,34 @@ function! s:BufferPicker() abort
   call s:OpenPickerScratch('[Omarchy buffers]', l:items, function('<SID>BufferPickerSink'))
 endfunction
 
+function! s:BufferPickerWithSink(prompt, sink) abort
+  let l:items = []
+  for l:buffer in range(1, bufnr('$'))
+    if buflisted(l:buffer)
+      call add(l:items, s:BufferPickerLine(l:buffer))
+    endif
+  endfor
+  if empty(l:items)
+    echo 'No listed buffers.'
+    return
+  endif
+  if s:FzfRun({
+        \ 'source': l:items,
+        \ 'sink': a:sink,
+        \ 'options': '--prompt="' . a:prompt . '> " --no-multi'
+        \ })
+    return
+  endif
+  call s:OpenPickerScratch('[Omarchy ' . tolower(a:prompt) . ']', l:items, a:sink)
+endfunction
+
+function! s:BuffersVsplit() abort
+  call s:BufferPickerWithSink('Buffers vsplit', function('<SID>BufferPickerSplitSink'))
+endfunction
+
 command! OmarchyBuffers call <SID>BufferPicker()
+command! OmarchyBuffersVsplit call <SID>BuffersVsplit()
+command! OmarchyCurrentBufferVsplit call <SID>OpenCurrentBufferRight()
 " MAP: <Space><Space> | Pick open buffer; falls back without FZF
 nnoremap <silent> <Space><Space> :OmarchyBuffers<CR>
 " MAP: <Leader>bn | Next buffer
@@ -1105,6 +1243,8 @@ nnoremap <silent> <Leader>bp :bprevious<CR>
 nnoremap <silent> <Leader>bd :bdelete<CR>
 " MAP: <Leader>bo | Keep only current buffer
 nnoremap <silent> <Leader>bo :call <SID>BufferOnly()<CR>
+" MAP: <Leader>bV | Pick buffer and open in right vertical split
+nnoremap <silent> <Leader>bV :OmarchyBuffersVsplit<CR>
 
 " 6. files and explorer --------------------------------------------------------
 let g:netrw_liststyle = get(g:, 'netrw_liststyle', 3)
@@ -1144,18 +1284,31 @@ function! s:NetrwDefaultDir() abort
   return empty(l:root) ? l:start : l:root
 endfunction
 
-function! s:NetrwOpen(dir) abort
+function! s:NetrwOpen(dir, ...) abort
   let l:dir = empty(a:dir) ? getcwd() : a:dir
-  if !s:CommandExists('Lexplore')
+  let l:focus_tree = a:0 ? a:1 : g:omarchy_file_explorer_focus
+  let l:origin = exists('*win_getid') ? win_getid() : -1
+  if !s:CommandExists('Explore')
     silent! runtime plugin/netrwPlugin.vim
   endif
-  if !s:CommandExists('Lexplore')
+  if !s:CommandExists('Explore')
     echo 'Netrw is not available in this Vim runtime.'
     return
   endif
-  execute 'Lexplore ' . fnameescape(l:dir)
+
+  let l:existing = s:NetrwWindow()
+  if l:existing > 0
+    execute l:existing . 'wincmd w'
+  else
+    topleft vertical new
+  endif
+
+  execute 'Explore ' . fnameescape(l:dir)
   if g:netrw_winsize < 0
     execute 'vertical resize ' . abs(g:netrw_winsize)
+  endif
+  if !l:focus_tree && l:origin > 0 && exists('*win_gotoid')
+    call win_gotoid(l:origin)
   endif
 endfunction
 
@@ -1165,19 +1318,19 @@ function! s:NetrwToggle() abort
     call s:NetrwCloseWindow(l:winnr)
     return
   endif
-  call s:NetrwOpen(s:NetrwDefaultDir())
+  call s:NetrwOpen(s:NetrwDefaultDir(), g:omarchy_file_explorer_focus)
 endfunction
 
 function! s:NetrwReveal() abort
   let l:file = expand('%:p')
   if empty(l:file)
-    call s:NetrwOpen(s:NetrwDefaultDir())
+    call s:NetrwOpen(s:NetrwDefaultDir(), 1)
     return
   endif
 
   let l:name = expand('%:t')
   let @/ = '\V' . escape(l:name, '\')
-  call s:NetrwOpen(fnamemodify(l:file, ':h'))
+  call s:NetrwOpen(fnamemodify(l:file, ':h'), 1)
   silent! normal! n
 endfunction
 
@@ -1242,6 +1395,17 @@ function! s:ProjectFiles() abort
   endif
 endfunction
 
+function! s:ProjectFileCandidates() abort
+  let l:root = s:GitRootForDir(getcwd())
+  if !empty(l:root)
+    let l:files = systemlist('git -C ' . shellescape(l:root) . ' ls-files')
+    if !v:shell_error && !empty(l:files)
+      return {'root': l:root, 'files': l:files}
+    endif
+  endif
+  return {'root': '', 'files': s:FallbackFindFiles()}
+endfunction
+
 function! s:GitFiles() abort
   if s:HasFzf() && s:InGitRepo()
     GFiles
@@ -1269,22 +1433,33 @@ endfunction
 
 function! s:FallbackProjectFiles() abort
   call s:WarnFzfFallback('Project files')
-  let l:root = s:GitRootForDir(getcwd())
-  if !empty(l:root)
-    let l:files = systemlist('git -C ' . shellescape(l:root) . ' ls-files')
-    if !v:shell_error && !empty(l:files)
-      call s:OpenPickerScratch('[project files]', l:files, function('<SID>OpenFileSink'), l:root)
-      return
-    endif
-  endif
-
-  let l:files = s:FallbackFindFiles()
-  if empty(l:files)
+  let l:candidates = s:ProjectFileCandidates()
+  if empty(l:candidates.files)
     echo 'No files found.'
     return
   endif
-  call s:OpenPickerScratch('[project files]', l:files, function('<SID>OpenFileSink'))
+  call s:OpenPickerScratch('[project files]', l:candidates.files, function('<SID>OpenFileSink'), l:candidates.root)
 endfunction
+
+function! s:ProjectFilesVsplit() abort
+  let l:candidates = s:ProjectFileCandidates()
+  let s:project_picker_root = l:candidates.root
+  if empty(l:candidates.files)
+    echo 'No files found.'
+    return
+  endif
+  if s:FzfRun({
+        \ 'source': l:candidates.files,
+        \ 'sink': function('<SID>OpenFileRightSink'),
+        \ 'options': '--prompt="Files vsplit> " --no-multi'
+        \ })
+    return
+  endif
+  call s:OpenPickerScratch('[project files vsplit]', l:candidates.files, function('<SID>OpenFileRightSink'), l:candidates.root)
+endfunction
+
+command! OmarchyFilesVsplit call <SID>ProjectFilesVsplit()
+command! OmarchyGrep call <SID>Ripgrep()
 
 function! s:FallbackGitFiles() abort
   let l:root = s:GitRootForDir(getcwd())
@@ -1346,10 +1521,12 @@ endfunction
 
 " MAP: <Leader>ff | Find project files
 nnoremap <silent> <Leader>ff :call <SID>ProjectFiles()<CR>
+" MAP: <Leader>fV | Find project file and open in right vertical split
+nnoremap <silent> <Leader>fV :OmarchyFilesVsplit<CR>
 " MAP: <Leader>fg | Find git-tracked files
 nnoremap <silent> <Leader>fg :call <SID>GitFiles()<CR>
 " MAP: <Leader>fr | Search text with ripgrep
-nnoremap <silent> <Leader>fr :call <SID>Ripgrep()<CR>
+nnoremap <silent> <Leader>fr :OmarchyGrep<CR>
 " MAP: <Leader>fl | Search current buffer lines
 nnoremap <silent> <Leader>fl :call <SID>BufferLines()<CR>
 " MAP: <Leader>fm | Search normal-mode maps
@@ -1366,9 +1543,39 @@ function! s:PythonAleLinters() abort
   return l:linters
 endfunction
 
-let g:ale_linters = get(g:, 'ale_linters', {'python': s:PythonAleLinters()})
+function! s:DefaultAleLinters() abort
+  let l:linters = {'python': s:PythonAleLinters()}
+  if executable('shellcheck')
+    let l:linters.sh = ['shellcheck']
+    let l:linters.bash = ['shellcheck']
+  endif
+  if executable('sqlfluff')
+    let l:linters.sql = ['sqlfluff']
+  endif
+  if executable('luacheck')
+    let l:linters.lua = ['luacheck']
+  endif
+  if executable('vint')
+    let l:linters.vim = ['vint']
+  endif
+  return l:linters
+endfunction
+
+function! s:DefaultAleFixers() abort
+  let l:fixers = {'python': (g:omarchy_python_format_imports ? ['ruff', 'ruff_format'] : ['ruff_format'])}
+  if executable('shfmt')
+    let l:fixers.sh = ['shfmt']
+    let l:fixers.bash = ['shfmt']
+  endif
+  if executable('sqlfluff')
+    let l:fixers.sql = ['sqlfluff']
+  endif
+  return l:fixers
+endfunction
+
+let g:ale_linters = get(g:, 'ale_linters', s:DefaultAleLinters())
 if !exists('g:ale_fixers')
-  let g:ale_fixers = {'python': (g:omarchy_python_format_imports ? ['ruff', 'ruff_format'] : ['ruff_format'])}
+  let g:ale_fixers = s:DefaultAleFixers()
 endif
 let g:ale_fix_on_save = get(g:, 'ale_fix_on_save', 0)
 let g:ale_sign_error = get(g:, 'ale_sign_error', 'E')
@@ -1876,16 +2083,74 @@ function! s:CopilotSuggest() abort
   call feedkeys((mode() ==# 'i' ? '' : 'i') . "\<Plug>(copilot-suggest)", 'm')
 endfunction
 
-function! s:CopilotCliRoot() abort
+function! s:TerminalRoot() abort
   let l:bufdir = expand('%:p:h')
+  if g:omarchy_terminal_root_strategy ==# 'cwd'
+    return getcwd()
+  elseif g:omarchy_terminal_root_strategy ==# 'buffer'
+    return (!empty(l:bufdir) && isdirectory(l:bufdir)) ? l:bufdir : getcwd()
+  elseif g:omarchy_terminal_root_strategy !=# 'project'
+    echo 'Unknown g:omarchy_terminal_root_strategy "' . g:omarchy_terminal_root_strategy . '"; using project.'
+  endif
+
   if !empty(l:bufdir) && isdirectory(l:bufdir)
     let l:root = s:GitRootForDir(l:bufdir)
     return empty(l:root) ? l:bufdir : l:root
   endif
-
   let l:root = s:GitRootForDir(getcwd())
   return empty(l:root) ? getcwd() : l:root
 endfunction
+
+function! s:TerminalWindow() abort
+  for l:winnr in range(1, winnr('$'))
+    let l:buf = winbufnr(l:winnr)
+    if l:buf > 0 && getbufvar(l:buf, 'omarchy_terminal', 0)
+      return l:winnr
+    endif
+  endfor
+  return -1
+endfunction
+
+function! s:OpenTerminal(...) abort
+  if exists(':terminal') != 2
+    echo 'This Vim build does not support :terminal. Open a shell outside Vim.'
+    return
+  endif
+
+  let l:cmd = a:0 && !empty(a:1) ? a:1 : g:omarchy_terminal_command
+  if empty(l:cmd)
+    echo 'No terminal command configured. Install bash or set g:omarchy_terminal_command.'
+    return
+  endif
+
+  let l:root = s:TerminalRoot()
+  execute 'botright ' . g:omarchy_terminal_height . 'split'
+  execute 'lcd ' . fnameescape(l:root)
+  try
+    execute 'terminal ' . l:cmd
+    let b:omarchy_terminal = 1
+    if exists('*term_getjob') || has('nvim')
+      startinsert
+    endif
+  catch
+    echohl ErrorMsg
+    echom 'Could not start terminal: ' . v:exception
+    echohl None
+  endtry
+endfunction
+
+function! s:ToggleTerminal() abort
+  let l:winnr = s:TerminalWindow()
+  if l:winnr > 0
+    execute l:winnr . 'wincmd w'
+    close
+    return
+  endif
+  call s:OpenTerminal()
+endfunction
+
+command! -nargs=* OmarchyTerminal call <SID>OpenTerminal(<q-args>)
+command! OmarchyTerminalToggle call <SID>ToggleTerminal()
 
 function! s:OpenCopilotCli() abort
   if !executable('copilot')
@@ -1898,7 +2163,7 @@ function! s:OpenCopilotCli() abort
     return
   endif
 
-  let l:root = s:CopilotCliRoot()
+  let l:root = s:TerminalRoot()
   botright split
   execute 'lcd ' . fnameescape(l:root)
   try
@@ -1959,6 +2224,10 @@ command! OmarchyCopilotToggle call <SID>ToggleCopilot()
 command! OmarchyCopilotStatus call <SID>CopilotStatus()
 command! OmarchyCopilotSuggest call <SID>CopilotSuggest()
 command! OmarchyCopilotChat call <SID>OpenCopilotCli()
+" MAP: <Leader>tt | Toggle project-aware login Bash terminal
+nnoremap <silent> <Leader>tt :OmarchyTerminalToggle<CR>
+" MAP: <Leader>tT | Open a new project-aware login Bash terminal
+nnoremap <silent> <Leader>tT :OmarchyTerminal<CR>
 if g:omarchy_install_copilot
   " MAP: <Leader>at | Toggle Copilot inline suggestions
   nnoremap <silent> <Leader>at :OmarchyCopilotToggle<CR>
@@ -2029,9 +2298,91 @@ function! s:PythonSymbols() abort
   nnoremap <buffer> <CR> :call <SID>PythonSymbolSink(getline('.'))<CR>
 endfunction
 
+function! s:SymbolPatterns() abort
+  return get({
+        \ 'python': [
+        \   '^\s*\(class\|async\s\+def\|def\)\s\+[A-Za-z_][A-Za-z0-9_]*',
+        \ ],
+        \ 'vim': [
+        \   '^\s*fu\%[nction]!\?\s\+\S\+',
+        \   '^\s*com\%[mand]!\?\s\+\S\+',
+        \   '^\s*aug\%[roup]\s\+\S\+',
+        \ ],
+        \ 'lua': [
+        \   '^\s*\(local\s\+\)\?function\s\+[A-Za-z_][A-Za-z0-9_\.:\-]*',
+        \   '^\s*[A-Za-z_][A-Za-z0-9_\.:\-]*\s*=\s*function',
+        \ ],
+        \ 'sh': [
+        \   '^\s*\(function\s\+\)\?[A-Za-z_][A-Za-z0-9_]*\s*()\s*{',
+        \   '^\s*function\s\+[A-Za-z_][A-Za-z0-9_]*',
+        \ ],
+        \ 'bash': [
+        \   '^\s*\(function\s\+\)\?[A-Za-z_][A-Za-z0-9_]*\s*()\s*{',
+        \   '^\s*function\s\+[A-Za-z_][A-Za-z0-9_]*',
+        \ ],
+        \ 'javascript': [
+        \   '^\s*\(export\s\+\)\?\(async\s\+\)\?function\s\+[A-Za-z_$][A-Za-z0-9_$]*',
+        \   '^\s*\(export\s\+\)\?class\s\+[A-Za-z_$][A-Za-z0-9_$]*',
+        \   '^\s*\(const\|let\|var\)\s\+[A-Za-z_$][A-Za-z0-9_$]*\s*=.*=>',
+        \ ],
+        \ 'typescript': [
+        \   '^\s*\(export\s\+\)\?\(async\s\+\)\?function\s\+[A-Za-z_$][A-Za-z0-9_$]*',
+        \   '^\s*\(export\s\+\)\?class\s\+[A-Za-z_$][A-Za-z0-9_$]*',
+        \   '^\s*\(const\|let\|var\)\s\+[A-Za-z_$][A-Za-z0-9_$]*\s*=.*=>',
+        \ ],
+        \ 'markdown': [
+        \   '^#\{1,6}\s\+\S',
+        \ ],
+        \ }, &filetype, [])
+endfunction
+
+function! s:Symbols() abort
+  if &filetype ==# 'python'
+    call s:PythonSymbols()
+    return
+  endif
+
+  let l:patterns = s:SymbolPatterns()
+  if empty(l:patterns)
+    echo 'No lightweight symbol detector for filetype "' . (empty(&filetype) ? 'none' : &filetype) . '".'
+    return
+  endif
+
+  let s:python_symbol_origin = bufnr('%')
+  let l:items = []
+  for lnum in range(1, line('$'))
+    let l:line = getline(lnum)
+    for l:pattern in l:patterns
+      if l:line =~# l:pattern
+        call add(l:items, printf('%5d  %s', lnum, substitute(l:line, '^\s*', '', '')))
+        break
+      endif
+    endfor
+  endfor
+
+  if empty(l:items)
+    echo 'No lightweight symbols found for filetype "' . &filetype . '".'
+    return
+  endif
+
+  if s:FzfRun({
+        \ 'source': l:items,
+        \ 'sink': function('<SID>PythonSymbolSink'),
+        \ 'options': '--prompt="Symbols> " --no-multi'
+        \ })
+    return
+  endif
+
+  botright new
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
+  call setline(1, l:items)
+  nnoremap <buffer> <CR> :call <SID>PythonSymbolSink(getline('.'))<CR>
+endfunction
+
 command! PythonSymbols call <SID>PythonSymbols()
-" MAP: <Leader>fs | Pick Python class/function
-nnoremap <silent> <Leader>fs :PythonSymbols<CR>
+command! Symbols call <SID>Symbols()
+" MAP: <Leader>fs | Pick current-file symbols
+nnoremap <silent> <Leader>fs :Symbols<CR>
 
 " 9. Status line ---------------------------------------------------------------
 function! OmarchyMode() abort
@@ -2045,6 +2396,18 @@ function! OmarchyMode() abort
         \ 'c': 'COMMAND',
         \ 'R': 'REPLACE',
         \ }, l:mode, toupper(l:mode))
+endfunction
+
+function! s:ModeHighlightGroup() abort
+  let l:mode = mode()
+  if l:mode ==# 'n'
+    return 'OmarchyModeNormal'
+  elseif l:mode =~# '^\(i\|ic\|ix\)$'
+    return 'OmarchyModeInsert'
+  elseif l:mode ==# 'v' || l:mode ==# 'V' || l:mode ==# "\<C-v>"
+    return 'OmarchyModeVisual'
+  endif
+  return 'OmarchyModeOther'
 endfunction
 
 function! OmarchyAleCounts() abort
@@ -2155,7 +2518,11 @@ augroup omarchy_git_status
 augroup END
 
 function! OmarchyStatusline() abort
-  let l:left = ' ' . OmarchyMode() . ' %f%m%r '
+  if g:omarchy_statusline_mode_colors
+    let l:left = '%#' . s:ModeHighlightGroup() . '# ' . OmarchyMode() . ' %#StatusLine#%f%m%r '
+  else
+    let l:left = ' ' . OmarchyMode() . ' %f%m%r '
+  endif
   let l:git = OmarchyGitBranch()
   if !empty(l:git)
     let l:left .= l:git . ' '
@@ -2233,6 +2600,101 @@ endfunction
 command! Keymaps call <SID>Keymaps()
 " MAP: <Leader>fk | Show config keymap reference
 nnoremap <silent> <Leader>fk :Keymaps<CR>
+
+function! s:AllMaps() abort
+  let l:lines = split(execute('verbose map'), "\n")
+  if empty(l:lines)
+    let l:lines = ['No mappings reported by :verbose map.']
+  endif
+  if s:FzfRun({
+        \ 'source': l:lines,
+        \ 'options': '--prompt="All maps> " --no-multi'
+        \ })
+    return
+  endif
+  call s:OpenScratch('[Omarchy all maps]', l:lines)
+endfunction
+
+command! OmarchyAllMaps call <SID>AllMaps()
+" MAP: <Leader>fK | Show all live key mappings
+nnoremap <silent> <Leader>fK :OmarchyAllMaps<CR>
+
+function! s:PluginPolicy() abort
+  call s:OpenScratch('[Omarchy plugin policy]', [
+        \ 'Opening Vim never installs, updates, cleans, upgrades, or downloads plugins.',
+        \ ':OmarchyPlugBootstrap downloads only vim-plug when you explicitly run it.',
+        \ ':PlugInstall installs declared plugins only when you explicitly run it.',
+        \ ':PlugUpdate updates plugins only when you explicitly run it.',
+        \ ':PlugClean and :PlugUpgrade are also manual vim-plug operations.',
+        \ 'Optional plugins are declared only when their flags are set before sourcing init.vim.',
+        \ 'This config does not use vim-plug lazy on/for triggers.',
+        \ ])
+endfunction
+
+function! s:PluginUpdateLine(name, plug) abort
+  let l:dir = get(a:plug, 'dir', '')
+  let l:uri = get(a:plug, 'uri', '')
+  if empty(l:dir) || !isdirectory(l:dir)
+    return printf('%-24s not installed', a:name)
+  endif
+  if !executable('git')
+    return printf('%-24s unknown: git not available', a:name)
+  endif
+
+  let l:local = systemlist('git -C ' . shellescape(l:dir) . ' rev-parse HEAD 2>/dev/null')
+  if v:shell_error || empty(l:local)
+    return printf('%-24s unknown: could not read local HEAD', a:name)
+  endif
+
+  let l:branch = get(a:plug, 'branch', '')
+  if empty(l:branch)
+    let l:remote_ref = systemlist('git -C ' . shellescape(l:dir) . ' symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null')
+    if !v:shell_error && !empty(l:remote_ref)
+      let l:branch = substitute(l:remote_ref[0], '^origin/', '', '')
+    endif
+  endif
+  if empty(l:branch)
+    let l:branch = 'HEAD'
+  endif
+
+  if empty(l:uri)
+    let l:uri_lines = systemlist('git -C ' . shellescape(l:dir) . ' config --get remote.origin.url 2>/dev/null')
+    let l:uri = (!v:shell_error && !empty(l:uri_lines)) ? l:uri_lines[0] : ''
+  endif
+  if empty(l:uri)
+    return printf('%-24s unknown: no remote URL', a:name)
+  endif
+
+  let l:remote = systemlist('git ls-remote ' . shellescape(l:uri) . ' ' . shellescape(l:branch) . ' 2>/dev/null')
+  if v:shell_error || empty(l:remote)
+    return printf('%-24s unknown: remote ref unavailable', a:name)
+  endif
+  let l:remote_hash = matchstr(l:remote[0], '^\x\+')
+  if empty(l:remote_hash)
+    return printf('%-24s unknown: could not parse remote ref', a:name)
+  endif
+  return printf('%-24s %s  local %.12s remote %.12s', a:name,
+        \ l:local[0] ==# l:remote_hash ? 'up-to-date' : 'update available',
+        \ l:local[0], l:remote_hash)
+endfunction
+
+function! s:PlugCheckUpdates() abort
+  if !exists('g:plugs') || type(g:plugs) != v:t_dict
+    echo 'vim-plug plugin metadata is unavailable.'
+    return
+  endif
+  let l:lines = [
+        \ 'Remote plugin update check. This uses git ls-remote only; it does not fetch, checkout, merge, pull, or update local plugin repos.',
+        \ '',
+        \ ]
+  for l:name in sort(keys(g:plugs))
+    call add(l:lines, s:PluginUpdateLine(l:name, g:plugs[l:name]))
+  endfor
+  call s:OpenScratch('[Omarchy plugin updates]', l:lines)
+endfunction
+
+command! OmarchyPluginPolicy call <SID>PluginPolicy()
+command! OmarchyPlugCheckUpdates call <SID>PlugCheckUpdates()
 
 " 11. Editing helpers ----------------------------------------------------------
 " MAP: jj | Leave insert mode
@@ -2367,10 +2829,13 @@ function! s:CommentPrefix() abort
         \ 'sh': '#',
         \ 'bash': '#',
         \ 'zsh': '#',
+        \ 'markdown': '<!--',
+        \ 'sql': '--',
         \ 'vim': '"',
         \ 'lua': '--',
         \ 'javascript': '//',
         \ 'typescript': '//',
+        \ 'html': '<!--',
         \ 'c': '//',
         \ 'cpp': '//',
         \ 'java': '//',
@@ -2391,6 +2856,12 @@ function! s:CommentRange(first, last, force) abort
       else
         call setline(lnum, substitute(substitute(l:line, '^\s*/\*\s*', '', ''), '\s*\*/\s*$', '', ''))
       endif
+    elseif l:prefix ==# '<!--'
+      if a:force || l:line !~# '^\s*<!--'
+        call setline(lnum, substitute(l:line, '^\s*', '&<!-- ', '') . ' -->')
+      else
+        call setline(lnum, substitute(substitute(l:line, '^\s*<!--\s*', '', ''), '\s*-->\s*$', '', ''))
+      endif
     elseif a:force || l:line !~# '^\s*' . l:escaped . '\s\?'
       call setline(lnum, substitute(l:line, '^\s*', '&' . l:prefix . ' ', ''))
     else
@@ -2408,6 +2879,11 @@ xnoremap <silent> <Leader>/ :CommentToggle<CR>gv
 nnoremap <silent> <Leader>// :CommentToggle!<CR>
 " MAP: <Leader>// | Force comment on selection
 xnoremap <silent> <Leader>// :CommentToggle!<CR>gv
+
+if g:omarchy_visual_paste_preserve_register
+  " MAP: p | Paste over selection without replacing the unnamed register
+  xnoremap <silent> p "_dP
+endif
 
 " MAP: <M-j> | Move line down
 nnoremap <silent> <M-j> :move .+1<CR>==
@@ -2554,6 +3030,14 @@ function! s:DiffClose() abort
     endif
   endif
 
+  for l:winnr in range(1, winnr('$'))
+    if getwinvar(l:winnr, '&diff')
+      diffoff!
+      echo 'Diff mode disabled for current tab.'
+      return
+    endif
+  endfor
+
   echo 'No Omarchy diff session is active for this buffer.'
 endfunction
 
@@ -2619,6 +3103,168 @@ function! s:DiffGitHead() abort
     return
   endif
   call s:StartDiffScratch('[HEAD] ' . fnamemodify(l:file, ':t'), l:lines)
+endfunction
+
+function! s:DiffFileSink(line) abort
+  let l:file = matchstr(a:line, '^\s*\zs.\{-}\ze\s*$')
+  if empty(l:file)
+    return
+  endif
+  let l:root = exists('b:omarchy_picker_root') && !empty(b:omarchy_picker_root)
+        \ ? b:omarchy_picker_root
+        \ : s:project_picker_root
+  if !empty(l:root)
+        \ && fnamemodify(l:file, ':p') !=# l:file
+    let l:file = l:root . '/' . l:file
+  endif
+  call s:ClosePickerScratch()
+  execute 'rightbelow vertical diffsplit ' . fnameescape(l:file)
+  nnoremap <buffer><silent> <Leader>dq :DiffClose<CR>
+  wincmd p
+  nnoremap <buffer><silent> <Leader>dq :DiffClose<CR>
+endfunction
+
+function! s:DiffFile() abort
+  let l:candidates = s:ProjectFileCandidates()
+  let s:project_picker_root = l:candidates.root
+  if empty(l:candidates.files)
+    echo 'No files found.'
+    return
+  endif
+  if s:FzfRun({
+        \ 'source': l:candidates.files,
+        \ 'sink': function('<SID>DiffFileSink'),
+        \ 'options': '--prompt="Diff file> " --no-multi'
+        \ })
+    return
+  endif
+  call s:OpenPickerScratch('[diff file]', l:candidates.files, function('<SID>DiffFileSink'), l:candidates.root)
+endfunction
+
+function! s:DiffBufferSink(line) abort
+  let l:buffer = str2nr(matchstr(a:line, '^\s*\zs\d\+'))
+  if l:buffer <= 0 || !bufexists(l:buffer)
+    return
+  endif
+  call s:ClosePickerScratch()
+  let l:origin = exists('*win_getid') ? win_getid() : -1
+  diffthis
+  call s:OpenBufferRight(l:buffer, 1)
+  diffthis
+  nnoremap <buffer><silent> <Leader>dq :DiffClose<CR>
+  if l:origin > 0 && exists('*win_gotoid')
+    call win_gotoid(l:origin)
+    nnoremap <buffer><silent> <Leader>dq :DiffClose<CR>
+  endif
+endfunction
+
+function! s:DiffBuffer() abort
+  call s:BufferPickerWithSink('Diff buffer', function('<SID>DiffBufferSink'))
+endfunction
+
+function! s:ListedBufferNumbers() abort
+  let l:buffers = []
+  for l:buffer in range(1, bufnr('$'))
+    if buflisted(l:buffer)
+      call add(l:buffers, l:buffer)
+    endif
+  endfor
+  return l:buffers
+endfunction
+
+function! s:DiffSelectedBuffers(buffers) abort
+  let l:buffers = []
+  for l:buffer in a:buffers
+    if l:buffer > 0 && bufexists(l:buffer) && index(l:buffers, l:buffer) < 0
+      call add(l:buffers, l:buffer)
+    endif
+  endfor
+  if len(l:buffers) < 2
+    echo 'Select at least two buffers for a multi-buffer diff.'
+    return
+  endif
+  if len(l:buffers) > 4
+    let l:buffers = l:buffers[0:3]
+    echo 'Using the first four selected buffers.'
+  endif
+
+  tabnew
+  execute 'buffer ' . l:buffers[0]
+  diffthis
+  nnoremap <buffer><silent> <Leader>dq :DiffClose<CR>
+  for l:buffer in l:buffers[1:]
+    execute 'rightbelow vertical sbuffer ' . l:buffer
+    diffthis
+    nnoremap <buffer><silent> <Leader>dq :DiffClose<CR>
+  endfor
+  wincmd =
+endfunction
+
+function! s:DiffBuffersFzfSink(lines) abort
+  let l:buffers = [bufnr('%')]
+  for l:line in a:lines
+    let l:buffer = str2nr(matchstr(l:line, '^\s*\zs\d\+'))
+    if l:buffer > 0
+      call add(l:buffers, l:buffer)
+    endif
+  endfor
+  call s:DiffSelectedBuffers(l:buffers)
+endfunction
+
+function! s:DiffBuffers() abort
+  let l:items = []
+  for l:buffer in s:ListedBufferNumbers()
+    if l:buffer != bufnr('%')
+      call add(l:items, s:BufferPickerLine(l:buffer))
+    endif
+  endfor
+  if empty(l:items)
+    echo 'No other listed buffers to diff.'
+    return
+  endif
+  if s:HasFzf() && exists('*fzf#run') && exists('*fzf#wrap')
+    try
+      call fzf#run(fzf#wrap({
+            \ 'source': l:items,
+            \ 'sink*': function('<SID>DiffBuffersFzfSink'),
+            \ 'options': '--prompt="Diff buffers> " --multi'
+            \ }))
+      return
+    catch
+      call s:Debug('DiffBuffers FZF failed: ' . v:exception)
+    endtry
+  endif
+
+  let l:input = input('Buffer numbers to diff with current (comma-separated): ')
+  if empty(l:input)
+    return
+  endif
+  let l:buffers = [bufnr('%')]
+  for l:item in split(l:input, ',')
+    call add(l:buffers, str2nr(l:item))
+  endfor
+  call s:DiffSelectedBuffers(l:buffers)
+endfunction
+
+function! s:DiffHelp() abort
+  call s:OpenScratch('[Omarchy diff help]', [
+        \ 'Omarchy diff commands:',
+        \ '  <Leader>ds / :DiffSaved    diff current buffer against saved file',
+        \ '  <Leader>dg / :DiffGitHead  diff current buffer against git HEAD',
+        \ '  <Leader>df / :DiffFile     pick a project file to diff',
+        \ '  <Leader>db / :DiffBuffer   pick an open buffer to diff',
+        \ '  <Leader>dB / :DiffBuffers  diff current buffer with 1-3 picked buffers',
+        \ '  <Leader>dq / :DiffClose    close Omarchy scratch diff or disable diff mode',
+        \ '  <Leader>dQ / :DiffOff      disable diff mode in the current tab',
+        \ '',
+        \ 'Native Vim diff navigation and merge:',
+        \ '  ]c       next diff hunk',
+        \ '  [c       previous diff hunk',
+        \ '  do       obtain change from the other window (:diffget)',
+        \ '  dp       put change into the other window (:diffput)',
+        \ '  :diffupdate   rescan diffs after edits',
+        \ '  :diffoff!     leave diff mode in all windows',
+        \ ])
 endfunction
 
 function! s:GitBlame() abort
@@ -2694,15 +3340,36 @@ endfunction
 
 command! DiffSaved call <SID>DiffSaved()
 command! DiffGitHead call <SID>DiffGitHead()
+command! DiffFile call <SID>DiffFile()
+command! DiffBuffer call <SID>DiffBuffer()
+command! DiffBuffers call <SID>DiffBuffers()
 command! DiffClose call <SID>DiffClose()
+command! DiffOff diffoff!
+command! DiffHelp call <SID>DiffHelp()
 command! OmarchyGitBlame call <SID>GitBlame()
 command! OmarchyFugitiveBlameSubject call <SID>FugitiveBlameShowSubject()
 " MAP: <Leader>ds | Diff buffer against saved file
 nnoremap <silent> <Leader>ds :DiffSaved<CR>
 " MAP: <Leader>dg | Diff buffer against git HEAD
 nnoremap <silent> <Leader>dg :DiffGitHead<CR>
+" MAP: <Leader>df | Pick project file to diff against current buffer
+nnoremap <silent> <Leader>df :DiffFile<CR>
+" MAP: <Leader>db | Pick open buffer to diff against current buffer
+nnoremap <silent> <Leader>db :DiffBuffer<CR>
+" MAP: <Leader>dB | Pick open buffers for 2-4 way diff
+nnoremap <silent> <Leader>dB :DiffBuffers<CR>
+" MAP: <Leader>dh | Show diff and merge help
+nnoremap <silent> <Leader>dh :DiffHelp<CR>
+" MAP: <Leader>dn | Next diff hunk
+nnoremap <silent> <Leader>dn ]c
+" MAP: <Leader>dN | Previous diff hunk
+nnoremap <silent> <Leader>dN [c
+" MAP: <Leader>du | Update diff view
+nnoremap <silent> <Leader>du :diffupdate<CR>
 " MAP: <Leader>dq | Close active Omarchy diff
 nnoremap <silent> <Leader>dq :DiffClose<CR>
+" MAP: <Leader>dQ | Turn off diff mode in current tab
+nnoremap <silent> <Leader>dQ :DiffOff<CR>
 
 function! s:WindowMaximizeToggle() abort
   if exists('t:omarchy_window_restore') && !empty(t:omarchy_window_restore)
@@ -2727,6 +3394,8 @@ nnoremap <silent> <Leader>wh :vsplit<CR>
 nnoremap <silent> <Leader>wj :split<CR>
 " MAP: <Leader>wv | Vertical split
 nnoremap <silent> <Leader>wv :vsplit<CR>
+" MAP: <Leader>wV | Open current buffer in right vertical split
+nnoremap <silent> <Leader>wV :OmarchyCurrentBufferVsplit<CR>
 " MAP: <Leader>ws | Horizontal split
 nnoremap <silent> <Leader>ws :split<CR>
 " MAP: <Leader>w<Left> | Focus window left
@@ -2963,6 +3632,8 @@ if g:omarchy_use_sessions
   command! SessionDelete call <SID>SessionDelete()
   command! OmarchySessionStatus call OmarchySessionStatus()
 
+  " MAP: <Leader>s | Session prefix guard; no-op on incomplete session key
+  nnoremap <silent> <Leader>s <Nop>
   " MAP: <Leader>ss | Save current session
   nnoremap <silent> <Leader>ss :SessionSave<CR>
   " MAP: <Leader>sr | Restore a saved session

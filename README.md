@@ -36,6 +36,19 @@ Recommended tools:
 - `bash`: fzf.vim preview support. Debian and Arch normally have it.
 - `fzf` `0.38.0+`: enables fzf/fzf.vim integration when found on `PATH`.
 
+Optional non-Python language tools:
+
+- `shellcheck`: shell diagnostics through ALE when already installed.
+- `shfmt`: shell formatting through `:ALEFix` when already installed.
+- `sqlfluff`: SQL/BigQuery diagnostics and formatting through ALE when already
+  installed.
+- `luacheck`: Lua diagnostics through ALE when already installed.
+- `vint`: Vimscript diagnostics through ALE when already installed.
+
+These are optional. The config detects them and wires them into ALE only when
+they are already on `PATH`; they are not new required dependencies and startup
+does not install them.
+
 Python tooling:
 
 - `python3`/`python`: runtime for Python tooling.
@@ -135,8 +148,9 @@ Accept removal of `fzf` and `fzf.vim` if they are no longer declared. The config
 
 If Git Bash still finds that binary, check shell startup files such as `~/.bashrc` and remove any PATH entry pointing at `~/.vim/plugged/fzf/bin`. Inside Vim, run `:OmarchyFzfStatus` to see FZF candidates, the accepted external path, version, and whether FZF integration is usable.
 
-Without FZF, `<Leader><Leader>`, `<Leader>ff`, `<Leader>fg`, `<Leader>fr`,
-`<Leader>fl`, `<Leader>fs`, and `<Leader>fk` use unfiltered scratch-buffer fallback pickers.
+Without FZF, `<Leader><Leader>`, `<Leader>ff`, `<Leader>fV`, `<Leader>fg`,
+`<Leader>fr`, `<Leader>fl`, `<Leader>fs`, `<Leader>fk`, and `<Leader>fK` use
+unfiltered scratch-buffer fallback pickers or clear built-in prompts.
 Press `<CR>` on an item to open/jump and `q` to close the picker. The Netrw file
 explorer maps under `<Leader>e` are built in and do not require FZF. Install an
 external `fzf` `0.38.0+` and rerun `:PlugInstall` to enable filtering.
@@ -417,6 +431,29 @@ This downloads only vim-plug. It does not install ALE, FZF, Copilot, or any othe
 - Copilot, gitgutter, and fugitive are declared only when their flags are set before sourcing `init.vim`.
 
 Close and reopen the editor after plugin installation. If you install `fzf` later, reopen Vim and run `:PlugInstall` again so vim-plug sees the updated plugin list. If you switch to a wrapper that enables more optional plugins after the first install, run `:PlugInstall` again so vim-plug installs them.
+
+### Plugin Policy
+
+Normal startup never installs, updates, cleans, upgrades, or downloads plugins.
+The manual plugin commands are:
+
+```vim
+:OmarchyPlugBootstrap
+:PlugInstall
+:PlugUpdate
+:PlugClean
+:PlugUpgrade
+:OmarchyPlugCheckUpdates
+:OmarchyPluginPolicy
+```
+
+`:OmarchyPlugBootstrap` downloads only vim-plug, and only when you run it.
+`:PlugInstall` and `:PlugUpdate` are the only install/update paths for declared
+plugins. `:OmarchyPlugCheckUpdates` uses `git ls-remote` to report remote update
+availability without fetching, checking out, merging, pulling, or changing local
+plugin repositories. Optional plugins are declared only when their flags are set
+before sourcing `init.vim`; this config does not use vim-plug `on` or `for`
+lazy-load triggers.
 
 ## Normal Startup Vs Test Startup
 
@@ -768,6 +805,39 @@ This does not disable LSP navigation or prevent the LSP from publishing its own
 diagnostics. Use `:ALEInfo` to inspect enabled linters and executable paths, and
 `:OmarchyDebug` for resolved project, virtualenv, shell, and prerequisite data.
 
+## Other Filetypes
+
+Vim filetype plugins and syntax highlighting are enabled globally with:
+
+```vim
+filetype plugin indent on
+syntax enable
+```
+
+The config adds a small amount of filetype help for common names:
+
+- `*.bash` is treated as Bash.
+- `*.bq.sql` and `*.bigquery.sql` are treated as SQL for BigQuery-oriented files.
+
+Markdown, Bash, SQL, Lua, Vimscript, TypeScript, HTML, CSS, and JavaScript use
+Vim's built-in filetype/syntax support where available. Comment toggling also
+knows about Markdown/HTML comments, SQL `--`, Lua `--`, Vimscript `"`, shell
+`#`, and common `//` languages.
+
+ALE support beyond Python is optional and tool-detected. If these commands are
+already on `PATH`, the config wires them into ALE defaults:
+
+| Filetype | Optional diagnostics | Optional fixer |
+| --- | --- | --- |
+| Shell/Bash | `shellcheck` | `shfmt` |
+| SQL/BigQuery | `sqlfluff` | `sqlfluff` |
+| Lua | `luacheck` | none by default |
+| Vimscript | `vint` | none by default |
+
+No new language tool is required to start Vim. TypeScript, HTML, CSS, and
+JavaScript LSP support is not enabled by default because practical language
+servers for those filetypes generally require Node.js.
+
 ## User Feature Reference
 
 Use this as the short map of what the config can do. The sections below provide
@@ -776,21 +846,28 @@ the detailed behavior, caveats, and setup notes.
 | Feature | Main keys / commands | Details |
 | --- | --- | --- |
 | Open-buffer picker | `<Leader><Leader>` / `<Space><Space>`, `:OmarchyBuffers` | Uses FZF when available; otherwise uses a built-in scratch picker. |
-| File explorer | `<Leader>ee`, `<Leader>eE`, `<Leader>eh` | Built-in Netrw tree, no plugin required. |
-| Project/file search | `<Leader>ff`, `<Leader>fg`, `<Leader>fr`, `<Leader>fl`, `<Leader>fs` | FZF-backed when available, with documented fallbacks for supported pickers. |
-| Keymap lookup | `<Leader>fk`, `:Keymaps` | Shows config-defined maps from `MAP:` comments. |
+| Right-split opening | `<Leader>wV`, `<Leader>fV`, `<Leader>bV` | Open the current buffer, a picked file, or a picked buffer in a right vertical split. |
+| File explorer | `<Leader>ee`, `<Leader>eE`, `<Leader>eh` | Built-in far-left Netrw tree, no plugin required. |
+| Project/file search | `<Leader>ff`, `<Leader>fg`, `<Leader>fr`, `<Leader>fl`, `<Leader>fs`, `:OmarchyGrep` | FZF-backed when available, with documented fallbacks for supported pickers. |
+| Symbols | `<Leader>fs`, `:Symbols`, `:PythonSymbols` | Current-file symbol picker; Python class/function support is preserved. |
+| Keymap lookup | `<Leader>fk`, `<Leader>fK`, `:Keymaps`, `:OmarchyAllMaps` | Shows config-defined maps and all live Vim mappings. |
 | Python LSP actions | `<Leader>ld`, `<Leader>lr`, `<Leader>lh`, `<Leader>ln`, `<Leader>la` | ALE-backed definition, references, hover, rename, and code actions. |
 | Diagnostics and quickfix | `<Leader>lj`, `<Leader>lk`, `<Leader>lf`, `<Leader>li`, `]q`, `[q`, `<Leader>lq` | ALE diagnostics plus Vim quickfix navigation. |
 | Insert completion | `<Tab>`, `<S-Tab>`, `<CR>`, `<M-/>`, `<C-x><C-o>` | Native/ALE completion, with optional Copilot kept separate. |
 | Delimiter jumps | `jl`, `jh` in normal or insert mode | Jump around brackets and quotes, useful with auto-pairs. |
 | Line-position cycle | Normal `0` | Cycles first column, first text, last text, and last column. |
-| Display toggles | `<Leader>nn`, `<F8>`, `<Leader>nh` | Cycle line numbers and toggle search highlighting. |
-| Comments and line moves | `<Leader>/`, `<Leader>//`, `<M-j>`, `<M-k>` | Toggle comments and move lines/selections. |
+| Display/status toggles | `<Leader>nn`, `<F8>`, `<Leader>nh` | Cycle line numbers, toggle search highlighting, and color the statusline mode label. |
+| Comments and line moves | `<Leader>/`, `<Leader>//`, `<M-j>`, `<M-k>` | Toggle/force comments and move lines/selections. |
+| Visual paste | visual `p` | Paste over a selection without replacing the unnamed register, unless disabled. |
 | Browser-safe windows | `<Leader>w...`, especially `<Leader>wm` / `<Leader>ww` | Split, focus, close, resize, and maximize without relying on `<C-w>`. |
 | Folding | `<Leader>zz`, `<Leader>z0`-`<Leader>z9` | Built-in folds; Python uses indent folding. |
-| Built-in diffs | `<Leader>ds`, `<Leader>dg`, `<Leader>dq` | Saved/HEAD base on the left, current buffer on the right. |
+| Terminal | `<Leader>tt`, `<Leader>tT`, `:OmarchyTerminal` | Opens a project-aware login Bash terminal when Bash is available. |
+| Built-in diffs | `<Leader>ds`, `<Leader>dg`, `<Leader>df`, `<Leader>db`, `<Leader>dB`, `<Leader>dq` | Saved/HEAD/file/buffer diff helpers plus 2-4 way buffer diffs. |
+| Interactive merge help | `<Leader>dh`, `<Leader>dn`, `<Leader>dN`, `<Leader>du`, `<Leader>dQ` | Documents and aliases native diff hunk navigation and merge commands. |
 | Git and blame | `<Leader>gb`, `<Leader>gg`, `<Leader>gd`, `<Leader>gh`, `<Leader>gs`, `<Leader>gu` | Fugitive/gitgutter integrations when enabled, with blame fallback. |
-| Sessions | `<Leader>ss`, `<Leader>sr`, `<Leader>sl`, `<Leader>sd` | Built-in session save, restore, list, and delete. |
+| Sessions | `<Leader>s`, `<Leader>ss`, `<Leader>sr`, `<Leader>sl`, `<Leader>sd` | Built-in sessions; bare `<Leader>s` is a guard that does nothing. |
+| Persistence | `undofile`, `autoread`, `checktime` | Persistent undo and external file-change checks using built-in Vim features. |
+| Plugin policy | `:OmarchyPluginPolicy`, `:OmarchyPlugCheckUpdates` | Manual plugin actions only; update check is read-only. |
 | Copilot, optional | `<Leader>at`, `<Leader>as`, `<Leader>ac`, insert `<C-J>` | Available only when the relevant Copilot flags/tools are enabled. |
 
 `<Leader>` is Space. For a complete flat list of mappings, use the table below
@@ -801,15 +878,18 @@ or run `<Leader>fk` inside Vim.
 | Key | Action |
 | --- | --- |
 | `<Space><Space>` / `<Leader><Leader>` | pick open buffer; uses FZF when available, otherwise a built-in scratch picker |
+| `<Leader>bV` | pick an open buffer and open it in a right vertical split |
 | `<Leader>ee` | toggle the left file explorer |
 | `<Leader>eE` | reveal the current file's directory in the explorer |
 | `<Leader>eh` | open Netrw file explorer help |
 | `<Leader>ff` | find project files |
+| `<Leader>fV` | find a project file and open it in a right vertical split |
 | `<Leader>fg` | find git-tracked files |
 | `<Leader>fr` | search text recursively under Vim's current working directory |
 | `<Leader>fl` | search current-buffer lines |
-| `<Leader>fs` | list Python classes/functions |
+| `<Leader>fs` | list current-file symbols; Python classes/functions use the preserved `:PythonSymbols` implementation |
 | `<Leader>fk` | show config keymap reference |
+| `<Leader>fK` | show all live key mappings |
 | `<Leader>ld` | ALE go to definition |
 | `<Leader>lr` | ALE find references |
 | `<Leader>lh` | ALE hover |
@@ -843,7 +923,11 @@ or run `<Leader>fk` inside Vim.
 | `<Leader>rr` | refresh screen |
 | `<Leader>/` | toggle comment |
 | `<Leader>//` | force comment |
+| Visual `p` | paste over selection without replacing the unnamed register |
+| `<Leader>tt` | toggle a project-aware login Bash terminal |
+| `<Leader>tT` | open a new project-aware login Bash terminal |
 | `<Leader>wh` / `<Leader>wv` | open a vertical split |
+| `<Leader>wV` | open the current buffer in a right vertical split |
 | `<Leader>wj` / `<Leader>ws` | open a horizontal split |
 | `<Leader>w<Left>` | focus the window to the left |
 | `<Leader>w<Down>` | focus the window below |
@@ -864,7 +948,16 @@ or run `<Leader>fk` inside Vim.
 | `<Leader>gu` | undo gitgutter hunk, when `g:omarchy_use_gitgutter = 1` |
 | `<Leader>ds` | diff against saved file |
 | `<Leader>dg` | diff against git HEAD |
-| `<Leader>dq` | close active diff |
+| `<Leader>df` | pick a project file to diff against the current buffer |
+| `<Leader>db` | pick an open buffer to diff against the current buffer |
+| `<Leader>dB` | pick open buffers for a 2-4 way diff |
+| `<Leader>dh` | show diff and merge help |
+| `<Leader>dn` | next diff hunk |
+| `<Leader>dN` | previous diff hunk |
+| `<Leader>du` | update diff view |
+| `<Leader>dq` | close active Omarchy diff or disable diff mode |
+| `<Leader>dQ` | turn off diff mode in the current tab |
+| `<Leader>s` | session prefix guard; intentionally does nothing |
 | `<Leader>ss` | save current session |
 | `<Leader>sr` | restore a saved session |
 | `<Leader>sl` | list saved sessions |
@@ -898,6 +991,77 @@ search highlighting and echoes the new state. The config also runs
 `set shortmess-=S` at the end where supported, so `/` and `?` searches show the
 current match position.
 
+The statusline colors only the mode label when
+`g:omarchy_statusline_mode_colors = 1`, which is the default:
+
+- NORMAL: light gray.
+- INSERT: orange.
+- VISUAL, V-LINE, and V-BLOCK: blue.
+- Other modes: green.
+
+Set this before sourcing `init.vim` to keep the mode label uncolored:
+
+```vim
+let g:omarchy_statusline_mode_colors = 0
+```
+
+## Key Timing
+
+Multi-key mappings use explicit timing settings:
+
+```vim
+let g:omarchy_timeoutlen = 350
+let g:omarchy_ttimeoutlen = 50
+```
+
+`timeoutlen` controls how long Vim waits for mapping sequences such as `jj`,
+`jk`, `jl`, `jh`, `<Leader>fk`, and `<Leader>ss`. Practical values:
+
+- Fast: `250`-`300`
+- Medium: `400`-`500`
+- Slow: `700`-`1000`
+
+`ttimeoutlen` controls terminal key-code timing for keys such as Escape,
+arrows, and Alt/meta combinations. Keep it shorter than `timeoutlen` so terminal
+keys remain responsive.
+
+## Persistence And External Changes
+
+When Vim supports persistent undo, this config enables `undofile` and stores
+undo history under a Vim/Neovim data undo directory. That means you can close a
+file, reopen it later, and still undo previous edits. Undo files are editor
+metadata; they do not change the file being edited.
+
+The config also enables `autoread` and calls `checktime` on focus changes,
+buffer entry, and `CursorHold`. `autoread` reloads a buffer when the file
+changed on disk and the buffer has no unsaved local edits. `checktime` is the
+explicit check that notices those external changes. If a buffer has unsaved
+local edits, Vim should warn rather than silently replacing your work.
+
+## Visual Paste
+
+Visual `p` is configured to paste over the selected text without replacing the
+unnamed register. This makes repeated replacement paste work as expected: yank
+once, select text, press `p`, select another range, press `p` again, and paste
+the same original text.
+
+Native Vim visual paste replaces the selection and stores the replaced text in
+the unnamed register. That native behavior is useful sometimes, but it often
+surprises users who expect paste text to stay reusable. To restore native visual
+paste behavior:
+
+```vim
+let g:omarchy_visual_paste_preserve_register = 0
+```
+
+The comment mappings were checked for conflicts and are already present in both
+normal and visual mode:
+
+```text
+<Leader>/   toggle comment
+<Leader>//  force comment
+```
+
 ## Windows And Folds
 
 The window maps under `<Leader>w` provide browser-safe alternatives for common
@@ -908,6 +1072,59 @@ JupyterLab, where `<C-w>` may be intercepted by the browser.
 first press stores the current tab layout and maximizes the active window; the
 second press restores the stored layout. Existing Alt-arrow resize maps remain
 available when the terminal sends those keys.
+
+Right-split helpers:
+
+```text
+<Leader>wV  open the current buffer in a right vertical split
+<Leader>fV  pick a project file and open it in a right vertical split
+<Leader>bV  pick an open buffer and open it in a right vertical split
+```
+
+The file and buffer pickers use FZF when available and built-in scratch picker
+fallbacks otherwise.
+
+## Terminal
+
+`<Leader>tt` toggles a bottom terminal, and `<Leader>tT` opens a new one. The
+stable command forms are:
+
+```vim
+:OmarchyTerminal
+:OmarchyTerminalToggle
+```
+
+When Bash is available, the default terminal command is:
+
+```vim
+let g:omarchy_terminal_command = 'bash --login -i'
+```
+
+That starts an interactive login Bash shell, matching the startup path used by
+normal Linux terminals, GCP Debian JupyterLab terminal sessions, and Git Bash.
+In Bash terms, login startup files such as `~/.bash_profile`,
+`~/.bash_login`, or `~/.profile` are handled by Bash's normal rules. If your
+login profile sources `~/.bashrc`, the terminal inside Vim will see that setup
+too.
+
+Terminal working directory selection is controlled by:
+
+```vim
+let g:omarchy_terminal_root_strategy = 'project'
+let g:omarchy_terminal_height = 15
+```
+
+Root strategies:
+
+- `'project'`: current buffer's git root, then current buffer directory, then
+  Vim's current working directory.
+- `'buffer'`: current buffer directory, then Vim's current working directory.
+- `'cwd'`: always Vim's current working directory.
+
+If Bash is unavailable, set `g:omarchy_terminal_command` before sourcing the
+config or use an external terminal.
+
+## Folding
 
 Folding uses built-in Vim folding. Python buffers use indent folds, startup
 keeps folds open with `foldlevelstart=99`, and native fold keys such as `za`,
@@ -925,14 +1142,14 @@ data, but this config intentionally keeps folding built-in and maintainable.
 ## File Explorer
 
 The file explorer uses Vim's built-in Netrw. It is configured as a simple
-left-side tree panel with the full Netrw banner hidden. It requires no plugin,
+far-left tree panel with the full Netrw banner hidden. It requires no plugin,
 FZF, Node.js, or shell command, and works in Vim and Neovim.
 
 Global maps and commands:
 
 | Key / Command | Action |
 | --- | --- |
-| `<Leader>ee` / `:FileExplorer` | Toggle the left explorer. In a git worktree it starts at the git root; otherwise it starts at the current file's directory or `:pwd`. |
+| `<Leader>ee` / `:FileExplorer` | Toggle the far-left explorer. In a git worktree it starts at the git root; otherwise it starts at the current file's directory or `:pwd`. By default focus returns to the editing window. |
 | `<Leader>eE` / `:FileExplorerReveal` | Open the explorer at the current file's directory and search to the current file name. |
 | `<Leader>eh` / `:FileExplorerHelp` | Open Netrw's quick map help. |
 
@@ -972,7 +1189,73 @@ You can override these before sourcing `omarchy/vim/init.vim`. Negative
 `g:netrw_winsize` values are treated as fixed columns; the default is a
 30-column left panel.
 
+Use this if you want `<Leader>ee` to leave focus in the tree after opening it:
+
+```vim
+let g:omarchy_file_explorer_focus = 1
+```
+
 > Ref: https://vimhelp.org/pi_netrw.txt.html
+
+## Project Grep And Finders
+
+`<Leader>fr` and `:OmarchyGrep` provide project-wide text search from Vim's
+current working directory. With FZF, fzf.vim, and `rg` available, this uses
+fzf.vim's `:Rg`. Without FZF, it prompts for a pattern and opens matching
+`rg --vimgrep` or recursive `grep` results in a scratch picker.
+
+Check the current search scope with:
+
+```vim
+:pwd
+```
+
+Change scope with Vim's normal `:cd` or start Vim from the desired project
+directory. File finders:
+
+```text
+<Leader>ff  find project files
+<Leader>fg  find git-tracked files
+<Leader>fV  find project file and open in right vertical split
+<Leader>fl  search current-buffer lines
+```
+
+Inside FZF prompts you can use FZF's exact-search syntax:
+
+```text
+'term   exact contains match
+^term   exact prefix match
+term$   exact suffix match
+!term   inverse exact match
+```
+
+## Current File Symbols
+
+`<Leader>fs` runs `:Symbols`, a lightweight current-file symbol picker. It uses
+FZF when available and a scratch picker otherwise. It is regex-based and does
+not require LSP, Tree-sitter, ctags, Node.js, Rust, or Go.
+
+Python support is preserved through the existing `:PythonSymbols` implementation:
+it finds `class`, `def`, and `async def` lines and jumps to the selected line.
+`:PythonSymbols` remains available directly and does not fail badly in a
+non-Python file; it simply reports when no Python-style symbols are found.
+
+`:Symbols` currently adds conservative detectors for Vimscript, Lua, shell,
+JavaScript, TypeScript, and Markdown headings. If a filetype has no detector or
+no matches, it reports that clearly instead of pretending to provide a semantic
+outline.
+
+## Keymap Lookup
+
+There are two keymap browsers:
+
+```text
+<Leader>fk  :Keymaps          config-declared maps from MAP: comments
+<Leader>fK  :OmarchyAllMaps   all live mappings from :verbose map
+```
+
+Use `<Leader>fk` for the curated Omarchy cheat sheet. Use `<Leader>fK` when you
+need to debug every active Vim mapping, including plugin and filetype mappings.
 
 ## Quickfix Navigation
 
@@ -1004,7 +1287,12 @@ Built-in Omarchy diffs do not require Fugitive:
 ```vim
 :DiffSaved
 :DiffGitHead
+:DiffFile
+:DiffBuffer
+:DiffBuffers
+:DiffHelp
 :DiffClose
+:DiffOff
 ```
 
 `<Leader>ds` opens a diff between the saved file and the current buffer.
@@ -1013,6 +1301,40 @@ files. These Omarchy diff windows place the saved/HEAD base on the left and the
 current buffer on the right, matching the common old-left/new-right side-by-side
 layout. Close the active Omarchy diff with `q` from the scratch diff window or
 `<Leader>dq` from either side.
+
+Additional built-in diff helpers:
+
+| Key / Command | Action |
+| --- | --- |
+| `<Leader>df` / `:DiffFile` | Pick a project file and open a side-by-side diff against the current buffer. |
+| `<Leader>db` / `:DiffBuffer` | Pick an open buffer and diff it against the current buffer. |
+| `<Leader>dB` / `:DiffBuffers` | Diff the current buffer with 1-3 selected open buffers in a new tab. |
+| `<Leader>dh` / `:DiffHelp` | Open a scratch help buffer for diff and merge commands. |
+| `<Leader>dq` / `:DiffClose` | Close an Omarchy scratch diff when active, otherwise turn off diff mode in the current tab. |
+| `<Leader>dQ` / `:DiffOff` | Turn off diff mode in the current tab. |
+
+For 3- or 4-way diffs, open the files first so they are listed buffers, then
+run `<Leader>dB`. This keeps the workflow simple and avoids a complicated
+multi-file filesystem picker. Multi-window diffs are most readable with two or
+three files; four files need a wide terminal and short lines.
+
+Native Vim diff navigation and merge commands remain the core merge workflow:
+
+```text
+]c  next diff hunk
+[c  previous diff hunk
+do  obtain change from the other window (:diffget)
+dp  put change into the other window (:diffput)
+```
+
+Omarchy adds these aliases without replacing the native keys:
+
+```text
+<Leader>dn  next diff hunk
+<Leader>dN  previous diff hunk
+<Leader>du  :diffupdate
+<Leader>dQ  :diffoff!
+```
 
 When Fugitive is enabled with `g:omarchy_use_fugitive = 1`, `<Leader>gd` still
 runs Fugitive's `:Gdiffsplit`. Fugitive owns that command's detailed behavior.
@@ -1084,6 +1406,9 @@ Sessions are stored as `.vim` files in `~/.vim/sessions` by default. Override wi
 
 Usage:
 
+- `<Leader>s` alone intentionally does nothing. It is a guard for the session
+  prefix so a mistyped session key does not fall through to Vim's normal `s`
+  substitute command and enter insert mode.
 - `<Leader>ss` or `:SessionSave [name]` saves the current window layout, buffers, and (with the default `sessionoptions`) working directory. It prompts for a name, defaulting to the current buffer name, else the working-directory basename. `:SessionSave!` overwrites without asking; a plain `:SessionSave` prompts before overwriting an existing session.
 - `<Leader>sr` or `:SessionRestore [name]` restores a session. With a name it restores that session directly; without one it shows a picker backed by fzf when available, otherwise an unfiltered scratch-buffer fallback.
 - `<Leader>sl` or `:SessionList` opens a read-only list of saved sessions and their full paths.
@@ -1294,6 +1619,8 @@ Inside Vim or Neovim:
 ```vim
 :OmarchyPlugBootstrap
 :PlugInstall
+:OmarchyPluginPolicy
+:OmarchyPlugCheckUpdates
 ```
 
 Expected: `:OmarchyPlugBootstrap` installs vim-plug if needed, and
@@ -1302,6 +1629,9 @@ Expected: `:OmarchyPlugBootstrap` installs vim-plug if needed, and
 `g:omarchy_use_fzf = 1` without it should warn and select fallback mode. No
 plugin hook should install an fzf binary. Node is required only for an enabled
 Pyright or Copilot profile; Rust and Go are not required.
+`:OmarchyPluginPolicy` documents the manual plugin policy.
+`:OmarchyPlugCheckUpdates` may use network access for `git ls-remote`, but it
+must not fetch, pull, checkout, merge, or modify local plugin repositories.
 
 Optional check:
 
@@ -1330,8 +1660,10 @@ Key checks:
 - `<Space><Space>` opens buffers. With FZF enabled it opens the FZF buffer
   picker; with FZF disabled it opens the built-in scratch-buffer picker.
 - `<Leader>ff` finds files.
+- `<Leader>fV` finds a file and opens it in a right vertical split.
 - `<Leader>fr` searches text recursively under Vim's current working directory. Check `:pwd` if the scope is unclear.
 - `<Leader>fk` shows config-defined mappings.
+- `<Leader>fK` shows all live mappings.
 
 ### 4. File Explorer
 
@@ -1346,6 +1678,9 @@ Inside Vim or Neovim:
 Key checks:
 
 - `<Leader>ee` opens a left Netrw tree and pressing it again closes that tree.
+- From a right-hand split, `<Leader>ee` still opens or reuses the far-left tree
+  and returns focus to the editing window unless
+  `g:omarchy_file_explorer_focus = 1`.
 - `<Leader>eE` opens the explorer at the current file's directory and searches to the current file name.
 - In the explorer, `<CR>` and `l` open files or expand/collapse directories, while `h` and `-` go up one directory.
 - In the explorer, `/` searches visible names; `n` and `N` move through matches.
@@ -1414,17 +1749,22 @@ Key checks on a symbol:
 - Insert mode `<Tab>` after a word and `<M-/>` trigger completion without the two-key control sequence.
 - Insert mode `<Tab>`, `<S-Tab>`, and `<CR>` navigate or accept the visible completion menu.
 
-### 6. Python Symbols
+### 6. Symbols
 
 Inside the same Python file:
 
 ```vim
 :PythonSymbols
+:Symbols
 ```
 
 Expected: `Greeter`, `hello`, and `unused` appear. Selecting one jumps to its line.
 
-This command is regex-based and does not require `pylsp`, but it is useful to test alongside Python files.
+These commands are regex-based and do not require `pylsp`, but they are useful
+to test alongside Python files. `:PythonSymbols` is preserved for Python
+class/function scanning. `:Symbols` wraps that behavior for Python and adds
+lightweight detectors for supported non-Python filetypes. In an unsupported
+filetype it should report a clear message, not error.
 
 ### 7. Statusline
 
@@ -1434,7 +1774,11 @@ Open a tracked file in this repo:
 vim -Nu omarchy/vim/init.vim omarchy/vim/init.vim
 ```
 
-Expected statusline includes mode, file, position, filetype/encoding info, time, ALE counts when ALE is loaded, and git branch when `git` is available.
+Expected statusline includes mode, file, position, filetype/encoding info, time,
+ALE counts when ALE is loaded, and git branch when `git` is available. With
+`g:omarchy_statusline_mode_colors = 1`, NORMAL is light gray, INSERT is orange,
+VISUAL modes are blue, and other modes are green. If colors are unreadable with
+your colorscheme, set the flag to `0`.
 
 ### 8. Editing Helpers
 
@@ -1452,6 +1796,10 @@ Manual checks:
 - `<Leader>nh` toggles search highlighting and reports the new state.
 - `<Leader>/` toggles comments on one line and visual selections.
 - `<Leader>//` comments without toggling off.
+- Visual `p` pastes over a selection without replacing the unnamed register.
+- With `let g:omarchy_visual_paste_preserve_register = 0`, visual `p` uses
+  native Vim behavior.
+- `<Leader>s` alone does nothing; `<Leader>sk` should not edit the buffer.
 - Alt-j/k moves lines or visual selections if your terminal sends those keys.
 - Visual `<` and `>` keep the visual selection.
 - `<C-L>` and `<Leader>rr` refresh the screen.
@@ -1462,13 +1810,25 @@ Manual checks:
 - `<Leader>w<Left>`, `<Leader>w<Down>`, `<Leader>w<Up>`, and
   `<Leader>w<Right>` move between windows without relying on browser-sensitive
   `<C-w>`.
+- `<Leader>wV` opens the current buffer in a right vertical split.
+- `<Leader>bV` picks a buffer and opens it in a right vertical split.
+- `<Leader>tt` opens a bottom terminal with `bash --login -i` when Bash is
+  available; `echo $0` and login-profile effects should match your normal shell
+  expectations.
 - In a Python file, `<Leader>zz` toggles all folds open/closed and
   `<Leader>z0` through `<Leader>z9` set fold levels.
 - `<Leader>ds` opens a diff against the saved file.
 - `<Leader>dg` opens a diff against `HEAD` for a tracked file.
+- `<Leader>df` picks a project file to diff against the current buffer.
+- `<Leader>db` picks an open buffer to diff against the current buffer.
+- `<Leader>dB` creates a 2-4 way diff from open buffers.
+- `]c`, `[c`, `<Leader>dn`, and `<Leader>dN` move between diff hunks.
+- `do` and `dp` perform native diff get/put merge actions.
+- `<Leader>dh` opens diff help.
 - Built-in Omarchy diffs show saved/HEAD content on the left and the current
   buffer on the right.
 - `q` or `<Leader>dq` closes an Omarchy diff and returns to the original buffer.
+- `<Leader>dQ` disables diff mode in the current tab.
 
 ### 9. Optional Flags
 
@@ -1626,9 +1986,25 @@ vim -Nu /tmp/omarchy-sessions-wrapper.vim
   selected fallback views.
 - FZF diagnosis: run `:OmarchyFzfStatus` inside Vim.
 - Keymap picker diagnosis: after pressing `<Leader>fk`, run `:OmarchyDebug` to see whether the picker entered FZF or fallback.
+- All-maps diagnosis: use `<Leader>fK` or `:OmarchyAllMaps` to inspect every
+  live mapping when a key behaves differently from the curated `<Leader>fk`
+  reference.
 - `Post-update hook for fzf ... /usr/share/vim/vimfiles/install not found` on Arch: update this repo and rerun `:PlugInstall` or `:PlugUpdate fzf`. The config no longer declares an fzf post-install hook.
 - `:Rg` fails: install `ripgrep`.
+- `<Leader>fr` search scope is surprising: run `:pwd`. The grep fallback
+  searches under Vim's current working directory.
 - previews are plain text: install `bat`; on Debian the executable is `batcat`.
+- visual paste replaced your expected paste text: the config preserves the
+  unnamed register for visual `p` by default. Set
+  `g:omarchy_visual_paste_preserve_register = 0` before sourcing the config if
+  you want native Vim visual paste behavior.
+- `<Leader>s` appears to do nothing: that is intentional. It protects the
+  session prefix from falling through to Vim's normal `s` editing command.
+- terminal startup files are not what you expect: `:OmarchyTerminal` runs
+  `bash --login -i` by default when Bash is available. Bash login files follow
+  Bash's normal precedence, so a `~/.bash_profile` can prevent `~/.profile` from
+  being read unless it sources it. Override with
+  `g:omarchy_terminal_command` if your environment needs a different shell.
 - ALE has no Python LSP commands: run `:PlugInstall` in the Vim/Neovim instance
   you use and confirm that `:ALEInfo` exists. Installing Python packages does
   not install the ALE editor plugin.
@@ -1651,7 +2027,13 @@ vim -Nu /tmp/omarchy-sessions-wrapper.vim
 
 ## Upgrade
 
-Inside Vim or Neovim:
+To check plugin update availability without updating local plugin repos:
+
+```vim
+:OmarchyPlugCheckUpdates
+```
+
+To actually update plugins, run this manually inside Vim or Neovim:
 
 ```vim
 :PlugUpdate
