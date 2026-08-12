@@ -331,6 +331,17 @@ function! s:ExternalPythonPath(path) abort
   return l:path
 endfunction
 
+function! s:VimInternalPath(path) abort
+  let l:path = substitute(a:path, '\\', '/', 'g')
+  if has('win32unix')
+    let l:drive = matchlist(l:path, '^\([A-Za-z]\):\(/\|$\)')
+    if !empty(l:drive)
+      return '/' . tolower(l:drive[1]) . strpart(l:path, 2)
+    endif
+  endif
+  return a:path
+endfunction
+
 function! s:PythonProjectEnvRoots(buffer) abort
   let l:roots = []
   let l:filename = bufexists(a:buffer) ? fnamemodify(bufname(a:buffer), ':p') : ''
@@ -982,7 +993,8 @@ function! s:GitRootForDir(dir) abort
   if v:shell_error || empty(l:root) || empty(l:root[0]) || l:root[0] ==# '-1'
     return ''
   endif
-  return isdirectory(l:root[0]) ? l:root[0] : ''
+  let l:root = s:VimInternalPath(l:root[0])
+  return isdirectory(l:root) ? l:root : ''
 endfunction
 
 function! s:OpenFileSink(line) abort
