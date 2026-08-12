@@ -24,8 +24,9 @@
 ### Cleanup
 
 ### Later
-* Clean up all the repetitive content in the readme, and break out the getting started and install and dependency info into a new file omarchy\vim\INSTALL_INSTRUCTIONS.md, while still keeping it clear and organized and easy to scan, at the same level of detail (don't lose info). Eg the fzf version is repeated over and over. Important info but not easy to maintain when repeated in too many places for no good reason. Clean that up. Keep it readable, but include all the information, even if it's not specific to this config (but relevant and needed for the user here - it might be how you use vim for that kind of feature, such as the quickfix list navigation which is still important for the user to see in the README even if it's truly a vim thing.)
 * If not sufficiently covered in the readme, call out moves to last or next position (which is across files, and using existing vim functionality, I think)
+
+### Preliminary plans available for...
 * TAB functionality
 * Breadcrumbs - what would that do and how would it work?
 * Tabs - how would that work? Is there a simple way to do that without plugins? Compatible with mouse? Reorderable? Renameable? fuzzy pickable?
